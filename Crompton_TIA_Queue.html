@@ -866,7 +866,10 @@
 
   function initMacroMap() {
     if (macroMapInstance || !document.getElementById('macroMap') || typeof L === 'undefined') return;
-    macroMapInstance = L.map('macroMap').setView([-27.55, 152.95], 8);
+    macroMapInstance = L.map('macroMap', {
+      maxBounds: [[-29, 138], [-10, 154]], // Queensland bounds
+      restrictBounds: true
+    }).setView([-27.55, 152.95], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19
@@ -2609,7 +2612,7 @@
           const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
           addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
           
-          displayQuickTiaMultipleRefs(searchInput, nearby);
+          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
         } else {
           document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
           document.getElementById('quickTiaError').style.display = 'block';
@@ -2637,7 +2640,7 @@
           const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
           addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
           
-          displayQuickTiaMultipleRefs(searchInput, nearby);
+          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
         } else {
           document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
           document.getElementById('quickTiaError').style.display = 'block';
@@ -2734,27 +2737,37 @@
     document.getElementById('quickTiaPanel').style.display = 'block';
   }
 
-  function displayQuickTiaMultipleRefs(searchTerm, nearbyArray) {
+  function displayQuickTiaMultipleRefs(searchTerm, nearbyArray, centerLat, centerLon) {
     document.getElementById('quickTiaMatchType').textContent = '⊙ Multiple References (5km radius)';
     document.getElementById('quickTiaMatchRoad').textContent = searchTerm;
     
     const refList = document.getElementById('quickTiaRefList');
     refList.innerHTML = '';
     
-    const refArray = nearbyArray.map(([siteId, data]) => ({
-      siteId,
-      road: data.road_name || data.description,
-      vadt: data.vadt,
-      d1_vadt: data.d1_vadt,
-      d2_vadt: data.d2_vadt,
-      lat: data.latitude,
-      lon: data.longitude
-    }));
+    const refArray = nearbyArray.map(([siteId, data]) => {
+      const distFromCenter = haversineDistance(centerLat, centerLon, Number(data.latitude), Number(data.longitude));
+      return {
+        siteId,
+        road: data.road_name || data.description,
+        vadt: data.vadt,
+        d1_vadt: data.d1_vadt,
+        d2_vadt: data.d2_vadt,
+        lat: data.latitude,
+        lon: data.longitude,
+        source: data.source || 'Unknown',
+        distance: Math.round(distFromCenter),
+        description: data.description,
+        direction: data.direction_descriptions ? data.direction_descriptions[0] : ''
+      };
+    });
 
     refArray.forEach((site, idx) => {
       const div = document.createElement('div');
-      div.style.cssText = 'padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85em;';
-      div.innerHTML = `<strong>${idx + 1}.</strong> ${site.road} - <strong>${site.vadt.toLocaleString()}</strong> VADT`;
+      div.style.cssText = 'padding: 10px; border-bottom: 1px solid #e0e0e0; font-size: 0.85em; background: #fafafa;';
+      const distanceText = site.distance < 1000 ? `${site.distance}m` : `${(site.distance/1000).toFixed(1)}km`;
+      const sourceLabel = `[${site.source}]`;
+      const directionText = site.direction ? ` • ${site.direction}` : '';
+      div.innerHTML = `<strong>${idx + 1}.</strong> ${site.road}<br/><small style="color: #666;">${sourceLabel} • ${distanceText} away • ${site.vadt.toLocaleString()} VADT${directionText}</small>`;
       refList.appendChild(div);
     });
 
