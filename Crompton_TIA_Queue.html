@@ -2457,9 +2457,9 @@
     const sites = Object.entries(macroSitesData);
     const searchLower = searchInput.toLowerCase();
 
-    // Step 1: Try exact road match
+    // Step 1: Try exact road name match (case-insensitive)
     const exactMatches = sites.filter(([, data]) => 
-      data.road_name && data.road_name.toLowerCase().includes(searchLower) &&
+      data.road_name && data.road_name.toLowerCase() === searchLower &&
       data.latitude && data.longitude
     );
 
@@ -2490,19 +2490,19 @@
       return;
     }
 
-    // Step 2: Try description/suburb match
-    const descMatches = sites.filter(([, data]) =>
-      (data.description && data.description.toLowerCase().includes(searchLower)) &&
+    // Step 2: Try partial road name match (contains search term)
+    const partialRoadMatches = sites.filter(([, data]) => 
+      data.road_name && data.road_name.toLowerCase().includes(searchLower) &&
       data.latitude && data.longitude
     );
 
-    if (descMatches.length > 0) {
-      // Find nearest point for reference, then get 3+ within 5km
-      const [refId, refData] = descMatches[0];
+    if (partialRoadMatches.length > 0) {
+      // Find nearest point and get references within 5km
+      const [refId, refData] = partialRoadMatches[0];
       const refLat = Number(refData.latitude);
       const refLon = Number(refData.longitude);
       
-      const nearby = sites.filter(([, data]) => {
+      const nearby = partialRoadMatches.filter(([, data]) => {
         if (!data.latitude || !data.longitude) return false;
         const dist = haversineDistance(refLat, refLon, Number(data.latitude), Number(data.longitude));
         return dist <= 5000; // 5km radius
@@ -2510,7 +2510,43 @@
 
       if (nearby.length >= 1) {
         // Ask user before showing references
-        const userConfirmed = confirm(`No exact match found for "${searchInput}". \n\nUse ${nearby.length} nearby reference site(s) within 5km radius?`);
+        const userConfirmed = confirm(`Found ${nearby.length} matching site(s) for "${searchInput}" within 5km radius. Use them as references?`);
+        if (userConfirmed) {
+          // Calculate center of references for map marker
+          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
+          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
+          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
+          
+          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
+        } else {
+          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or try a different road name.';
+          document.getElementById('quickTiaError').style.display = 'block';
+        }
+        return;
+      }
+    }
+
+    // Step 3: Try suburb/description match
+    const descMatches = sites.filter(([, data]) =>
+      (data.description && data.description.toLowerCase().includes(searchLower)) &&
+      data.latitude && data.longitude
+    );
+
+    if (descMatches.length > 0) {
+      // Find nearest point for reference, then get sites within 5km
+      const [refId, refData] = descMatches[0];
+      const refLat = Number(refData.latitude);
+      const refLon = Number(refData.longitude);
+      
+      const nearby = descMatches.filter(([, data]) => {
+        if (!data.latitude || !data.longitude) return false;
+        const dist = haversineDistance(refLat, refLon, Number(data.latitude), Number(data.longitude));
+        return dist <= 5000; // 5km radius
+      }).slice(0, 5); // Get up to 5 points
+
+      if (nearby.length >= 1) {
+        // Ask user before showing references
+        const userConfirmed = confirm(`Found ${nearby.length} site(s) near "${searchInput}" within 5km radius. Use them as references?`);
         if (userConfirmed) {
           // Calculate center of references for map marker
           const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
@@ -2526,34 +2562,8 @@
       }
     }
 
-    // Step 3: Fallback - find nearest sites with 5km radius
-    if (sites.length > 0) {
-      const [refId, refData] = sites[0];
-      const refLat = Number(refData.latitude);
-      const refLon = Number(refData.longitude);
-      
-      const nearby = sites.filter(([, data]) => {
-        if (!data.latitude || !data.longitude) return false;
-        const dist = haversineDistance(refLat, refLon, Number(data.latitude), Number(data.longitude));
-        return dist <= 5000;
-      }).slice(0, 5);
-
-      if (nearby.length >= 1) {
-        const userConfirmed = confirm(`No exact match found for "${searchInput}". \n\nUse ${nearby.length} nearby reference site(s) within 5km radius?`);
-        if (userConfirmed) {
-          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
-          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
-          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
-          
-          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
-        } else {
-          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
-          document.getElementById('quickTiaError').style.display = 'block';
-        }
-        return;
-      }
-    }
-
+    // Step 4: No results found
+    document.getElementById('quickTiaError').innerHTML = `<strong>❌ No data found for "${searchInput}"</strong><br>Try:<ul style="margin: 8px 0 0 0; padding-left: 20px;"><li>Exact road name (e.g., "Pacific Motorway")</li><li>Suburb name (e.g., "Brisbane", "Rockhampton")</li><li>Selecting a location from the map above</li></ul>`;
     document.getElementById('quickTiaError').style.display = 'block';
   }
 
