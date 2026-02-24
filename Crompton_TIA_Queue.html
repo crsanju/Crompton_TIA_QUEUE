@@ -926,6 +926,44 @@
         }
       }
       
+      // Handle Ipswich peak hour format
+      if (!direction && props['Direction']) {
+        const ipswichDir = String(props['Direction']).trim();
+        
+        // Parse AM/PM peak hours from "HH:MM" format
+        let amPeakStartHour = null;
+        if (props['Weekday Avg AM Peak Start Hour']) {
+          const amTimeMatch = String(props['Weekday Avg AM Peak Start Hour']).match(/^(\d+):/);
+          amPeakStartHour = amTimeMatch ? parseInt(amTimeMatch[1]) : null;
+        }
+        let pmPeakStartHour = null;
+        if (props['Weekday Avg PM Peak Start Hour']) {
+          const pmTimeMatch = String(props['Weekday Avg PM Peak Start Hour']).match(/^(\d+):/);
+          pmPeakStartHour = pmTimeMatch ? parseInt(pmTimeMatch[1]) : null;
+        }
+        
+        const amPeakFlow = Number(props['Weekday Avg AM Peak Flow Vehicles Per Hour']) || null;
+        const pmPeakFlow = Number(props['Weekday Avg PM Peak Flow Vehicles Per Hour']) || null;
+        
+        const site = sites[siteId];
+        const assignedDir = site._directionMap[ipswichDir];
+        
+        if (assignedDir) {
+          if (amPeakStartHour !== null && amPeakFlow !== null && amPeakStartHour >= 0 && amPeakStartHour < 24) {
+            if (site.directions_weekday[assignedDir]) {
+              site.directions_weekday[assignedDir][amPeakStartHour] = Math.ceil(amPeakFlow);
+              site.directions[assignedDir][amPeakStartHour] = Math.ceil(amPeakFlow);
+            }
+          }
+          if (pmPeakStartHour !== null && pmPeakFlow !== null && pmPeakStartHour >= 0 && pmPeakStartHour < 24) {
+            if (site.directions_weekday[assignedDir]) {
+              site.directions_weekday[assignedDir][pmPeakStartHour] = Math.ceil(pmPeakFlow);
+              site.directions[assignedDir][pmPeakStartHour] = Math.ceil(pmPeakFlow);
+            }
+          }
+        }
+      }
+      
       if (hourMatch) {
         const hourIndex = parseInt(hourMatch[1]);
         if (hourIndex >= 0 && hourIndex < 24 && direction && sites[siteId].directions_weekday[direction]) {
