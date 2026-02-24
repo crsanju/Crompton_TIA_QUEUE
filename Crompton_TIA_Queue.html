@@ -2440,7 +2440,7 @@
     });
     percInput.addEventListener('change', (e) => {
       percSlider.value = e.target.value;
-      updateTIACalculations();
+      updateTiaCalculations();
     });
   }
 
@@ -2509,19 +2509,13 @@
       }).slice(0, 5); // Get up to 5 points
 
       if (nearby.length >= 1) {
-        // Ask user before showing references
-        const userConfirmed = confirm(`Found ${nearby.length} matching site(s) for "${searchInput}" within 5km radius. Use them as references?`);
-        if (userConfirmed) {
-          // Calculate center of references for map marker
-          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
-          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
-          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
-          
-          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
-        } else {
-          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or try a different road name.';
-          document.getElementById('quickTiaError').style.display = 'block';
-        }
+        // Auto-display references - no confirmation dialog
+        const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
+        const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
+        addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
+        
+        displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
+        showNotification(`📍 Found ${nearby.length} reference site(s) - Adjust % to refine`);
         return;
       }
     }
@@ -2545,25 +2539,82 @@
       }).slice(0, 5); // Get up to 5 points
 
       if (nearby.length >= 1) {
-        // Ask user before showing references
-        const userConfirmed = confirm(`Found ${nearby.length} site(s) near "${searchInput}" within 5km radius. Use them as references?`);
-        if (userConfirmed) {
-          // Calculate center of references for map marker
-          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
-          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
-          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
-          
-          displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
-        } else {
-          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
-          document.getElementById('quickTiaError').style.display = 'block';
-        }
+        // Auto-display references - no confirmation dialog
+        const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
+        const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
+        addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
+        
+        displayQuickTiaMultipleRefs(searchInput, nearby, centerLat, centerLon);
+        showNotification(`📍 Found ${nearby.length} sites near "${searchInput}" - Adjust % to refine`);
         return;
       }
     }
 
-    // Step 4: No results found
-    document.getElementById('quickTiaError').innerHTML = `<strong>❌ No data found for "${searchInput}"</strong><br>Try:<ul style="margin: 8px 0 0 0; padding-left: 20px;"><li>Exact road name (e.g., "Pacific Motorway")</li><li>Suburb name (e.g., "Brisbane", "Rockhampton")</li><li>Selecting a location from the map above</li></ul>`;
+    // Step 4: Extract key words and search more broadly
+    // Try to extract suburb/road keywords from the input
+    const keywords = searchLower.split(/\s+/).filter(w => w.length > 3); // Words > 3 chars
+    let broadMatches = [];
+    
+    for (const keyword of keywords) {
+      const matches = sites.filter(([, data]) =>
+        (data.road_name && data.road_name.toLowerCase().includes(keyword)) ||
+        (data.description && data.description.toLowerCase().includes(keyword))
+      ).filter(([, data]) => data.latitude && data.longitude);
+      
+      broadMatches = broadMatches.concat(matches);
+      if (broadMatches.length >= 3) break;
+    }
+
+    // Remove duplicates
+    const seen = new Set();
+    broadMatches = broadMatches.filter(([id]) => {
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+
+    if (broadMatches.length >= 3) {
+      // Calculate center of all broad matches for map marker
+      const centerLat = broadMatches.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / broadMatches.length;
+      const centerLon = broadMatches.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / broadMatches.length;
+      
+      // Get closest 5 to the center
+      const sorted = broadMatches.sort(([, a], [, b]) => {
+        const distA = haversineDistance(centerLat, centerLon, Number(a.latitude), Number(a.longitude));
+        const distB = haversineDistance(centerLat, centerLon, Number(b.latitude), Number(b.longitude));
+        return distA - distB;
+      }).slice(0, 5);
+      
+      addSearchMarker(centerLat, centerLon, 'Reference area: ' + searchInput);
+      displayQuickTiaMultipleRefs(searchInput, sorted, centerLat, centerLon);
+      showNotification(`🗺️ Using ${sorted.length} nearby reference sites - Adjust % to refine`);
+      return;
+    }
+
+    // Step 5: If still nothing, find closest 3+ points in entire database
+    if (sites.length >= 3) {
+      // Use statewide center (Brisbane area)
+      const defaultLat = -27.55;
+      const defaultLon = 152.95;
+      
+      const sorted = sites.filter(([, data]) => data.latitude && data.longitude).sort(([, a], [, b]) => {
+        const distA = haversineDistance(defaultLat, defaultLon, Number(a.latitude), Number(a.longitude));
+        const distB = haversineDistance(defaultLat, defaultLon, Number(b.latitude), Number(b.longitude));
+        return distA - distB;
+      }).slice(0, 5);
+      
+      if (sorted.length >= 3) {
+        const centerLat = sorted.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / sorted.length;
+        const centerLon = sorted.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / sorted.length;
+        addSearchMarker(centerLat, centerLon, 'Statewide reference: Queensland average');
+        displayQuickTiaMultipleRefs('Queensland Average Sites', sorted, centerLat, centerLon);
+        showNotification(`🗺️ Using ${sorted.length} statewide reference sites - Adjust % to refine`);
+        return;
+      }
+    }
+
+    // Step 6: No results found
+    document.getElementById('quickTiaError').innerHTML = `<strong>❌ No data found for "${searchInput}"</strong><br>Try:<ul style="margin: 8px 0 0 0; padding-left: 20px;"><li>Full road name (e.g., "Pacific Motorway")</li><li>Suburb name (e.g., "Brisbane", "Rockhampton", "Baringa")</li><li>Selecting a location from the map above</li></ul>`;
     document.getElementById('quickTiaError').style.display = 'block';
   }
 
