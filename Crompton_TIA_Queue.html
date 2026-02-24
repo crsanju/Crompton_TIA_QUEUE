@@ -273,6 +273,39 @@
     .print-btn:hover {
       background: #45a049;
     }
+
+    .source-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.82em;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .source-tmr {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-color: #90caf9;
+    }
+
+    .source-gold-coast {
+      background: #fff3e0;
+      color: #ef6c00;
+      border-color: #ffcc80;
+    }
+
+    .source-ipswich {
+      background: #f3e5f5;
+      color: #7b1fa2;
+      border-color: #ce93d8;
+    }
+
+    .source-logan {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-color: #a5d6a7;
+    }
   </style>
 </head>
 <body>
@@ -299,6 +332,16 @@
       <div class="grid-2" style="margin-bottom: 12px;">
         <div style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 10px;">
           <label style="color: #2e7d32;">Search & Select from Database</label>
+          <div style="margin-bottom: 8px;">
+            <label for="macroSourceFilter" style="color: #2e7d32; font-size: 0.8em; margin-bottom: 4px;">Data Source</label>
+            <select id="macroSourceFilter" style="border: 2px solid #4caf50; background-color: #f0fdf4;">
+              <option value="ALL" selected>All Sources (TMR + Gold Coast + Ipswich + Logan)</option>
+              <option value="TMR">TMR Only</option>
+              <option value="Gold Coast">Gold Coast Only</option>
+              <option value="Ipswich">Ipswich Only</option>
+              <option value="Logan">Logan Only</option>
+            </select>
+          </div>
           <input type="text" id="macroSiteSearch" list="macroSitesList" placeholder="Type Site ID or Name to autofill..." style="border: 2px solid #4caf50; background-color: #f0fdf4;" />
           <datalist id="macroSitesList"></datalist>
           <p style="font-size: 0.75em; color: #666; margin-top: 6px;">Or manually enter VADT & parameters below</p>
@@ -309,6 +352,7 @@
         <h3 style="margin:0 0 8px 0; color:#2e7d32;">📍 Selected Site Details</h3>
         <div style="display:grid; grid-template-columns:160px 1fr; gap:6px; font-size:0.9em;">
           <div style="font-weight:700;">Site ID:</div><div id="macroDetailSiteId">-</div>
+          <div style="font-weight:700;">Source:</div><div id="macroDetailSource">-</div>
           <div style="font-weight:700;">Road Name:</div><div id="macroDetailRoadName">-</div>
           <div style="font-weight:700;">Description:</div><div id="macroDetailDescription">-</div>
           <div style="font-weight:700;">Coordinates:</div><div id="macroDetailCoords">-</div>
@@ -625,13 +669,23 @@
 <script>
   // ===== GITHUB CONFIG & DATA LOADING =====
   const GITHUB_TMR_URL = 'https://raw.githubusercontent.com/crsanju/Cromton_Traffic_Analysis/main/tmr.geojson';
+  const GITHUB_GOLDCOAST_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/goldcoast.geojson';
+  const GITHUB_IPSWICH_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/Ipswich.geojson';
+  const GITHUB_LOGAN_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/main/logan.geojson';
 
   let macroSitesData = {};
   let selectedMacroSite = null;
   let macroMapInstance = null;
   let macroSiteLayer = null;
   let selectedMacroMarker = null;
+  let macroSourceFilter = 'ALL';
   const macroMarkersById = {};
+
+  function getFilteredMacroSiteEntries() {
+    const entries = Object.entries(macroSitesData);
+    if (macroSourceFilter === 'ALL') return entries;
+    return entries.filter(([, site]) => (site && site.source) === macroSourceFilter);
+  }
 
   function initMacroMap() {
     if (macroMapInstance || !document.getElementById('macroMap') || typeof L === 'undefined') return;
@@ -646,10 +700,12 @@
   function renderMacroMapSites() {
     if (!macroMapInstance || !macroSiteLayer || typeof L === 'undefined') return;
     macroSiteLayer.clearLayers();
+    selectedMacroMarker = null;
     Object.keys(macroMarkersById).forEach(key => delete macroMarkersById[key]);
 
     const points = [];
-    Object.entries(macroSitesData).forEach(([siteId, site]) => {
+    const filteredEntries = getFilteredMacroSiteEntries();
+    filteredEntries.forEach(([siteId, site]) => {
       const lat = Number(site.latitude);
       const lon = Number(site.longitude);
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
@@ -671,7 +727,16 @@
     if (points.length) {
       macroMapInstance.fitBounds(points, { padding: [24, 24] });
       const info = document.getElementById('macroMapInfo');
-      if (info) info.textContent = `${points.length} sites loaded. Click a marker to select a site.`;
+      if (info) {
+        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan' : macroSourceFilter;
+        info.textContent = `${points.length} sites loaded for ${label}. Click a marker to select a site.`;
+      }
+    } else {
+      const info = document.getElementById('macroMapInfo');
+      if (info) {
+        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan' : macroSourceFilter;
+        info.textContent = `No mappable sites found for ${label}.`;
+      }
     }
   }
 
@@ -710,22 +775,42 @@
     }
   }
 
-  function parseMacroTrafficData(jsonData) {
+  function parseMacroTrafficData(jsonData, sourceName = 'TMR') {
     const sites = {};
     const features = jsonData.features || [];
+
+    const normalizeDirectionKey = (rawDirection) => {
+      if (!rawDirection) return null;
+      const value = String(rawDirection).trim().toUpperCase();
+      if (value === 'GAZETTAL' || value === 'D1' || value.includes('WITH GAZ') || value.includes('WITH_GAZ')) {
+        return 'GAZETTAL';
+      }
+      if (value === 'AGAINST GAZETTAL' || value === 'D2' || value.includes('AGAINST')) {
+        return 'AGAINST GAZETTAL';
+      }
+      return null;
+    };
 
     features.forEach(feature => {
       const props = feature.properties;
       if (!props) return;
 
-      const siteId = String(props['SITE_ID']);
+      const rawSiteId = props['SITE_ID'] || props['site_id'] || props['ID'] || props['id'] || props['SITE'] || props['Site'] || '';
+      const siteId = String(rawSiteId || '').trim();
+      if (!siteId) return;
       const description = props['DESCRIPTION'] ? String(props['DESCRIPTION']).replace(/"/g, '') : '';
       const roadName = props['ROAD_NAME'] ? String(props['ROAD_NAME']).replace(/"/g, '') : '';
-      const longitude = props['LONGITUDE'] || feature.geometry.coordinates[0];
-      const latitude = props['LATITUDE'] || feature.geometry.coordinates[1];
+      const geomCoords = feature && feature.geometry && Array.isArray(feature.geometry.coordinates)
+        ? feature.geometry.coordinates
+        : [];
+      const longitude = props['LONGITUDE'] || props['LON'] || props['LONG'] || geomCoords[0];
+      const latitude = props['LATITUDE'] || props['LAT'] || geomCoords[1];
       const countYear = Number(props['COUNT_YEAR'] || props['DATA_YEAR'] || props['YEAR']) || 2024;
       const growthRate = Number(props['GROWTH_RATE'] || props['GROWTH'] || '') || null;
       const hvPercent = Number(props['HV_PERCENT'] || props['HVP'] || '') || null;
+      const totalVadtFromProps = Number(props['VADT'] || props['AADT'] || props['TOTAL_VADT'] || '') || null;
+      const d1VadtFromProps = Number(props['D1_VADT'] || props['GAZETTAL_VADT'] || props['VADT_D1'] || '') || null;
+      const d2VadtFromProps = Number(props['D2_VADT'] || props['AGAINST_GAZETTAL_VADT'] || props['VADT_D2'] || '') || null;
       
       // Extract lane counts if available
       const d1Lanes = Number(props['D1_LANES'] || props['GAZETTAL_LANES'] || props['LANES_D1'] || '') || null;
@@ -735,18 +820,20 @@
       if (!sites[siteId]) {
         sites[siteId] = {
           id: siteId,
+          source: sourceName,
           description: description,
           road_name: roadName,
           longitude: longitude,
           latitude: latitude,
           countYear: countYear,
+          vadt: totalVadtFromProps,
           growth_rate: growthRate,
           hv_percent: hvPercent || 5.0,
           d1_lanes: d1Lanes,
           d2_lanes: d2Lanes,
           total_lanes: totalLanes,
-          d1_vadt: 0,
-          d2_vadt: 0,
+          d1_vadt: d1VadtFromProps || 0,
+          d2_vadt: d2VadtFromProps || 0,
           dtca_auto: false,
           d1_direction_label: 'Gazettal',
           d2_direction_label: 'Against Gazettal',
@@ -771,7 +858,7 @@
 
       const hours = props['HOURS'];
       const hourMatch = hours ? String(hours).match(/^(\d+)\s+to\s+(\d+)$/) : null;
-      const direction = props['GAZETTAL_DIRECTION'];
+      const direction = normalizeDirectionKey(props['GAZETTAL_DIRECTION'] || props['DIRECTION'] || props['direction']);
       
       // Extract compass direction from description for this specific direction
       if (direction && (description || roadName)) {
@@ -785,7 +872,7 @@
       
       if (hourMatch) {
         const hourIndex = parseInt(hourMatch[1]);
-        if (hourIndex >= 0 && hourIndex < 24 && direction) {
+        if (hourIndex >= 0 && hourIndex < 24 && direction && sites[siteId].directions_weekday[direction]) {
           const weekdayAvg = props['WEEKDAY_AVERAGE'] ? Math.ceil(parseFloat(props['WEEKDAY_AVERAGE'])) : 0;
           sites[siteId].directions_weekday[direction][hourIndex] = weekdayAvg;
           sites[siteId].directions[direction][hourIndex] = weekdayAvg;
@@ -802,9 +889,27 @@
       const d1Total = gazData.reduce((a, b) => a + (Number(b) || 0), 0);
       const d2Total = agData.reduce((a, b) => a + (Number(b) || 0), 0);
       
-      site.d1_vadt = Math.ceil(d1Total);
-      site.d2_vadt = Math.ceil(d2Total);
+      const computedD1 = Math.ceil(d1Total);
+      const computedD2 = Math.ceil(d2Total);
+
+      if (computedD1 > 0 || computedD2 > 0) {
+        site.d1_vadt = computedD1;
+        site.d2_vadt = computedD2;
+      }
+
+      if (site.d1_vadt <= 0 && site.d2_vadt <= 0) {
+        const totalVadt = Number(site.vadt || 0);
+        if (totalVadt > 0) {
+          site.d1_vadt = Math.round(totalVadt * 0.5);
+          site.d2_vadt = Math.round(totalVadt * 0.5);
+        }
+      }
+
       site.dtca_auto = (d1Total > 0 && d2Total > 0);
+
+      if (!site.dtca_auto && site.d1_vadt > 0 && site.d2_vadt > 0) {
+        site.dtca_auto = true;
+      }
       
       // Smart direction labeling with opposite direction inference
       const gazLabel = site.direction_descriptions['GAZETTAL'];
@@ -843,26 +948,61 @@
     return sites;
   }
 
+  function mergeMacroSites(...siteMaps) {
+    const merged = {};
+    siteMaps.forEach(map => {
+      Object.entries(map || {}).forEach(([siteId, site]) => {
+        let uniqueKey = siteId;
+        if (merged[uniqueKey]) {
+          const src = site && site.source ? site.source : 'DATA';
+          uniqueKey = `${siteId} (${src})`;
+        }
+        merged[uniqueKey] = {
+          ...site,
+          id: uniqueKey
+        };
+      });
+    });
+    return merged;
+  }
+
   async function loadMacroSitesData() {
-    console.log('Loading Macro sites from GitHub...');
-    const data = await fetchGitHubData(GITHUB_TMR_URL);
-    if (data) {
-      macroSitesData = parseMacroTrafficData(data);
-      console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites`);
-      document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
-      populateMacroSitesDatalist();
-      initMacroMap();
-      renderMacroMapSites();
+    console.log('Loading Macro sites from GitHub (TMR + Gold Coast + Ipswich + Logan)...');
+    const [tmrData, goldCoastData, ipswichData, loganData] = await Promise.all([
+      fetchGitHubData(GITHUB_TMR_URL),
+      fetchGitHubData(GITHUB_GOLDCOAST_URL),
+      fetchGitHubData(GITHUB_IPSWICH_URL),
+      fetchGitHubData(GITHUB_LOGAN_URL)
+    ]);
+
+    const tmrSites = tmrData ? parseMacroTrafficData(tmrData, 'TMR') : {};
+    const goldCoastSites = goldCoastData ? parseMacroTrafficData(goldCoastData, 'Gold Coast') : {};
+    const ipswichSites = ipswichData ? parseMacroTrafficData(ipswichData, 'Ipswich') : {};
+    const loganSites = loganData ? parseMacroTrafficData(loganData, 'Logan') : {};
+
+    macroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites);
+
+    console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites (TMR: ${Object.keys(tmrSites).length}, Gold Coast: ${Object.keys(goldCoastSites).length}, Ipswich: ${Object.keys(ipswichSites).length}, Logan: ${Object.keys(loganSites).length})`);
+    document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
+    populateMacroSitesDatalist();
+    initMacroMap();
+    renderMacroMapSites();
+
+    const mapInfo = document.getElementById('macroMapInfo');
+    if (mapInfo) {
+      mapInfo.textContent = `${Object.keys(macroSitesData).length} combined sites loaded (TMR + Gold Coast + Ipswich + Logan). Click a marker to select a site.`;
     }
   }
 
   function populateMacroSitesDatalist() {
     const datalist = document.getElementById('macroSitesList');
     datalist.innerHTML = '';
-    Object.entries(macroSitesData).forEach(([id, data]) => {
+    const filteredEntries = getFilteredMacroSiteEntries();
+    filteredEntries.forEach(([id, data]) => {
       const option = document.createElement('option');
       option.value = id;
-      option.textContent = `${id} - ${data.description}`;
+      const sourceTag = data.source ? ` [${data.source}]` : '';
+      option.textContent = `${id} - ${data.description}${sourceTag}`;
       datalist.appendChild(option);
     });
   }
@@ -882,7 +1022,16 @@
       if (el) el.textContent = value || '-';
     };
 
+    const setSourceBadge = (sourceValue) => {
+      const el = document.getElementById('macroDetailSource');
+      if (!el) return;
+      const source = String(sourceValue || 'N/A').trim();
+      const classSuffix = source.toLowerCase().replace(/\s+/g, '-');
+      el.innerHTML = `<span class="source-pill source-${classSuffix}">${source}</span>`;
+    };
+
     setText('macroDetailSiteId', siteId);
+    setSourceBadge(data.source || 'N/A');
     setText('macroDetailRoadName', data.road_name || 'N/A');
     setText('macroDetailDescription', data.description || 'N/A');
     setText('macroDetailCountYear', data.countYear || data.count_year || 'N/A');
@@ -1183,6 +1332,17 @@
       }
     }
   });
+
+  const macroSourceFilterEl = document.getElementById('macroSourceFilter');
+  if (macroSourceFilterEl) {
+    macroSourceFilterEl.addEventListener('change', (e) => {
+      macroSourceFilter = String((e.target && e.target.value) || 'ALL');
+      const searchInput = document.getElementById('macroSiteSearch');
+      if (searchInput) searchInput.value = '';
+      populateMacroSitesDatalist();
+      renderMacroMapSites();
+    });
+  }
 
   // Load sites on page load
   document.addEventListener('DOMContentLoaded', () => {
