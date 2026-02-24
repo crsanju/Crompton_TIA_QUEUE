@@ -813,16 +813,33 @@
       const suburb = props['SUBURB'] || props['Suburb'] || '';
       const rawDescription = props['DESCRIPTION'] || props['LOCATION'] || props['COUNTER_LOCATION_BETWEEN'] || props['Site Description'] || '';
       const description = suburb ? `${suburb} - ${rawDescription}` : String(rawDescription).replace(/"/g, '').trim();
-      const roadName = String(props['ROAD_NAME'] || props['STREET'] || props['STREET_NAME'] || props['Road Name'] || '').replace(/"/g, '').trim();
+      const roadName = String(props['ROAD_NAME'] || props['STREET'] || props['STREET_NAME'] || props['Road Name'] || props['Road_Name'] || '').replace(/"/g, '').trim();
       const geomCoords = feature && feature.geometry && Array.isArray(feature.geometry.coordinates)
         ? feature.geometry.coordinates
         : [];
-      const longitude = props['LONGITUDE'] || props['LON'] || props['LONG'] || props['Longitude'] || geomCoords[0];
-      const latitude = props['LATITUDE'] || props['LAT'] || props['Latitude'] || geomCoords[1];
+      
+      // Handle LineString or MultiPoint geometries by extracting the first point
+      let longitude = props['LONGITUDE'] || props['LON'] || props['LONG'] || props['Longitude'];
+      let latitude = props['LATITUDE'] || props['LAT'] || props['Latitude'];
+      
+      if (!longitude || !latitude) {
+        if (feature.geometry.type === 'LineString' && geomCoords.length > 0) {
+          // For LineString, use the first coordinate
+          const firstPoint = geomCoords[0];
+          if (Array.isArray(firstPoint) && firstPoint.length >= 2) {
+            longitude = longitude || firstPoint[0];
+            latitude = latitude || firstPoint[1];
+          }
+        } else if (feature.geometry.type === 'Point') {
+          // For Point, coordinates are [lon, lat]
+          longitude = longitude || geomCoords[0];
+          latitude = latitude || geomCoords[1];
+        }
+      }
       const countYear = Number(props['COUNT_YEAR'] || props['DATA_YEAR'] || props['YEAR'] || props['AADT_DATE']?.substring(0,4)) || 2024;
       const growthRate = Number(props['GROWTH_RATE'] || props['GROWTH'] || '') || null;
-      const hvPercent = Number(props['HV_PERCENT'] || props['HVP'] || props['Percentage Commercial Vehicles']) || null;
-      const totalVadtFromProps = Number(props['VADT'] || props['AADT'] || props['VPD'] || props['TOTAL_VADT'] || props['Average Daily Traffic Adt Vehicles Per Day'] || props['Average Weekday Traffic Awt Vehicles Per Day']) || null;
+      const hvPercent = Number(props['HV_PERCENT'] || props['HVP'] || props['Percentage Commercial Vehicles'] || props['Percent_Commercial_Heavy_Vehicl']) || null;
+      const totalVadtFromProps = Number(props['VADT'] || props['AADT'] || props['VPD'] || props['TOTAL_VADT'] || props['Average Daily Traffic Adt Vehicles Per Day'] || props['Average Weekday Traffic Awt Vehicles Per Day'] || props['ADT']) || null;
       
       // Try to get directional volumes from various field names
       let d1VadtFromProps = Number(props['D1_VADT'] || props['GAZETTAL_VADT'] || props['VADT_D1'] || props['VOL1'] || '') || null;
