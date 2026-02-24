@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TMR Macro TIA+Queue Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f3ef;
+      --ink: #1c1c1c;
+      --muted: #5f5f5f;
+      --card: #ffffff;
+      --line: #e1ded8;
+      --brand: #1f5e63;
+      --brand-2: #0f2f32;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Space Grotesk", "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #e8f0ef 0%, transparent 55%),
+                  radial-gradient(1200px 600px at 100% -10%, #f3e7dc 0%, transparent 50%),
+                  var(--bg);
+      margin: 0;
+      padding: 24px;
+      color: var(--ink);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .home-button {
+      background-color: var(--brand);
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15px;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: auto;
+      text-decoration: none;
+    }
+
+    .home-button:hover { background-color: #174a4e; }
+    .home-button::before { content: '🏠'; }
+
+    h1 {
+      text-align: center;
+      margin: 10px 0 8px;
+      color: var(--brand-2);
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 8px 0 16px;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      color: var(--brand-2);
+      font-size: 1.05rem;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 8px;
+    }
+
+    .grid { display:grid; grid-template-columns:repeat(4, minmax(180px,1fr)); gap:12px; }
+    .grid-2 { display:grid; grid-template-columns:repeat(2, minmax(180px,1fr)); gap:12px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+      background: var(--card);
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .grid > div,
+    .grid-2 > div {
+      background: #fbfbfa;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid #cfd6ce;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid rgba(31, 94, 99, 0.2);
+      border-color: var(--brand);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.98rem;
+    }
+
+    button:hover { background: #174a4e; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #faf9f7;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .kpi-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--brand-2);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .table-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin: 8px 0;
+    }
+
+    .copy-table-btn {
+      width: auto;
+      margin: 0;
+      padding: 7px 12px;
+      font-size: 0.84rem;
+      border-radius: 7px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .copy-table-btn:hover { background: #174a4e; }
+
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { border:1px solid #dbe2ea; padding:8px; text-align:center; }
+    th { background: var(--brand); color:#fff; position: sticky; top: 0; z-index: 1; }
+    .rowhead { text-align:left; font-weight:700; background:#f4f3f0; }
+    .status-yes { background:#d1fae5; }
+    .status-no { background:#fee2e2; }
+    .hidden { display:none; }
+
+    .table-note {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    #macroMap {
+      height: 320px;
+      width: 100%;
+      border: 2px solid #0056b3;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 1180px) {
+      .grid, .kpi-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 12px; }
+      .container { padding: 14px; }
+      .grid, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+      table { font-size: 12px; }
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; border: none; }
+      .navbar, .home-button, button, #macroMap, .copy-table-btn { display: none !important; }
+      .card { page-break-inside: avoid; }
+      h1 { font-size: 24pt; color: #000; }
+      h2 { font-size: 16pt; page-break-after: avoid; }
+      h3 { font-size: 12pt; page-break-after: avoid; }
+      table { font-size: 9pt; }
+      th { background: #333 !important; color: white !important; }
+      .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+      .print-header h2 { margin: 0; }
+      .print-header p { margin: 5px 0; font-size: 10pt; color: #666; }
+      details { display: block !important; }
+      details summary { display: none !important; }
+      details > * { display: block !important; }
+    }
+
+    .print-header { display: none; }
+    
+    .print-btn {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9em;
+      margin-left: 10px;
+      transition: background 0.2s;
+    }
+    
+    .print-btn:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="print-header">
+      <h2>TMR Macro TIA+Queue Analysis Report</h2>
+      <p>Generated: <span id="printDate"></span></p>
+      <p>Crompton Traffic Analysis System</p>
+    </div>
+    
+    <div class="navbar">
+      <a class="home-button" href="index.html">Home</a>
+      <button class="print-btn" onclick="printReport()">🖨️ Print Report</button>
+      <span style="margin-left:auto; font-size:0.9em; color:#666;">
+        <strong>Sites Loaded:</strong> <span id="sitesLoadedCount">0</span>
+      </span>
+    </div>
+    <h1>TMR Macro TIA+Queue Analysis</h1>
+    <p class="subtitle">TMR database-integrated directional traffic, queue metrics, and capacity checks with automated parameters.</p>
+
+    <!-- Site Selection Card -->
+    <div class="card">
+      <h2>1. Select Site or Manual Entry</h2>
+      <div class="grid-2" style="margin-bottom: 12px;">
+        <div style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 10px;">
+          <label style="color: #2e7d32;">Search & Select from Database</label>
+          <input type="text" id="macroSiteSearch" list="macroSitesList" placeholder="Type Site ID or Name to autofill..." style="border: 2px solid #4caf50; background-color: #f0fdf4;" />
+          <datalist id="macroSitesList"></datalist>
+          <p style="font-size: 0.75em; color: #666; margin-top: 6px;">Or manually enter VADT & parameters below</p>
+        </div>
+      </div>
+
+      <div id="macroSiteDetailsPanel" style="display:none; background:#e8f5e9; border:1px solid #81c784; border-radius:6px; padding:12px; margin-bottom:12px;">
+        <h3 style="margin:0 0 8px 0; color:#2e7d32;">📍 Selected Site Details</h3>
+        <div style="display:grid; grid-template-columns:160px 1fr; gap:6px; font-size:0.9em;">
+          <div style="font-weight:700;">Site ID:</div><div id="macroDetailSiteId">-</div>
+          <div style="font-weight:700;">Road Name:</div><div id="macroDetailRoadName">-</div>
+          <div style="font-weight:700;">Description:</div><div id="macroDetailDescription">-</div>
+          <div style="font-weight:700;">Coordinates:</div><div id="macroDetailCoords">-</div>
+          <div style="font-weight:700;">Google Maps:</div><div>📍 <a id="macroMapLink" href="#" target="_blank" style="color:#0056b3; text-decoration:none;">View on Google Maps</a></div>
+          <div style="font-weight:700;">Count Year:</div><div id="macroDetailCountYear">-</div>
+          <div style="font-weight:700;">Growth Rate:</div><div id="macroDetailGrowthRate">-</div>
+          <div style="font-weight:700;">HV%:</div><div id="macroDetailHV">-</div>
+          <div style="font-weight:700;">D1 VADT:</div><div id="macroDetailD1">-</div>
+          <div style="font-weight:700;">D2 VADT:</div><div id="macroDetailD2">-</div>
+          <div style="font-weight:700;">Total VADT:</div><div id="macroDetailTotal">-</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <h3 style="margin: 0 0 6px 0; color: #1f5e63; font-size: 1rem;">Site Location (Macro)</h3>
+        <p style="font-size: 0.85em; color:#555; margin: 0 0 8px 0;">Select a site from search or click a marker to auto-fill inputs.</p>
+        <div id="macroMap"></div>
+        <div style="background:#e3f2fd; border:1px solid #64b5f6; border-radius:6px; padding:8px; margin-top:8px;">
+          <p style="margin:0; font-size:0.85em; color:#1565c0;">
+            <strong>Map Status:</strong> <span id="macroMapInfo">Waiting for site data...</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Database Data Visualization (Collapsed by Default) -->
+    <details class="card" id="macroDataVizSection" style="display:none;">
+      <summary style="cursor: pointer; font-size: 1.1em; font-weight: 700; color: #1f5e63; padding: 10px 0;">
+        📊 Data Loaded from Database (Click to Expand)
+      </summary>
+      <div style="margin-top: 15px;">
+        <h3 style="color: #1f5e63; margin: 0 0 10px 0;">Hourly Traffic Profile</h3>
+        <canvas id="macroHourlyChart" style="max-height: 350px;"></canvas>
+        
+        <h3 style="color: #1f5e63; margin: 20px 0 10px 0;">Directional Distribution</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <h4 style="text-align: center; color: #2e7d32; margin: 0 0 10px 0;">Gazettal</h4>
+            <canvas id="macroD1PieChart" style="max-height: 250px;"></canvas>
+          </div>
+          <div>
+            <h4 style="text-align: center; color: #c30000; margin: 0 0 10px 0;">Against Gazettal</h4>
+            <canvas id="macroD2PieChart" style="max-height: 250px;"></canvas>
+          </div>
+        </div>
+        
+        <h3 style="color: #1f5e63; margin: 20px 0 10px 0;">Peak Hour Analysis</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 8px; padding: 12px;">
+            <h4 style="color: #2e7d32; margin: 0 0 8px 0;">Gazettal Peak Hours</h4>
+            <div id="macroD1PeakHours" style="font-size: 0.9em;"></div>
+          </div>
+          <div style="background: #ffebee; border: 1px solid #ef5350; border-radius: 8px; padding: 12px;">
+            <h4 style="color: #c30000; margin: 0 0 8px 0;">Against Gazettal Peak Hours</h4>
+            <div id="macroD2PeakHours" style="font-size: 0.9em;"></div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="card">
+      <h2 style="display: flex; justify-content: space-between; align-items: center;">
+        Analysis Parameters
+        <span style="font-size: 0.75em; font-weight: normal;">
+          <span style="color:#f44336;">🔴 User Input</span> | <span style="color:#4caf50;">🟢 Auto-calculated</span>
+        </span>
+      </h2>
+
+      <!-- AUTO-FILLED TAB -->
+      <fieldset style="border: 2px solid #4caf50; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #f0fdf4;">
+        <legend style="padding: 0 12px; font-weight: bold; color: #2e7d32; font-size: 1.1em;">✓ Auto-filled from Database</legend>
+        <div class="grid-2">
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">Site ID</label>
+            <input id="macroSiteId" type="text" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">Base Year</label>
+            <input id="baseYear" type="number" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">HV % (from DB)</label>
+            <input id="baseHVPercent" type="number" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">D1 VADT (from DB)</label>
+            <input id="D1_VADT" type="number" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">D2 VADT (from DB)</label>
+            <input id="D2_VADT" type="number" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">VADT (Auto-calc)</label>
+            <input id="VADT" type="number" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">DTCA (Auto-detect)</label>
+            <select id="DTCA" readonly style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20; pointer-events: none;"><option>Yes</option><option>No</option></select>
+          </div>
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 10px;">
+            <label style="color: #2e7d32; font-weight: bold;">Target Year (Auto-filled, editable)</label>
+            <input id="macroOpeningYear" type="number" value="" min="2024" step="1" style="border: 1px solid #81c784; background-color: #f1f8f6; color: #1b5e20;" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- USER INPUT TAB -->
+      <fieldset style="border: 2px solid #f44336; padding: 15px; border-radius: 8px; background: #fff8f8;">
+        <legend style="padding: 0 12px; font-weight: bold; color: #c30000; font-size: 1.1em;">✎ You Must Fill These</legend>
+        
+        <div class="grid" style="margin-bottom: 12px;">
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">Growth Rate (% p.a.) *</label>
+            <p style="font-size: 0.8em; color: #666; margin: 0 0 4px 0;">(auto-filled if in DB)</p>
+            <input id="macroGrowthRate" type="number" value="2.5" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">Terrain *</label>
+            <select id="macroTerrainType" style="border: 1px solid #ffc107; background-color: #fffbf0;">
+              <option value="flat">Flat</option>
+              <option value="rolling">Rolling</option>
+              <option value="mountainous">Mountainous</option>
+            </select>
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">Road Trains (RTR)? *</label>
+            <select id="RTR" style="border: 1px solid #ffc107; background-color: #fffbf0;"><option>No</option><option>Yes</option></select>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-bottom: 12px; border-top: 1px solid #ddd; padding-top: 12px;">
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D1 Lanes *</label>
+            <p style="font-size: 0.8em; color: #666; margin: 0 0 4px 0;">(auto-filled if in DB)</p>
+            <input id="D1_Lanes" type="number" value="1" min="1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D2 Lanes *</label>
+            <p style="font-size: 0.8em; color: #666; margin: 0 0 4px 0;">(auto-filled if in DB)</p>
+            <input id="D2_Lanes" type="number" value="1" min="1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">HV (%) *</label>
+            <p style="font-size: 0.8em; color: #666; margin: 0 0 4px 0;">(auto-filled if in DB)</p>
+            <input id="HVP" type="number" value="5" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">DHVPA *</label>
+            <select id="DHVPA" style="border: 1px solid #ffc107; background-color: #fffbf0;"><option>Yes</option><option selected>No</option></select>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-bottom: 12px; border-top: 1px solid #ddd; padding-top: 12px;">
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D1 HV% *</label>
+            <input id="D1_HVP" type="number" value="5" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D2 HV% *</label>
+            <input id="D2_HVP" type="number" value="5" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">RTP (%) *</label>
+            <input id="RTP" type="number" value="0" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">DRTPA *</label>
+            <select id="DRTPA" style="border: 1px solid #ffc107; background-color: #fffbf0;"><option>Yes</option><option selected>No</option></select>
+          </div>
+        </div>
+
+        <div class="grid" style="border-top: 1px solid #ddd; padding-top: 12px;">
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D1 RT% *</label>
+            <input id="D1_RTP" type="number" value="0" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+          <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px;">
+            <label style="color: #c30000; font-weight: bold;">D2 RT% *</label>
+            <input id="D2_RTP" type="number" value="0" step="0.1" style="border: 1px solid #ffc107; background-color: #fffbf0;" />
+          </div>
+        </div>
+      </fieldset>
+
+      <button id="calcBtn" style="margin-top: 20px; padding: 14px; font-size: 1em; font-weight: bold; background: #1f5e63; color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%;">Calculate All</button>
+    </div>
+
+    <details class="card">
+      <summary style="font-weight:700; color:#1f5e63; cursor:pointer;">Quick KPI (Optional)</summary>
+      <div class="kpi-grid" style="margin-top:12px;">
+        <div class="kpi"><div class="kpi-label">Design Volume (DV)</div><div class="kpi-value" id="kpiDV">-</div></div>
+        <div class="kpi"><div class="kpi-label">D1 Peak Queue (2m)</div><div class="kpi-value" id="kpiD1PeakQueue">-</div></div>
+        <div class="kpi"><div class="kpi-label">D2 Peak Queue (2m)</div><div class="kpi-value" id="kpiD2PeakQueue">-</div></div>
+        <div class="kpi"><div class="kpi-label">Worst V/C Ratio</div><div class="kpi-value" id="kpiWorstVcr">-</div></div>
+        <div class="kpi"><div class="kpi-label">SLRF Peak</div><div class="kpi-value" id="kpiSlrfPeak">-</div></div>
+        <div class="kpi"><div class="kpi-label">Road Train Rule</div><div class="kpi-value" id="kpiRoadTrain">-</div></div>
+      </div>
+    </details>
+
+    <div class="card">
+      <h2>Grouped Directional Summary</h2>
+      
+      <h3 id="groupedHeaderD2" style="margin: 12px 0 8px 0; color: #c30000; font-size: 1.05em;">🔴 Against Gazettal (D2)</h3>
+      <div class="table-wrap">
+        <table id="groupedTableD2">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>AM</th>
+              <th>OP</th>
+              <th>PM</th>
+              <th>EV</th>
+              <th>Daily Total</th>
+            </tr>
+          </thead>
+          <tbody id="groupedBodyD2"></tbody>
+        </table>
+      </div>
+
+      <h3 id="groupedHeaderD1" style="margin: 20px 0 8px 0; color: #2e7d32; font-size: 1.05em;">🟢 Gazettal (D1)</h3>
+      <div class="table-wrap">
+        <table id="groupedTableD1">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>AM</th>
+              <th>OP</th>
+              <th>PM</th>
+              <th>EV</th>
+              <th>Daily Total</th>
+            </tr>
+          </thead>
+          <tbody id="groupedBodyD1"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Queue Length Estimation</h2>
+      
+      <h3 id="queueHeaderD2" style="margin: 12px 0 8px 0; color: #c30000; font-size: 1.05em;">🔴 Against Gazettal (D2)</h3>
+      <div class="table-wrap">
+        <table id="queueGroupedTableD2">
+          <thead>
+            <tr>
+              <th>Queue Duration</th>
+              <th>AM</th>
+              <th>OP</th>
+              <th>PM</th>
+              <th>EV</th>
+              <th>Max Queue</th>
+            </tr>
+          </thead>
+          <tbody id="queueGroupedBodyD2"></tbody>
+        </table>
+      </div>
+
+      <h3 id="queueHeaderD1" style="margin: 20px 0 8px 0; color: #2e7d32; font-size: 1.05em;">🟢 Gazettal (D1)</h3>
+      <div class="table-wrap">
+        <table id="queueGroupedTableD1">
+          <thead>
+            <tr>
+              <th>Queue Duration</th>
+              <th>AM</th>
+              <th>OP</th>
+              <th>PM</th>
+              <th>EV</th>
+              <th>Max Queue</th>
+            </tr>
+          </thead>
+          <tbody id="queueGroupedBodyD1"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>VCR / LOS Analysis</h2>
+      
+      <h3 id="vcrHeaderD2" style="margin: 12px 0 8px 0; color: #c30000; font-size: 1.05em;">🔴 Against Gazettal (D2)</h3>
+      <div class="table-wrap" style="width:100%;">
+        <table id="vcrGroupedTableD2">
+          <thead>
+            <tr><th>Metric</th><th>AM</th><th>OP</th><th>PM</th><th>EV</th></tr>
+          </thead>
+          <tbody id="vcrGroupedBodyD2"></tbody>
+        </table>
+      </div>
+
+      <h3 id="vcrHeaderD1" style="margin: 20px 0 8px 0; color: #2e7d32; font-size: 1.05em;">🟢 Gazettal (D1)</h3>
+      <div class="table-wrap" style="width:100%;">
+        <table id="vcrGroupedTableD1">
+          <thead>
+            <tr><th>Metric</th><th>AM</th><th>OP</th><th>PM</th><th>EV</th></tr>
+          </thead>
+          <tbody id="vcrGroupedBodyD1"></tbody>
+        </table>
+      </div>
+      <p class="table-note">* Design Volume is greater of 30th highest hour of AADT or 500.</p>
+    </div>
+
+    <details class="card">
+      <summary style="cursor: pointer; font-size: 1.2em; font-weight: 700; color: #1f5e63; margin-bottom: 10px;">Formula Trace (Click to Expand)</summary>
+      <div class="table-wrap">
+        <table id="traceTable">
+          <thead>
+            <tr><th>Trace Item</th><th>Applied Value / Rule</th></tr>
+          </thead>
+          <tbody id="traceBody"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+<script>
+  // ===== GITHUB CONFIG & DATA LOADING =====
+  const GITHUB_TMR_URL = 'https://raw.githubusercontent.com/crsanju/Cromton_Traffic_Analysis/main/tmr.geojson';
+
+  let macroSitesData = {};
+  let selectedMacroSite = null;
+  let macroMapInstance = null;
+  let macroSiteLayer = null;
+  let selectedMacroMarker = null;
+  const macroMarkersById = {};
+
+  function initMacroMap() {
+    if (macroMapInstance || !document.getElementById('macroMap') || typeof L === 'undefined') return;
+    macroMapInstance = L.map('macroMap').setView([-27.55, 152.95], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(macroMapInstance);
+    macroSiteLayer = L.layerGroup().addTo(macroMapInstance);
+  }
+
+  function renderMacroMapSites() {
+    if (!macroMapInstance || !macroSiteLayer || typeof L === 'undefined') return;
+    macroSiteLayer.clearLayers();
+    Object.keys(macroMarkersById).forEach(key => delete macroMarkersById[key]);
+
+    const points = [];
+    Object.entries(macroSitesData).forEach(([siteId, site]) => {
+      const lat = Number(site.latitude);
+      const lon = Number(site.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+      const marker = L.circleMarker([lat, lon], {
+        radius: 4,
+        color: '#1f5e63',
+        fillColor: '#1f5e63',
+        fillOpacity: 0.75,
+        weight: 1
+      }).addTo(macroSiteLayer);
+
+      marker.bindTooltip(`${siteId} - ${site.road_name || site.description || 'Site'}`);
+      marker.on('click', () => selectMacroSite(siteId));
+      macroMarkersById[siteId] = marker;
+      points.push([lat, lon]);
+    });
+
+    if (points.length) {
+      macroMapInstance.fitBounds(points, { padding: [24, 24] });
+      const info = document.getElementById('macroMapInfo');
+      if (info) info.textContent = `${points.length} sites loaded. Click a marker to select a site.`;
+    }
+  }
+
+  function focusMacroSiteOnMap(siteId) {
+    if (!macroMapInstance) return;
+    const marker = macroMarkersById[siteId];
+    if (!marker) return;
+
+    if (selectedMacroMarker) {
+      selectedMacroMarker.setStyle({ radius: 4, color: '#1f5e63', fillColor: '#1f5e63', fillOpacity: 0.75, weight: 1 });
+    }
+
+    marker.setStyle({ radius: 7, color: '#d36b2c', fillColor: '#d36b2c', fillOpacity: 0.95, weight: 2 });
+    selectedMacroMarker = marker;
+    const pos = marker.getLatLng();
+    macroMapInstance.setView(pos, Math.max(macroMapInstance.getZoom(), 11));
+
+    const info = document.getElementById('macroMapInfo');
+    const site = macroSitesData[siteId];
+    if (info && site) {
+      info.textContent = `Selected ${siteId} (${site.road_name || site.description || 'Site'}) at ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`;
+    }
+  }
+
+  async function fetchGitHubData(url) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (err) {
+      console.warn('Fetch failed:', err.message);
+      return null;
+    }
+  }
+
+  function parseMacroTrafficData(jsonData) {
+    const sites = {};
+    const features = jsonData.features || [];
+
+    features.forEach(feature => {
+      const props = feature.properties;
+      if (!props) return;
+
+      const siteId = String(props['SITE_ID']);
+      const description = props['DESCRIPTION'] ? String(props['DESCRIPTION']).replace(/"/g, '') : '';
+      const roadName = props['ROAD_NAME'] ? String(props['ROAD_NAME']).replace(/"/g, '') : '';
+      const longitude = props['LONGITUDE'] || feature.geometry.coordinates[0];
+      const latitude = props['LATITUDE'] || feature.geometry.coordinates[1];
+      const countYear = Number(props['COUNT_YEAR'] || props['DATA_YEAR'] || props['YEAR']) || 2024;
+      const growthRate = Number(props['GROWTH_RATE'] || props['GROWTH'] || '') || null;
+      const hvPercent = Number(props['HV_PERCENT'] || props['HVP'] || '') || null;
+      
+      // Extract lane counts if available
+      const d1Lanes = Number(props['D1_LANES'] || props['GAZETTAL_LANES'] || props['LANES_D1'] || '') || null;
+      const d2Lanes = Number(props['D2_LANES'] || props['AGAINST_GAZETTAL_LANES'] || props['LANES_D2'] || '') || null;
+      const totalLanes = Number(props['LANES'] || props['NUM_LANES'] || props['TOTAL_LANES'] || '') || null;
+
+      if (!sites[siteId]) {
+        sites[siteId] = {
+          id: siteId,
+          description: description,
+          road_name: roadName,
+          longitude: longitude,
+          latitude: latitude,
+          countYear: countYear,
+          growth_rate: growthRate,
+          hv_percent: hvPercent || 5.0,
+          d1_lanes: d1Lanes,
+          d2_lanes: d2Lanes,
+          total_lanes: totalLanes,
+          d1_vadt: 0,
+          d2_vadt: 0,
+          dtca_auto: false,
+          d1_direction_label: 'Gazettal',
+          d2_direction_label: 'Against Gazettal',
+          directions_weekday: {
+            'GAZETTAL': new Array(24).fill(0),
+            'AGAINST GAZETTAL': new Array(24).fill(0)
+          },
+          directions: {
+            'GAZETTAL': new Array(24).fill(0),
+            'AGAINST GAZETTAL': new Array(24).fill(0)
+          },
+          hour_order: {
+            'GAZETTAL': [],
+            'AGAINST GAZETTAL': []
+          },
+          direction_descriptions: {
+            'GAZETTAL': '',
+            'AGAINST GAZETTAL': ''
+          }
+        };
+      }
+
+      const hours = props['HOURS'];
+      const hourMatch = hours ? String(hours).match(/^(\d+)\s+to\s+(\d+)$/) : null;
+      const direction = props['GAZETTAL_DIRECTION'];
+      
+      // Extract compass direction from description for this specific direction
+      if (direction && (description || roadName)) {
+        const textToSearch = `${description} ${roadName}`;
+        const dirMatch = textToSearch.match(/(Northbound|Southbound|Eastbound|Westbound|North|South|East|West|NB|SB|EB|WB)/i);
+        if (dirMatch && !sites[siteId].direction_descriptions[direction]) {
+          const foundDir = dirMatch[0];
+          sites[siteId].direction_descriptions[direction] = foundDir;
+        }
+      }
+      
+      if (hourMatch) {
+        const hourIndex = parseInt(hourMatch[1]);
+        if (hourIndex >= 0 && hourIndex < 24 && direction) {
+          const weekdayAvg = props['WEEKDAY_AVERAGE'] ? Math.ceil(parseFloat(props['WEEKDAY_AVERAGE'])) : 0;
+          sites[siteId].directions_weekday[direction][hourIndex] = weekdayAvg;
+          sites[siteId].directions[direction][hourIndex] = weekdayAvg;
+        }
+      }
+    });
+
+    // Calculate D1 & D2 VADT from directional data and set labels
+    Object.keys(sites).forEach(siteId => {
+      const site = sites[siteId];
+      const gazData = site.directions_weekday['GAZETTAL'] || new Array(24).fill(0);
+      const agData = site.directions_weekday['AGAINST GAZETTAL'] || new Array(24).fill(0);
+      
+      const d1Total = gazData.reduce((a, b) => a + (Number(b) || 0), 0);
+      const d2Total = agData.reduce((a, b) => a + (Number(b) || 0), 0);
+      
+      site.d1_vadt = Math.ceil(d1Total);
+      site.d2_vadt = Math.ceil(d2Total);
+      site.dtca_auto = (d1Total > 0 && d2Total > 0);
+      
+      // Smart direction labeling with opposite direction inference
+      const gazLabel = site.direction_descriptions['GAZETTAL'];
+      const agLabel = site.direction_descriptions['AGAINST GAZETTAL'];
+      
+      // If both have the same direction or one is missing, infer the opposite
+      const getOppositeDir = (dir) => {
+        if (!dir) return null;
+        const d = dir.toLowerCase();
+        if (d.includes('north') || d === 'nb') return 'Southbound';
+        if (d.includes('south') || d === 'sb') return 'Northbound';
+        if (d.includes('east') || d === 'eb') return 'Westbound';
+        if (d.includes('west') || d === 'wb') return 'Eastbound';
+        return null;
+      };
+      
+      let finalGazLabel = gazLabel;
+      let finalAgLabel = agLabel;
+      
+      // If both exist and are the same (error case), fix it
+      if (gazLabel && agLabel && gazLabel.toLowerCase() === agLabel.toLowerCase()) {
+        finalAgLabel = getOppositeDir(gazLabel);
+      }
+      // If only one exists, infer the other
+      else if (gazLabel && !agLabel) {
+        finalAgLabel = getOppositeDir(gazLabel);
+      }
+      else if (!gazLabel && agLabel) {
+        finalGazLabel = getOppositeDir(agLabel);
+      }
+      
+      site.d1_direction_label = finalGazLabel ? `Gazettal (${finalGazLabel})` : 'Gazettal';
+      site.d2_direction_label = finalAgLabel ? `Against Gazettal (${finalAgLabel})` : 'Against Gazettal';
+    });
+
+    return sites;
+  }
+
+  async function loadMacroSitesData() {
+    console.log('Loading Macro sites from GitHub...');
+    const data = await fetchGitHubData(GITHUB_TMR_URL);
+    if (data) {
+      macroSitesData = parseMacroTrafficData(data);
+      console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites`);
+      document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
+      populateMacroSitesDatalist();
+      initMacroMap();
+      renderMacroMapSites();
+    }
+  }
+
+  function populateMacroSitesDatalist() {
+    const datalist = document.getElementById('macroSitesList');
+    datalist.innerHTML = '';
+    Object.entries(macroSitesData).forEach(([id, data]) => {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = `${id} - ${data.description}`;
+      datalist.appendChild(option);
+    });
+  }
+
+  function selectMacroSite(siteId) {
+    const data = macroSitesData[siteId];
+    if (!data) return;
+
+    selectedMacroSite = siteId;
+    document.getElementById('macroSiteSearch').value = siteId;
+    
+    const detailsPanel = document.getElementById('macroSiteDetailsPanel');
+    if (detailsPanel) detailsPanel.style.display = 'block';
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || '-';
+    };
+
+    setText('macroDetailSiteId', siteId);
+    setText('macroDetailRoadName', data.road_name || 'N/A');
+    setText('macroDetailDescription', data.description || 'N/A');
+    setText('macroDetailCountYear', data.countYear || data.count_year || 'N/A');
+    setText('macroDetailGrowthRate', data.growth_rate ? `${data.growth_rate}% p.a.` : 'N/A');
+    setText('macroDetailHV', data.hv_percent ? `${data.hv_percent}%` : 'N/A');
+
+    const d1 = Number(data.d1_vadt) || 0;
+    const d2 = Number(data.d2_vadt) || 0;
+    const vadt = d1 + d2;
+
+    setText('macroDetailD1', d1.toLocaleString());
+    setText('macroDetailD2', d2.toLocaleString());
+    setText('macroDetailTotal', vadt.toLocaleString());
+
+    if (Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude))) {
+      const lat = Number(data.latitude);
+      const lon = Number(data.longitude);
+      setText('macroDetailCoords', `${lat.toFixed(6)}, ${lon.toFixed(6)}`);
+      document.getElementById('macroMapLink').href = `https://www.google.com/maps?q=${lat},${lon}`;
+    } else {
+      setText('macroDetailCoords', 'N/A');
+      document.getElementById('macroMapLink').href = '#';
+    }
+
+    // Auto-fill DATABASE fields (green)
+    document.getElementById('macroSiteId').value = siteId;
+    document.getElementById('baseYear').value = data.countYear || 2024;
+    document.getElementById('baseHVPercent').value = data.hv_percent || 5.0;
+    document.getElementById('D1_VADT').value = d1;
+    document.getElementById('D2_VADT').value = d2;
+    
+    // Auto-calculate VADT
+    document.getElementById('VADT').value = Math.round(vadt);
+    
+    // Auto-detect DTCA based on directional data
+    document.getElementById('DTCA').value = data.dtca_auto ? 'Yes' : 'No';
+    
+    // Auto-fill growth rate if available in DB
+    if (data.growth_rate !== null) {
+      document.getElementById('macroGrowthRate').value = data.growth_rate;
+    }
+    
+    // Auto-fill HVP if available in DB (but not HV% field, that's DB read-only)
+    if (data.hv_percent) {
+      document.getElementById('HVP').value = data.hv_percent;
+    }
+    
+    // Auto-fill lane counts if available in DB
+    const d1LanesEl = document.getElementById('D1_Lanes');
+    const d2LanesEl = document.getElementById('D2_Lanes');
+    const d1LanesWrapper = d1LanesEl ? d1LanesEl.closest('div') : null;
+    const d2LanesWrapper = d2LanesEl ? d2LanesEl.closest('div') : null;
+    const d1LanesLabel = d1LanesWrapper ? d1LanesWrapper.querySelector('label') : null;
+    const d2LanesLabel = d2LanesWrapper ? d2LanesWrapper.querySelector('label') : null;
+    
+    if (data.d1_lanes !== null && data.d1_lanes > 0) {
+      d1LanesEl.value = data.d1_lanes;
+      d1LanesEl.readOnly = true;
+      d1LanesEl.style.border = '1px solid #81c784';
+      d1LanesEl.style.backgroundColor = '#f1f8f6';
+      d1LanesEl.style.color = '#1b5e20';
+      if (d1LanesWrapper) {
+        d1LanesWrapper.style.background = '#e8f5e9';
+        d1LanesWrapper.style.border = '1px solid #81c784';
+      }
+      if (d1LanesLabel) {
+        d1LanesLabel.style.color = '#2e7d32';
+        d1LanesLabel.innerHTML = 'D1 Lanes (from DB)';
+      }
+    } else {
+      d1LanesEl.value = 1;
+      d1LanesEl.readOnly = false;
+      d1LanesEl.style.border = '1px solid #ffc107';
+      d1LanesEl.style.backgroundColor = '#fffbf0';
+      d1LanesEl.style.color = '#000';
+      if (d1LanesWrapper) {
+        d1LanesWrapper.style.background = '#fff3cd';
+        d1LanesWrapper.style.border = '1px solid #ffc107';
+      }
+      if (d1LanesLabel) {
+        d1LanesLabel.style.color = '#c30000';
+        d1LanesLabel.innerHTML = 'D1 Lanes *';
+      }
+    }
+    
+    if (data.d2_lanes !== null && data.d2_lanes > 0) {
+      d2LanesEl.value = data.d2_lanes;
+      d2LanesEl.readOnly = true;
+      d2LanesEl.style.border = '1px solid #81c784';
+      d2LanesEl.style.backgroundColor = '#f1f8f6';
+      d2LanesEl.style.color = '#1b5e20';
+      if (d2LanesWrapper) {
+        d2LanesWrapper.style.background = '#e8f5e9';
+        d2LanesWrapper.style.border = '1px solid #81c784';
+      }
+      if (d2LanesLabel) {
+        d2LanesLabel.style.color = '#2e7d32';
+        d2LanesLabel.innerHTML = 'D2 Lanes (from DB)';
+      }
+    } else {
+      d2LanesEl.value = 1;
+      d2LanesEl.readOnly = false;
+      d2LanesEl.style.border = '1px solid #ffc107';
+      d2LanesEl.style.backgroundColor = '#fffbf0';
+      d2LanesEl.style.color = '#000';
+      if (d2LanesWrapper) {
+        d2LanesWrapper.style.background = '#fff3cd';
+        d2LanesWrapper.style.border = '1px solid #ffc107';
+      }
+      if (d2LanesLabel) {
+        d2LanesLabel.style.color = '#c30000';
+        d2LanesLabel.innerHTML = 'D2 Lanes *';
+      }
+    }
+    
+    syncVisibility();
+    focusMacroSiteOnMap(siteId);
+    
+    // Render charts with database data
+    renderMacroCharts(data);
+    
+    console.log(`Selected site: ${siteId}, VADT: ${vadt}, DTCA: ${data.dtca_auto}, D1: ${data.d1_vadt}, D2: ${data.d2_vadt}`);
+  }
+
+  // ===== CHART RENDERING =====
+  let macroHourlyChartInstance = null;
+  let macroD1PieChartInstance = null;
+  let macroD2PieChartInstance = null;
+
+  function renderMacroCharts(data) {
+    if (!data || !data.directions_weekday) return;
+    
+    // Show the visualization section
+    const vizSection = document.getElementById('macroDataVizSection');
+    if (vizSection) vizSection.style.display = 'block';
+    
+    const gazData = data.directions_weekday['GAZETTAL'] || new Array(24).fill(0);
+    const agData = data.directions_weekday['AGAINST GAZETTAL'] || new Array(24).fill(0);
+    
+    // Hourly Profile Chart
+    const ctx1 = document.getElementById('macroHourlyChart');
+    if (ctx1) {
+      if (macroHourlyChartInstance) macroHourlyChartInstance.destroy();
+      
+      macroHourlyChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+          datasets: [
+            {
+              label: 'Gazettal',
+              data: gazData,
+              borderColor: '#4caf50',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Against Gazettal',
+              data: agData,
+              borderColor: '#ef5350',
+              backgroundColor: 'rgba(239, 83, 80, 0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            title: { display: false },
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Volume (vph)' }
+            },
+            x: {
+              title: { display: true, text: 'Hour of Day' }
+            }
+          }
+        }
+      });
+    }
+    
+    // Gazettal Pie Chart (AM/OP/PM/EV breakdown)
+    const d1Total = gazData.reduce((a, b) => a + b, 0);
+    const d1AM = [6,7,8].map(h => gazData[h]).reduce((a,b) => a+b, 0);
+    const d1OP = [10,11,12,13,14,15].map(h => gazData[h]).reduce((a,b) => a+b, 0);
+    const d1PM = [16,17,18].map(h => gazData[h]).reduce((a,b) => a+b, 0);
+    const d1EV = d1Total - d1AM - d1OP - d1PM;
+    
+    const ctx2 = document.getElementById('macroD1PieChart');
+    if (ctx2) {
+      if (macroD1PieChartInstance) macroD1PieChartInstance.destroy();
+      
+      macroD1PieChartInstance = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: ['AM (6-9)', 'OP (10-15)', 'PM (16-18)', 'EV (Other)'],
+          datasets: [{
+            data: [d1AM, d1OP, d1PM, d1EV],
+            backgroundColor: ['#ff9800', '#2196f3', '#f44336', '#9c27b0']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+    
+    // Against Gazettal Pie Chart
+    const d2Total = agData.reduce((a, b) => a + b, 0);
+    const d2AM = [6,7,8].map(h => agData[h]).reduce((a,b) => a+b, 0);
+    const d2OP = [10,11,12,13,14,15].map(h => agData[h]).reduce((a,b) => a+b, 0);
+    const d2PM = [16,17,18].map(h => agData[h]).reduce((a,b) => a+b, 0);
+    const d2EV = d2Total - d2AM - d2OP - d2PM;
+    
+    const ctx3 = document.getElementById('macroD2PieChart');
+    if (ctx3) {
+      if (macroD2PieChartInstance) macroD2PieChartInstance.destroy();
+      
+      macroD2PieChartInstance = new Chart(ctx3, {
+        type: 'pie',
+        data: {
+          labels: ['AM (6-9)', 'OP (10-15)', 'PM (16-18)', 'EV (Other)'],
+          datasets: [{
+            data: [d2AM, d2OP, d2PM, d2EV],
+            backgroundColor: ['#ff9800', '#2196f3', '#f44336', '#9c27b0']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+    
+    // Peak Hours Analysis
+    const getPeakHours = (hourlyData) => {
+      const indexed = hourlyData.map((val, idx) => ({hour: idx, volume: val}));
+      indexed.sort((a, b) => b.volume - a.volume);
+      return indexed.slice(0, 5);
+    };
+    
+    const d1Peaks = getPeakHours(gazData);
+    const d2Peaks = getPeakHours(agData);
+    
+    const d1PeakEl = document.getElementById('macroD1PeakHours');
+    if (d1PeakEl) {
+      d1PeakEl.innerHTML = d1Peaks.map((p, i) => 
+        `<div><strong>${i+1}.</strong> ${p.hour}:00-${p.hour+1}:00 → ${Math.round(p.volume).toLocaleString()} vph</div>`
+      ).join('');
+    }
+    
+    const d2PeakEl = document.getElementById('macroD2PeakHours');
+    if (d2PeakEl) {
+      d2PeakEl.innerHTML = d2Peaks.map((p, i) => 
+        `<div><strong>${i+1}.</strong> ${p.hour}:00-${p.hour+1}:00 → ${Math.round(p.volume).toLocaleString()} vph</div>`
+      ).join('');
+    }
+  }
+
+  // ===== PRINT FUNCTIONALITY =====
+  function printReport() {
+    document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-AU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    window.print();
+  }
+
+  document.getElementById('macroSiteSearch').addEventListener('input', (e) => {
+    const value = e.target.value.trim();
+    if (value && macroSitesData[value]) {
+      selectMacroSite(value);
+    }
+  });
+
+  document.getElementById('macroSiteSearch').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const value = e.target.value.trim();
+      if (value && macroSitesData[value]) {
+        selectMacroSite(value);
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Load sites on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const openingYearInput = document.getElementById('macroOpeningYear');
+    if (openingYearInput && !openingYearInput.value) {
+      openingYearInput.value = String(new Date().getFullYear());
+    }
+    initMacroMap();
+    loadMacroSitesData();
+  });
+
+  // ===== EXISTING CALCULATION LOGIC =====
+
+  const ids = [
+    'RTR','DTCA','DHVPA','DRTPA','VADT','D1_VADT','D2_VADT','HVP','RTP','D1_HVP','D2_HVP','D1_RTP','D2_RTP','D1_Lanes','D2_Lanes',
+    'macroOpeningYear','macroGrowthRate','macroTerrainType'
+  ];
+  function txt(id){
+    const el = document.getElementById(id);
+    return String((el && el.value) || '').trim();
+  }
+  function num(id){
+    const el = document.getElementById(id);
+    return Number((el && el.value) || 0) || 0;
+  }
+  function numberRoundUp(n, digits=0){
+    const m = Math.pow(10,digits);
+    return Math.ceil(((Number(n)||0) * m) - 1e-12) / m;
+  }
+  function ceilingVBA(n, sig){
+    if (!sig) return 0;
+    return Math.ceil((Number(n)||0)/sig)*sig;
+  }
+
+  function applyYesNoColor(selectId){
+    const el = document.getElementById(selectId);
+    if (!el) return;
+    el.classList.remove('status-yes','status-no');
+    if (el.value === 'Yes') el.classList.add('status-yes');
+    if (el.value === 'No') el.classList.add('status-no');
+  }
+
+  function syncVisibility(){
+    const shouldHideDirectional = txt('DTCA') !== 'Yes';
+    const wrap = document.getElementById('dirVadtWrap');
+    if (wrap) {
+      wrap.classList.toggle('hidden', shouldHideDirectional);
+      return;
+    }
+
+    const d1Card = (document.getElementById('D1_VADT') || {}).closest ? document.getElementById('D1_VADT').closest('div[style]') : null;
+    const d2Card = (document.getElementById('D2_VADT') || {}).closest ? document.getElementById('D2_VADT').closest('div[style]') : null;
+    [d1Card, d2Card].forEach(card => {
+      if (card && card.classList) card.classList.toggle('hidden', shouldHideDirectional);
+    });
+  }
+
+  function syncDirectionalRtFromOverall() {
+    const rtrYes = txt('RTR').toUpperCase() === 'YES';
+    const drtpaNo = txt('DRTPA').toUpperCase() === 'NO';
+    if (!rtrYes || !drtpaNo) return;
+
+    const rtp = num('RTP');
+    const d1 = document.getElementById('D1_RTP');
+    const d2 = document.getElementById('D2_RTP');
+    if (d1) d1.value = String(rtp);
+    if (d2) d2.value = String(rtp);
+  }
+
+  function getHVPercent(direction){
+    const dhvpa = txt('DHVPA').toUpperCase();
+    if (dhvpa === 'YES') return numberRoundUp(num(`D${direction}_HVP`) / 100, 12);
+    return numberRoundUp((num('HVP') / 2) / 100, 12);
+  }
+
+  function getRTPercent(direction){
+    const drtpa = txt('DRTPA').toUpperCase();
+    if (drtpa === 'YES') return numberRoundUp(num(`D${direction}_RTP`) / 100, 12);
+    return numberRoundUp((num('RTP') / 2) / 100, 12);
+  }
+
+  function baseDirectionalVolume(direction){
+    const dtca = txt('DTCA').toUpperCase();
+    const vadt = num('VADT');
+    if (dtca === 'YES') return num(`D${direction}_VADT`) * 0.12 * 0.8;
+    return vadt * 0.12 * 0.8 * 0.5;
+  }
+
+  function calcDirection(direction){
+    const lanes = Math.max(1, num(`D${direction}_Lanes`));
+
+    const peakHV = numberRoundUp(baseDirectionalVolume(direction) * getHVPercent(direction), 0);
+    const peakRT = numberRoundUp(baseDirectionalVolume(direction) * getRTPercent(direction), 0);
+    const peakLV = numberRoundUp(baseDirectionalVolume(direction) - peakHV - peakRT, 0);
+
+    const offLV = numberRoundUp(peakLV * 0.42, 0);
+    const offHV = numberRoundUp(peakHV * 0.42, 0);
+    const offRT = numberRoundUp(peakRT * 0.42, 0);
+
+    const peakLVPL = numberRoundUp(peakLV / lanes, 0);
+    const peakHVPL = numberRoundUp(peakHV / lanes, 0);
+    const peakRTPL = numberRoundUp(peakRT / lanes, 0);
+
+    const offLVPL = numberRoundUp(offLV / lanes, 0);
+    const offHVPL = numberRoundUp(offHV / lanes, 0);
+    const offRTPL = numberRoundUp(offRT / lanes, 0);
+
+    const lv5mp = numberRoundUp(peakLVPL * 5 / 60, 0);
+    const hv5mp = numberRoundUp(peakHVPL * 5 / 60, 0);
+    const rt5mp = numberRoundUp(peakRTPL * 5 / 60, 0);
+
+    const lv5mop = numberRoundUp(offLVPL * 5 / 60, 0);
+    const hv5mop = numberRoundUp(offHVPL * 5 / 60, 0);
+    const rt5mop = numberRoundUp(offRTPL * 5 / 60, 0);
+
+    let q2qp = lv5mp*2.4 + hv5mp*8 + rt5mp*25.2;
+    let q5qp = lv5mp*6 + hv5mp*20 + rt5mp*63;
+    let q2qop = lv5mop*2.4 + hv5mop*8 + rt5mop*25.2;
+    let q5qop = lv5mop*6 + hv5mop*20 + rt5mop*63;
+
+    const rtr = txt('RTR').toUpperCase();
+    const roadTrainFactor = rtr === 'YES' ? 1.5 : 1;
+    const minQ = rtr === 'YES' ? 89 : 26;
+    q2qp = q2qp * roadTrainFactor;
+    q5qp = q5qp * roadTrainFactor;
+    q2qop = q2qop * roadTrainFactor;
+    q5qop = q5qop * roadTrainFactor;
+    q2qp = q2qp < minQ ? minQ : q2qp;
+    q5qp = q5qp < minQ ? minQ : q5qp;
+    q2qop = q2qop < minQ ? minQ : q2qop;
+    q5qop = q5qop < minQ ? minQ : q5qop;
+
+    q2qp = ceilingVBA(q2qp, 5);
+    q5qp = ceilingVBA(q5qp, 5);
+    q2qop = ceilingVBA(q2qop, 5);
+    q5qop = ceilingVBA(q5qop, 5);
+
+    return {
+      lanes,
+      peakLV, peakHV, peakRT,
+      offLV, offHV, offRT,
+      peakLVPL, peakHVPL, peakRTPL,
+      offLVPL, offHVPL, offRTPL,
+      lv5mp, hv5mp, rt5mp,
+      lv5mop, hv5mop, rt5mop,
+      q2qp, q2qop, q5qp, q5qop
+    };
+  }
+
+  function calculateDV(){
+    const totalLanes = Math.max(1, num('D1_Lanes') + num('D2_Lanes'));
+    let dv = num('VADT') * 0.12 / totalLanes;
+    if (dv < 500) dv = 500;
+    return numberRoundUp(dv, 0);
+  }
+
+  function vcrColor(v){
+    if (v === null || Number.isNaN(v) || v < 0) return '';
+    if (v <= 0.6) return '#00eb00';
+    if (v <= 0.7) return '#add8e6';
+    if (v <= 0.9) return '#ffff00';
+    if (v <= 0.95) return '#ffc896';
+    if (v <= 1.0) return '#ffc000';
+    return '#c00000';
+  }
+
+  function fmtVcr(v){ return (v === null || Number.isNaN(v) || v < 0) ? 'N/A' : v.toFixed(3); }
+  function losLabel(v){
+    if (v === null || Number.isNaN(v) || v < 0) return 'N/A';
+    if (v <= 0.60) return 'LOS A';
+    if (v <= 0.70) return 'LOS B';
+    if (v <= 0.90) return 'LOS C';
+    if (v <= 0.95) return 'LOS D';
+    if (v <= 1.00) return 'LOS E';
+    return 'LOS F';
+  }
+
+  function setVcrCell(td, value){
+    td.textContent = fmtVcr(value);
+    td.style.background = vcrColor(value);
+    td.style.fontWeight = '700';
+  }
+
+  function setVcrLosCell(td, value){
+    td.textContent = `${fmtVcr(value)} (${losLabel(value)})`;
+    td.style.background = vcrColor(value);
+    td.style.fontWeight = '700';
+  }
+
+  const periods = [
+    { key: 'AM', hours: [6, 7, 8, 9] },
+    { key: 'OP', hours: [10, 11, 12, 13, 14, 15] },
+    { key: 'PM', hours: [16, 17, 18] },
+    { key: 'EV', hours: [0, 1, 2, 3, 4, 5, 19, 20, 21, 22, 23] }
+  ];
+
+  function queueFromFiveMinute(total5, hvPct, rtPct, isRtr){
+    const hv = total5 * hvPct;
+    const rt = total5 * rtPct;
+    const lv = Math.max(0, total5 - hv - rt);
+
+    let q2 = (lv * 2.4) + (hv * 8) + (rt * 25.2);
+    let q5 = (lv * 6) + (hv * 20) + (rt * 63);
+    let q10 = (lv * 12) + (hv * 40) + (rt * 126);
+    let q15 = (lv * 18) + (hv * 60) + (rt * 189);
+
+    const factor = isRtr ? 1.5 : 1;
+    const minQ = isRtr ? 89 : 26;
+
+    q2 = Math.max(q2 * factor, minQ);
+    q5 = Math.max(q5 * factor, minQ);
+    q10 = Math.max(q10 * factor, minQ);
+    q15 = Math.max(q15 * factor, minQ);
+
+    return {
+      q2: ceilingVBA(q2, 5),
+      q5: ceilingVBA(q5, 5),
+      q10: ceilingVBA(q10, 5),
+      q15: ceilingVBA(q15, 5)
+    };
+  }
+
+  function buildPeriodProfile(direction, dailyTotal, hvPct, rtPct, laneCount, rtrYes){
+    const profile = {};
+    const site = selectedMacroSite ? macroSitesData[selectedMacroSite] : null;
+    const directionKey = direction === 1 ? 'GAZETTAL' : 'AGAINST GAZETTAL';
+    const hourly = site && site.directions_weekday && Array.isArray(site.directions_weekday[directionKey])
+      ? site.directions_weekday[directionKey]
+      : null;
+
+    const fallbackShares = { AM: 0.2, OP: 0.4, PM: 0.2, EV: 0.2 };
+    const baseByPeriod = { AM: 0, OP: 0, PM: 0, EV: 0 };
+
+    if (hourly) {
+      periods.forEach(period => {
+        baseByPeriod[period.key] = period.hours.reduce((sum, hour) => sum + (Number(hourly[hour]) || 0), 0);
+      });
+    } else {
+      periods.forEach(period => {
+        baseByPeriod[period.key] = (Number(dailyTotal) || 0) * fallbackShares[period.key];
+      });
+    }
+
+    const baseTotal = periods.reduce((sum, period) => sum + baseByPeriod[period.key], 0);
+    const scale = baseTotal > 0 ? (Number(dailyTotal) || 0) / baseTotal : 1;
+
+    periods.forEach(period => {
+      const total = Math.max(0, baseByPeriod[period.key] * scale);
+      const hv = Math.round(total * hvPct);
+      const rt = Math.round(total * rtPct);
+      const lv = Math.max(0, Math.round(total) - hv - rt);
+      const hoursCount = period.hours.length;
+      const hourlyAvg = hoursCount > 0 ? total / hoursCount : 0;
+      const hourlyPerLane = laneCount > 0 ? hourlyAvg / laneCount : 0;
+      const per5 = hourlyPerLane / 12;
+      const queue = queueFromFiveMinute(per5, hvPct, rtPct, rtrYes);
+
+      profile[period.key] = { total, lv, hv, rt, hourlyPerLane, per5, queue };
+    });
+
+    return profile;
+  }
+
+  function tableToText(table){
+    if (!table) return '';
+    const rows = table.querySelectorAll('tr');
+    const lines = [];
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('th, td');
+      const values = Array.from(cells).map(cell =>
+        (cell.textContent || '').replace(/\s+/g, ' ').trim()
+      );
+      lines.push(values.join('\t'));
+    });
+
+    return lines.join('\n');
+  }
+
+  async function copyTableById(tableId, button){
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const text = tableToText(table);
+    if (!text) return;
+
+    const original = button ? button.textContent : '';
+    try {
+      await navigator.clipboard.writeText(text);
+      if (button) {
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = original; }, 1100);
+      }
+    } catch (_error) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (button) {
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = original; }, 1100);
+      }
+    }
+  }
+
+  function setupTableCopyButtons(){
+    const tables = document.querySelectorAll('table[id]');
+    tables.forEach(table => {
+      const tableId = table.id;
+      const wrapper = table.closest('.table-wrap');
+      const host = wrapper || table.parentElement;
+      if (!host) return;
+
+      const existing = host.previousElementSibling;
+      if (existing && existing.classList && existing.classList.contains('table-actions')) return;
+
+      const actions = document.createElement('div');
+      actions.className = 'table-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'copy-table-btn';
+      copyBtn.textContent = 'Copy Table';
+      copyBtn.addEventListener('click', () => copyTableById(tableId, copyBtn));
+
+      actions.appendChild(copyBtn);
+      host.parentNode.insertBefore(actions, host);
+    });
+  }
+
+  function maxValid(values){
+    const nums = values.filter(v => Number.isFinite(v) && v >= 0);
+    return nums.length ? Math.max(...nums) : null;
+  }
+
+  function updateSummaryKpis({ dv, d1, d2, rtr, slrfPeak, worstVcr }){
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+      return el;
+    };
+
+    set('kpiDV', `${dv}`);
+    set('kpiD1PeakQueue', `${d1.q2qp} m`);
+    set('kpiD2PeakQueue', `${d2.q2qp} m`);
+    set('kpiRoadTrain', rtr === 'YES' ? 'Active' : 'Inactive');
+
+    const slrfText = (slrfPeak === null || Number.isNaN(slrfPeak) || slrfPeak < 0) ? 'N/A' : slrfPeak.toFixed(3);
+    const slrfEl = set('kpiSlrfPeak', slrfText);
+    const worstText = (worstVcr === null || Number.isNaN(worstVcr) || worstVcr < 0) ? 'N/A' : worstVcr.toFixed(3);
+    const worstEl = set('kpiWorstVcr', worstText);
+
+    if (worstEl) {
+      worstEl.style.background = vcrColor(worstVcr);
+      worstEl.style.color = '#1c1c1c';
+      worstEl.style.borderRadius = '6px';
+      worstEl.style.padding = '2px 6px';
+      worstEl.style.display = 'inline-block';
+    }
+    if (slrfEl) {
+      slrfEl.style.background = vcrColor(slrfPeak);
+      slrfEl.style.color = '#1c1c1c';
+      slrfEl.style.borderRadius = '6px';
+      slrfEl.style.padding = '2px 6px';
+      slrfEl.style.display = 'inline-block';
+    }
+  }
+
+  function calculateAll(){
+    syncVisibility();
+    syncDirectionalRtFromOverall();
+    ['RTR','DTCA','DHVPA','DRTPA'].forEach(applyYesNoColor);
+
+    const d1 = calcDirection(1);
+    const d2 = calcDirection(2);
+    const dv = calculateDV();
+    
+    // Get direction labels from selected site
+    const d1Label = (selectedMacroSite && macroSitesData[selectedMacroSite]) ? macroSitesData[selectedMacroSite].d1_direction_label : 'Gazettal (D1)';
+    const d2Label = (selectedMacroSite && macroSitesData[selectedMacroSite]) ? macroSitesData[selectedMacroSite].d2_direction_label : 'Against Gazettal (D2)';
+    const dtca = txt('DTCA').toUpperCase();
+    const dhvpa = txt('DHVPA').toUpperCase();
+    const drtpa = txt('DRTPA').toUpperCase();
+    const rtr = txt('RTR').toUpperCase();
+
+    const d1Daily = dtca === 'YES' ? num('D1_VADT') : num('VADT') / 2;
+    const d2Daily = dtca === 'YES' ? num('D2_VADT') : num('VADT') / 2;
+    const d1Profile = buildPeriodProfile(1, d1Daily, getHVPercent(1), getRTPercent(1), d1.lanes, rtr === 'YES');
+    const d2Profile = buildPeriodProfile(2, d2Daily, getHVPercent(2), getRTPercent(2), d2.lanes, rtr === 'YES');
+
+    const base1Peak = (d1.peakLVPL + d1.peakHVPL + d1.peakRTPL) / dv;
+    const base1Off  = (d1.offLVPL + d1.offHVPL + d1.offRTPL) / dv;
+    const base2Peak = (d2.peakLVPL + d2.peakHVPL + d2.peakRTPL) / dv;
+    const base2Off  = (d2.offLVPL + d2.offHVPL + d2.offRTPL) / dv;
+
+    let slc1Peak = null, slc1Off = null, slc2Peak = null, slc2Off = null;
+    if (d1.lanes === 2) {
+      slc1Peak = ((d1.peakLVPL + d1.peakHVPL + d1.peakRTPL) * 2) / dv;
+      slc1Off = ((d1.offLVPL + d1.offHVPL + d1.offRTPL) * 2) / dv;
+    } else if (d1.lanes > 2) {
+      slc1Peak = (((d1.peakLVPL + d1.peakHVPL + d1.peakRTPL) * d1.lanes) / (d1.lanes - 1)) / dv;
+      slc1Off = (((d1.offLVPL + d1.offHVPL + d1.offRTPL) * d1.lanes) / (d1.lanes - 1)) / dv;
+    }
+
+    if (d2.lanes === 2) {
+      slc2Peak = ((d2.peakLVPL + d2.peakHVPL + d2.peakRTPL) * 2) / dv;
+      slc2Off = ((d2.offLVPL + d2.offHVPL + d2.offRTPL) * 2) / dv;
+    } else if (d2.lanes > 2) {
+      slc2Peak = (((d2.peakLVPL + d2.peakHVPL + d2.peakRTPL) * d2.lanes) / (d2.lanes - 1)) / dv;
+      slc2Off = (((d2.offLVPL + d2.offHVPL + d2.offRTPL) * d2.lanes) / (d2.lanes - 1)) / dv;
+    }
+
+    let slrfPeak = null, slrfOff = null;
+    if (d1.lanes === 1 && d2.lanes === 1) {
+      slrfPeak = (d1.peakLVPL + d1.peakHVPL + d1.peakRTPL + d2.peakLVPL + d2.peakHVPL + d2.peakRTPL) / dv;
+      slrfOff = (d1.offLVPL + d1.offHVPL + d1.offRTPL + d2.offLVPL + d2.offHVPL + d2.offRTPL) / dv;
+    }
+
+    // Update section headers with intelligent direction labels
+    const setHeader = (id, emoji, label) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `${emoji} ${label}`;
+    };
+    
+    setHeader('groupedHeaderD2', '🔴', d2Label);
+    setHeader('groupedHeaderD1', '🟢', d1Label);
+    setHeader('queueHeaderD2', '🔴', d2Label);
+    setHeader('queueHeaderD1', '🟢', d1Label);
+    setHeader('vcrHeaderD2', '🔴', d2Label);
+    setHeader('vcrHeaderD1', '🟢', d1Label);
+    
+    const groupedBodyD2 = document.getElementById('groupedBodyD2');
+    if (groupedBodyD2) {
+      groupedBodyD2.innerHTML = `
+        <tr>
+          <td class="rowhead">LV Volume</td>
+          <td>${d2Profile.AM.lv.toLocaleString()}</td>
+          <td>${d2Profile.OP.lv.toLocaleString()}</td>
+          <td>${d2Profile.PM.lv.toLocaleString()}</td>
+          <td>${d2Profile.EV.lv.toLocaleString()}</td>
+          <td>${Math.round(d2Profile.AM.lv + d2Profile.OP.lv + d2Profile.PM.lv + d2Profile.EV.lv).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td class="rowhead">HV Volume</td>
+          <td>${d2Profile.AM.hv.toLocaleString()}</td>
+          <td>${d2Profile.OP.hv.toLocaleString()}</td>
+          <td>${d2Profile.PM.hv.toLocaleString()}</td>
+          <td>${d2Profile.EV.hv.toLocaleString()}</td>
+          <td>${Math.round(d2Daily).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td class="rowhead">Hrly Avg / lane</td>
+          <td>${Math.round(d2Profile.AM.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d2Profile.OP.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d2Profile.PM.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d2Profile.EV.hourlyPerLane).toLocaleString()}</td>
+          <td>-</td>
+        </tr>
+      `;
+    }
+
+    const groupedBodyD1 = document.getElementById('groupedBodyD1');
+    if (groupedBodyD1) {
+      groupedBodyD1.innerHTML = `
+        <tr>
+          <td class="rowhead">LV Volume</td>
+          <td>${d1Profile.AM.lv.toLocaleString()}</td>
+          <td>${d1Profile.OP.lv.toLocaleString()}</td>
+          <td>${d1Profile.PM.lv.toLocaleString()}</td>
+          <td>${d1Profile.EV.lv.toLocaleString()}</td>
+          <td>${Math.round(d1Profile.AM.lv + d1Profile.OP.lv + d1Profile.PM.lv + d1Profile.EV.lv).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td class="rowhead">HV Volume</td>
+          <td>${d1Profile.AM.hv.toLocaleString()}</td>
+          <td>${d1Profile.OP.hv.toLocaleString()}</td>
+          <td>${d1Profile.PM.hv.toLocaleString()}</td>
+          <td>${d1Profile.EV.hv.toLocaleString()}</td>
+          <td>${Math.round(d1Daily).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td class="rowhead">Hrly Avg / lane</td>
+          <td>${Math.round(d1Profile.AM.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d1Profile.OP.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d1Profile.PM.hourlyPerLane).toLocaleString()}</td>
+          <td>${Math.round(d1Profile.EV.hourlyPerLane).toLocaleString()}</td>
+          <td>-</td>
+        </tr>
+      `;
+    }
+
+    const queueGroupedBodyD2 = document.getElementById('queueGroupedBodyD2');
+    if (queueGroupedBodyD2) {
+      const queueRowsD2 = [
+        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q2) },
+        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q5) },
+        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q10) },
+        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q15) }
+      ];
+
+      queueGroupedBodyD2.innerHTML = queueRowsD2.map(row => {
+        const maxQueue = Math.max(...row.values);
+        return `
+          <tr>
+            <td class="rowhead">${row.label} Length (m)</td>
+            <td>${Math.round(row.values[0]).toLocaleString()}</td>
+            <td>${Math.round(row.values[1]).toLocaleString()}</td>
+            <td>${Math.round(row.values[2]).toLocaleString()}</td>
+            <td>${Math.round(row.values[3]).toLocaleString()}</td>
+            <td><strong>${Math.round(maxQueue).toLocaleString()}</strong></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    const queueGroupedBodyD1 = document.getElementById('queueGroupedBodyD1');
+    if (queueGroupedBodyD1) {
+      const queueRowsD1 = [
+        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q2) },
+        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q5) },
+        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q10) },
+        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q15) }
+      ];
+
+      queueGroupedBodyD1.innerHTML = queueRowsD1.map(row => {
+        const maxQueue = Math.max(...row.values);
+        return `
+          <tr>
+            <td class="rowhead">${row.label} Length (m)</td>
+            <td>${Math.round(row.values[0]).toLocaleString()}</td>
+            <td>${Math.round(row.values[1]).toLocaleString()}</td>
+            <td>${Math.round(row.values[2]).toLocaleString()}</td>
+            <td>${Math.round(row.values[3]).toLocaleString()}</td>
+            <td><strong>${Math.round(maxQueue).toLocaleString()}</strong></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    const periodKeys = ['AM','OP','PM','EV'];
+    const baseD1 = Object.fromEntries(periodKeys.map(k => [k, d1Profile[k].hourlyPerLane / dv]));
+    const baseD2 = Object.fromEntries(periodKeys.map(k => [k, d2Profile[k].hourlyPerLane / dv]));
+
+    const slcFromBase = (baseMap, laneCount) => {
+      const out = {};
+      periodKeys.forEach(k => {
+        if (laneCount === 2) out[k] = baseMap[k] * 2;
+        else if (laneCount > 2) out[k] = (baseMap[k] * laneCount) / (laneCount - 1);
+        else out[k] = null;
+      });
+      return out;
+    };
+
+    const slcD1 = slcFromBase(baseD1, d1.lanes);
+    const slcD2 = slcFromBase(baseD2, d2.lanes);
+    const slrf = {};
+    periodKeys.forEach(k => {
+      if (d1.lanes === 1 && d2.lanes === 1) slrf[k] = (d1Profile[k].hourlyPerLane + d2Profile[k].hourlyPerLane) / dv;
+      else slrf[k] = null;
+    });
+
+    const vcrGroupedBodyD2 = document.getElementById('vcrGroupedBodyD2');
+    if (vcrGroupedBodyD2) {
+      const rowsD2 = [
+        { label: `Design Volume (Capacity) * = ${Math.round(dv).toLocaleString()}`, values: null },
+        { label: 'Base VCR', values: baseD2 },
+        { label: 'Single Lane Closure', values: slcD2 },
+        { label: 'Single Lane Reversible Flow', values: slrf }
+      ];
+
+      vcrGroupedBodyD2.innerHTML = '';
+      rowsD2.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rowhead">${row.label}</td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+        `;
+        const cells = tr.querySelectorAll('.vcr-cell');
+        if (!row.values) {
+          cells.forEach(cell => {
+            cell.textContent = '-';
+            cell.style.background = '#f4f3f0';
+          });
+        } else {
+          setVcrLosCell(cells[0], row.values.AM);
+          setVcrLosCell(cells[1], row.values.OP);
+          setVcrLosCell(cells[2], row.values.PM);
+          setVcrLosCell(cells[3], row.values.EV);
+        }
+        vcrGroupedBodyD2.appendChild(tr);
+      });
+    }
+
+    const vcrGroupedBodyD1 = document.getElementById('vcrGroupedBodyD1');
+    if (vcrGroupedBodyD1) {
+      const rowsD1 = [
+        { label: `Design Volume (Capacity) * = ${Math.round(dv).toLocaleString()}`, values: null },
+        { label: 'Base VCR', values: baseD1 },
+        { label: 'Single Lane Closure', values: slcD1 },
+        { label: 'Single Lane Reversible Flow', values: slrf }
+      ];
+
+      vcrGroupedBodyD1.innerHTML = '';
+      rowsD1.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rowhead">${row.label}</td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+          <td class="vcr-cell"></td>
+        `;
+        const cells = tr.querySelectorAll('.vcr-cell');
+        if (!row.values) {
+          cells.forEach(cell => {
+            cell.textContent = '-';
+            cell.style.background = '#f4f3f0';
+          });
+        } else {
+          setVcrLosCell(cells[0], row.values.AM);
+          setVcrLosCell(cells[1], row.values.OP);
+          setVcrLosCell(cells[2], row.values.PM);
+          setVcrLosCell(cells[3], row.values.EV);
+        }
+        vcrGroupedBodyD1.appendChild(tr);
+      });
+    }
+
+    const worstVcr = maxValid([
+      base1Peak, base1Off, base2Peak, base2Off,
+      slc1Peak, slc1Off, slc2Peak, slc2Off,
+      slrfPeak, slrfOff
+    ]);
+
+    updateSummaryKpis({ dv, d1, d2, rtr, slrfPeak, worstVcr });
+
+    const traceRows = [
+      ['DTCA Path', dtca === 'YES' ? 'Directional VADT (D1_VADT / D2_VADT)' : '50/50 split from VADT'],
+      ['DHVPA Path', dhvpa === 'YES' ? 'Directional HV% (D1_HVP / D2_HVP)' : 'HVP/2 applied per direction'],
+      ['DRTPA Path', drtpa === 'YES' ? 'Directional RT% (D1_RTP / D2_RTP)' : 'RTP/2 applied per direction'],
+      ['RTR Queue Rule', rtr === 'YES' ? 'Road Train: queue ×1.5, then min 89 m, then ceiling-to-5' : 'No Road Train: min 26 m, then ceiling-to-5'],
+      ['DV Formula', `max(500, VADT×0.12/(D1_Lanes+D2_Lanes)) = ${dv}`],
+      ['D1 Base Peak Volume', `VADT branch result = ${numberRoundUp(baseDirectionalVolume(1), 3)}`],
+      ['D2 Base Peak Volume', `VADT branch result = ${numberRoundUp(baseDirectionalVolume(2), 3)}`],
+      ['D1 HV% Used', `${numberRoundUp(getHVPercent(1) * 100, 3)}%`],
+      ['D2 HV% Used', `${numberRoundUp(getHVPercent(2) * 100, 3)}%`],
+      ['D1 RT% Used', `${numberRoundUp(getRTPercent(1) * 100, 3)}%`],
+      ['D2 RT% Used', `${numberRoundUp(getRTPercent(2) * 100, 3)}%`],
+      ['SLC Applied', 'Only when lane count is 2 or >2 per direction'],
+      ['SLRF Applied', (d1.lanes === 1 && d2.lanes === 1) ? 'Yes (both directions single lane)' : 'No (requires D1=1 and D2=1 lanes)']
+    ];
+
+    const traceBody = document.getElementById('traceBody');
+    if (traceBody) {
+      traceBody.innerHTML = '';
+      traceRows.forEach(([k,v]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rowhead">${k}</td><td>${v}</td>`;
+        traceBody.appendChild(tr);
+      });
+    }
+  }
+
+  // Auto-calculation removed: user must click "Calculate All" button
+  // ids.forEach(id => {
+  //   const el = document.getElementById(id);
+  //   if (!el) return;
+  //   el.addEventListener('change', calculateAll);
+  //   el.addEventListener('input', calculateAll);
+  // });
+
+  ['RTR', 'DRTPA', 'RTP'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', syncDirectionalRtFromOverall);
+    el.addEventListener('input', syncDirectionalRtFromOverall);
+  });
+
+  const calcBtn = document.getElementById('calcBtn');
+  if (calcBtn) {
+    calcBtn.addEventListener('click', calculateAll);
+  }
+  setupTableCopyButtons();
+  // Initial calculation removed: calculateAll();
+</script>
+</body>
+</html>
