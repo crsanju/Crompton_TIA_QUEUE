@@ -841,14 +841,14 @@
           longitude: longitude,
           latitude: latitude,
           countYear: countYear,
-          vadt: totalVadtFromProps,
+          vadt: 0, // Will be calculated from d1_vadt + d2_vadt
           growth_rate: growthRate,
           hv_percent: hvPercent || 5.0,
           d1_lanes: d1Lanes,
           d2_lanes: d2Lanes,
           total_lanes: totalLanes,
-          d1_vadt: d1VadtFromProps || 0,
-          d2_vadt: d2VadtFromProps || 0,
+          d1_vadt: 0,
+          d2_vadt: 0,
           dtca_auto: false,
           d1_direction_label: 'Gazettal',
           d2_direction_label: 'Against Gazettal',
@@ -867,20 +867,46 @@
           direction_descriptions: {
             'GAZETTAL': '',
             'AGAINST GAZETTAL': ''
-          }
+          },
+          _directionMap: {} // Track which actual directions map to D1/D2
         };
+      }
+      
+      // Handle Ipswich/council data where each direction is a separate feature
+      const ipswichDirection = props['Direction']; // "Eastbound", "Westbound", etc.
+      if (ipswichDirection && totalVadtFromProps) {
+        const site = sites[siteId];
+        // Map first unique direction to GAZETTAL, second to AGAINST GAZETTAL
+        if (!site._directionMap[ipswichDirection]) {
+          const assignedDirs = Object.keys(site._directionMap);
+          if (assignedDirs.length === 0) {
+            site._directionMap[ipswichDirection] = 'GAZETTAL';
+            site.d1_vadt = totalVadtFromProps;
+            site.direction_descriptions['GAZETTAL'] = ipswichDirection;
+          } else if (assignedDirs.length === 1) {
+            site._directionMap[ipswichDirection] = 'AGAINST GAZETTAL';
+            site.d2_vadt = totalVadtFromProps;
+            site.direction_descriptions['AGAINST GAZETTAL'] = ipswichDirection;
+          }
+        }
+      } else {
+        // For TMR/Gold Coast/Logan data with D1/D2 in same feature or aggregated
+        const site = sites[siteId];
+        if (totalVadtFromProps && !site.vadt) site.vadt = totalVadtFromProps;
+        if (d1VadtFromProps) site.d1_vadt = d1VadtFromProps;
+        if (d2VadtFromProps) site.d2_vadt = d2VadtFromProps;
         
         // Parse direction labels from council data fields
-        const dir1Label = props['DIRECTION_1A'] || props['DIR1'] || props['Direction'] || '';
+        const dir1Label = props['DIRECTION_1A'] || props['DIR1'] || '';
         const dir2Label = props['DIRECTION_2A'] || props['DIR2'] || '';
         
         if (dir1Label) {
           const match = String(dir1Label).match(/(North|South|East|West|Northbound|Southbound|Eastbound|Westbound|N|S|E|W)/i);
-          if (match) sites[siteId].direction_descriptions['GAZETTAL'] = match[0];
+          if (match) site.direction_descriptions['GAZETTAL'] = match[0];
         }
         if (dir2Label) {
           const match = String(dir2Label).match(/(North|South|East|West|Northbound|Southbound|Eastbound|Westbound|N|S|E|W)/i);
-          if (match) sites[siteId].direction_descriptions['AGAINST GAZETTAL'] = match[0];
+          if (match) site.direction_descriptions['AGAINST GAZETTAL'] = match[0];
         }
       }
 
@@ -931,6 +957,9 @@
           site.d1_vadt = Math.round(totalVadt * 0.5);
           site.d2_vadt = Math.round(totalVadt * 0.5);
         }
+      } else if (!site.vadt || site.vadt <= 0) {
+        // If we have d1/d2 but no total, calculate it (for Ipswich data)
+        site.vadt = (site.d1_vadt || 0) + (site.d2_vadt || 0);
       }
 
       site.dtca_auto = (d1Total > 0 && d2Total > 0);
@@ -938,6 +967,9 @@
       if (!site.dtca_auto && site.d1_vadt > 0 && site.d2_vadt > 0) {
         site.dtca_auto = true;
       }
+      
+      // Clean up helper property
+      delete site._directionMap;
       
       // Smart direction labeling with opposite direction inference
       const gazLabel = site.direction_descriptions['GAZETTAL'];
