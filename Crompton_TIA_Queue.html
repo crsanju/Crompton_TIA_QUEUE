@@ -665,6 +665,101 @@
         </table>
       </div>
     </details>
+
+    <!-- ===== TIA ANALYSIS TOOL ===== -->
+    <div class="card">
+      <h2>🔍 TIA Analysis Tool - Any Location</h2>
+      <p style="color: #555; margin: 0 0 15px 0; font-size: 0.95em;">
+        Enter any road name or address. The tool will find matching data and calculate traffic impacts.
+      </p>
+      
+      <div style="background: #e3f2fd; border: 1px solid #64b5f6; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <h3 style="margin: 0 0 12px 0; color: #1565c0;">📍 Location Search</h3>
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+          <div>
+            <label style="display: block; font-weight: bold; color: #1565c0; margin-bottom: 6px;">Enter Road Name or Suburb</label>
+            <input type="text" id="tiaSearchInput" placeholder="eg. Brisbane Road, Rockhampton OR Bellbird Park" style="width: 100%; border: 2px solid #64b5f6; padding: 8px; border-radius: 4px; font-size: 0.95em;" />
+            <p style="font-size: 0.8em; color: #666; margin: 4px 0 0 0;">System will find exact/nearby datapoints on same road</p>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button onclick="performTIASearch()" style="background: #1976d2; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Search</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIA Results Panel -->
+      <div id="tiaResultsPanel" style="display: none; background: #f5f5f5; border: 2px solid #2196f3; border-radius: 8px; padding: 15px;">
+        <h3 style="margin: 0 0 15px 0; color: #1565c0; border-bottom: 2px solid #2196f3; padding-bottom: 10px;">📊 TIA Analysis Results</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div style="background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px;">
+            <h4 style="margin: 0 0 10px 0; color: #d32f2f;">Reference Data Source</h4>
+            <div id="tiaSourceInfo" style="font-size: 0.9em; line-height: 1.6;">
+              <div><strong>Type:</strong> <span id="tiaSourceType">-</span></div>
+              <div><strong>Road:</strong> <span id="tiaSourceRoad">-</span></div>
+              <div><strong>Distance:</strong> <span id="tiaSourceDistance">-</span></div>
+              <div><strong>VADT:</strong> <span id="tiaSourceVADT">-</span></div>
+            </div>
+          </div>
+          
+          <div style="background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px;">
+            <h4 style="margin: 0 0 10px 0; color: #1b5e20;">Peak Hour Demand</h4>
+            <div id="tiaPeakInfo" style="font-size: 0.9em; line-height: 1.6;">
+              <div><strong>AM Peak D1:</strong> <span id="tiaPeakAMD1">-</span> veh/hr</div>
+              <div><strong>AM Peak D2:</strong> <span id="tiaPeakAMD2">-</span> veh/hr</div>
+              <div><strong>PM Peak D1:</strong> <span id="tiaPeakPMD1">-</span> veh/hr</div>
+              <div><strong>PM Peak D2:</strong> <span id="tiaPeakPMD2">-</span> veh/hr</div>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="margin: 15px 0 10px 0; color: #1565c0; border-bottom: 1px solid #bbb; padding-bottom: 8px;">🚗 Queue Length Analysis</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; padding: 12px;">
+            <h5 style="margin: 0 0 10px 0; color: #2e7d32;">D1 (Gazettal) Queue</h5>
+            <div id="tiaD1Queue" style="font-size: 0.85em; line-height: 1.8; background: white; padding: 8px; border-radius: 4px;">
+              <div><strong>Lanes:</strong> <span id="tiaD1Lanes">-</span></div>
+              <div><strong>Avg Queue Length:</strong> <span id="tiaD1AvgQueue">-</span> vehicles</div>
+              <div><strong>95% Queue Length:</strong> <span id="tiaD1P95Queue">-</span> vehicles</div>
+              <div><strong>Level of Service:</strong> <span id="tiaD1LOS">-</span></div>
+              <div><strong>Capacity Utilization:</strong> <span id="tiaD1Util">-</span>%</div>
+            </div>
+          </div>
+
+          <div style="background: #ffebee; border: 1px solid #ef5350; border-radius: 6px; padding: 12px;">
+            <h5 style="margin: 0 0 10px 0; color: #c30000;">D2 (Against Gazettal) Queue</h5>
+            <div id="tiaD2Queue" style="font-size: 0.85em; line-height: 1.8; background: white; padding: 8px; border-radius: 4px;">
+              <div><strong>Lanes:</strong> <span id="tiaD2Lanes">-</span></div>
+              <div><strong>Avg Queue Length:</strong> <span id="tiaD2AvgQueue">-</span> vehicles</div>
+              <div><strong>95% Queue Length:</strong> <span id="tiaD2P95Queue">-</span> vehicles</div>
+              <div><strong>Level of Service:</strong> <span id="tiaD2LOS">-</span></div>
+              <div><strong>Capacity Utilization:</strong> <span id="tiaD2Util">-</span>%</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 6px; padding: 12px; margin-top: 12px;">
+          <h5 style="margin: 0 0 8px 0; color: #e65100;">⚠️ Notes</h5>
+          <ul style="margin: 0; padding-left: 20px; font-size: 0.85em; color: #555;">
+            <li>Queue calculations use M/M/c queuing model (Erlang C)</li>
+            <li>LOS: A (&lt;30%) → Excellent | B (30-50%) → Good | C (50-70%) → Acceptable | D (70-85%) → At-capacity | E (&gt;85%) → Over-capacity | F (≥100%) → Breakdown</li>
+            <li>Assumes Poisson arrival, exponential service (2.5 sec/vehicle)</li>
+            <li id="tiaMatchNote"></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="tiaNoResultsPanel" style="display: none; background: #ffebee; border: 1px solid #ef5350; border-radius: 8px; padding: 15px;">
+        <h3 style="color: #c30000; margin: 0 0 8px 0;">❌ No matching data found</h3>
+        <p style="margin: 0; color: #555;">The road or location you searched does not have exact matches. Please try:</p>
+        <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #555;">
+          <li>Searching by a different road name</li>
+          <li>Using a nearby suburb name</li>
+          <li>Clicking a marker on the Site Selection map above</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -2166,6 +2261,185 @@
   }
   setupTableCopyButtons();
   // Initial calculation removed: calculateAll();
+
+  // ===== TIA ANALYSIS TOOL FUNCTIONS =====
+  
+  // Haversine distance calculation (meters)
+  function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Earth radius in meters
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  // Find best matching site (exact road match or closest distance)
+  function findBestMatchSite(searchTerm) {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const sites = Object.entries(macroSitesData);
+    
+    // First, try exact road name match
+    const roadMatches = sites.filter(([, data]) => 
+      data.road_name && data.road_name.toLowerCase().includes(searchLower)
+    );
+    
+    if (roadMatches.length > 0) {
+      return { sites: roadMatches, matchType: 'exact_road' };
+    }
+    
+    // Try description/suburb match
+    const descMatches = sites.filter(([, data]) => 
+      (data.description && data.description.toLowerCase().includes(searchLower)) ||
+      (data.source && data.source.toLowerCase().includes(searchLower))
+    );
+    
+    if (descMatches.length > 0) {
+      return { sites: descMatches, matchType: 'description' };
+    }
+    
+    // Return closest 3 sites as fallback
+    if (sites.length > 0) {
+      return { sites: sites.slice(0, 3), matchType: 'nearby' };
+    }
+    
+    return null;
+  }
+
+  // Queue modeling using M/M/c (Erlang C)
+  function calculateQueueMetrics(peakVolume, lanes, serviceDuration = 2.5) {
+    const serviceRate = 3600 / serviceDuration; // vehicles per hour per lane
+    const rho = peakVolume / (lanes * serviceRate); // utilization
+    
+    if (rho >= 1.0) {
+      return {
+        avgQueue: Infinity,
+        p95Queue: Infinity,
+        los: 'F',
+        capacity: peakVolume + (peakVolume * 0.1)
+      };
+    }
+    
+    // Erlang C formula for average queue
+    const erlangNum = Math.pow(rho * lanes, lanes) / factorial(lanes) * (1 / (1 - rho));
+    const erlangDen = (Math.pow(rho * lanes, lanes) / factorial(lanes) * (1 / (1 - rho))) + 
+                      (1 - rho) * sum(Array.from({length: lanes}, (_, n) => 
+                        Math.pow(rho * lanes, n) / factorial(n)));
+    const pw = erlangNum / erlangDen; // Probability of waiting
+    
+    // Average queue length (vehicles waiting)
+    const avgQueue = (pw * rho) / (1 - rho) * lanes;
+    
+    // 95th percentile queue
+    const p95Queue = avgQueue + Math.sqrt(avgQueue * 2);
+    
+    // Level of Service based on utilization
+    let los = 'A';
+    if (rho >= 0.85) los = 'E';
+    else if (rho >= 0.70) los = 'D';
+    else if (rho >= 0.50) los = 'C';
+    else if (rho >= 0.30) los = 'B';
+    
+    return {
+      avgQueue: Math.round(avgQueue * 10) / 10,
+      p95Queue: Math.round(p95Queue * 10) / 10,
+      los: los,
+      utilization: Math.round(rho * 1000) / 10
+    };
+  }
+
+  // Helper: Factorial
+  function factorial(n) {
+    if (n <= 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= n; i++) result *= i;
+    return result;
+  }
+
+  // Helper: Sum array
+  function sum(arr) {
+    return arr.reduce((a, b) => a + b, 0);
+  }
+
+  // Main TIA search function
+  function performTIASearch() {
+    const searchInput = document.getElementById('tiaSearchInput').value.trim();
+    if (!searchInput) {
+      alert('Please enter a road name or location');
+      return;
+    }
+
+    const matchResult = findBestMatchSite(searchInput);
+    if (!matchResult || !matchResult.sites.length) {
+      document.getElementById('tiaResultsPanel').style.display = 'none';
+      document.getElementById('tiaNoResultsPanel').style.display = 'block';
+      return;
+    }
+
+    // Use the first matched site
+    const [siteId, siteData] = matchResult.sites[0];
+    const d1Lanes = siteData.d1_lanes || 1;
+    const d2Lanes = siteData.d2_lanes || 1;
+    
+    // Calculate peak hour volumes (assume 9% of VADT occurs in peak hour)
+    const peakHourPercent = 0.09;
+    const d1PeakAM = Math.round(siteData.d1_vadt * peakHourPercent);
+    const d2PeakAM = Math.round(siteData.d2_vadt * peakHourPercent);
+    const d1PeakPM = d1PeakAM;
+    const d2PeakPM = d2PeakAM;
+
+    // Calculate queue metrics
+    const d1Queue = calculateQueueMetrics(d1PeakAM, d1Lanes);
+    const d2Queue = calculateQueueMetrics(d2PeakAM, d2Lanes);
+
+    // Display source info
+    document.getElementById('tiaSourceType').textContent = matchResult.matchType === 'exact_road' ? '✓ Exact Road Match' : 
+                                                           matchResult.matchType === 'description' ? '⊙ Location Match' : 
+                                                           '⊗ Nearby Reference';
+    document.getElementById('tiaSourceRoad').textContent = siteData.road_name || siteData.description || siteId;
+    document.getElementById('tiaSourceDistance').textContent = matchResult.matchType === 'exact_road' ? 'Same Road' : 'Reference data';
+    document.getElementById('tiaSourceVADT').textContent = siteData.vadt.toLocaleString() + ' vehicles/day';
+
+    // Display peak hour info
+    document.getElementById('tiaPeakAMD1').textContent = d1PeakAM;
+    document.getElementById('tiaPeakAMD2').textContent = d2PeakAM;
+    document.getElementById('tiaPeakPMD1').textContent = d1PeakPM;
+    document.getElementById('tiaPeakPMD2').textContent = d2PeakPM;
+
+    // Display queue results
+    document.getElementById('tiaD1Lanes').textContent = d1Lanes;
+    document.getElementById('tiaD1AvgQueue').textContent = isFinite(d1Queue.avgQueue) ? d1Queue.avgQueue.toFixed(1) : 'Breakdown';
+    document.getElementById('tiaD1P95Queue').textContent = isFinite(d1Queue.p95Queue) ? d1Queue.p95Queue.toFixed(0) : 'Breakdown';
+    document.getElementById('tiaD1LOS').textContent = d1Queue.los;
+    document.getElementById('tiaD1Util').textContent = d1Queue.utilization.toFixed(1);
+
+    document.getElementById('tiaD2Lanes').textContent = d2Lanes;
+    document.getElementById('tiaD2AvgQueue').textContent = isFinite(d2Queue.avgQueue) ? d2Queue.avgQueue.toFixed(1) : 'Breakdown';
+    document.getElementById('tiaD2P95Queue').textContent = isFinite(d2Queue.p95Queue) ? d2Queue.p95Queue.toFixed(0) : 'Breakdown';
+    document.getElementById('tiaD2LOS').textContent = d2Queue.los;
+    document.getElementById('tiaD2Util').textContent = d2Queue.utilization.toFixed(1);
+
+    // Update note
+    const note = matchResult.matchType === 'exact_road' ? 
+                 '✓ Data sourced from exact road match: ' + siteData.source :
+                 matchResult.matchType === 'description' ?
+                 '⊙ Data interpolated from nearby location match' :
+                 '! Using nearest reference site for estimate';
+    document.getElementById('tiaMatchNote').textContent = note;
+
+    document.getElementById('tiaNoResultsPanel').style.display = 'none';
+    document.getElementById('tiaResultsPanel').style.display = 'block';
+  }
+
+  // Allow Enter key to trigger search
+  document.getElementById('tiaSearchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') performTIASearch();
+  });
+
 </script>
 </body>
 </html>
