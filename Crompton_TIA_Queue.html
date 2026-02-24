@@ -447,7 +447,7 @@
       </div>
 
       <div style="margin-top: 10px;">
-        <h3 style="margin: 0 0 6px 0; color: #1f5e63; font-size: 1rem;">Site Location (Macro)</h3>
+        <h3 style="margin: 0 0 6px 0; color: #1f5e63; font-size: 1rem;">Site Location </h3>
         <p style="font-size: 0.85em; color:#555; margin: 0 0 8px 0;">Select a site from search or click a marker to auto-fill inputs.</p>
         <div id="macroMap"></div>
         <div style="background:#e3f2fd; border:1px solid #64b5f6; border-radius:6px; padding:8px; margin-top:8px;">
@@ -853,6 +853,7 @@
   let selectedMacroSite = null;
   let macroMapInstance = null;
   let macroSiteLayer = null;
+  let macroSearchMarkerLayer = null;
   let selectedMacroMarker = null;
   let macroSourceFilter = 'ALL';
   const macroMarkersById = {};
@@ -2555,9 +2556,29 @@
     );
 
     if (exactMatches.length > 0) {
-      // Use exact match
+      // Use exact match - auto-apply without showing panel
       const [siteId, siteData] = exactMatches[0];
-      displayQuickTiaExactMatch(siteId, siteData);
+      
+      // Store data for use
+      window.selectedTiaData = {
+        type: 'exact',
+        siteId: siteId,
+        vadt: siteData.vadt,
+        d1_vadt: siteData.d1_vadt,
+        d2_vadt: siteData.d2_vadt,
+        lat: siteData.latitude,
+        lon: siteData.longitude,
+        road: siteData.road_name
+      };
+
+      // Display on map
+      addSearchMarker(siteData.latitude, siteData.longitude, 'Exact Match: ' + (siteData.road_name || siteData.description));
+      
+      // Auto-fill form and scroll
+      useExactTIAData();
+      
+      // Show brief notification
+      showNotification('✓ Exact match found for "' + siteData.road_name + '" - Data loaded');
       return;
     }
 
@@ -2580,7 +2601,19 @@
       }).slice(0, 5); // Get up to 5 points
 
       if (nearby.length >= 1) {
-        displayQuickTiaMultipleRefs(searchInput, nearby);
+        // Ask user before showing references
+        const userConfirmed = confirm(`No exact match found for "${searchInput}". \n\nUse ${nearby.length} nearby reference site(s) within 5km radius?`);
+        if (userConfirmed) {
+          // Calculate center of references for map marker
+          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
+          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
+          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
+          
+          displayQuickTiaMultipleRefs(searchInput, nearby);
+        } else {
+          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
+          document.getElementById('quickTiaError').style.display = 'block';
+        }
         return;
       }
     }
@@ -2598,12 +2631,81 @@
       }).slice(0, 5);
 
       if (nearby.length >= 1) {
-        displayQuickTiaMultipleRefs(searchInput, nearby);
+        const userConfirmed = confirm(`No exact match found for "${searchInput}". \n\nUse ${nearby.length} nearby reference site(s) within 5km radius?`);
+        if (userConfirmed) {
+          const centerLat = nearby.reduce((sum, [, data]) => sum + Number(data.latitude), 0) / nearby.length;
+          const centerLon = nearby.reduce((sum, [, data]) => sum + Number(data.longitude), 0) / nearby.length;
+          addSearchMarker(centerLat, centerLon, 'Search area: ' + searchInput + ' (5km radius)');
+          
+          displayQuickTiaMultipleRefs(searchInput, nearby);
+        } else {
+          document.getElementById('quickTiaError').innerHTML = 'Search cancelled. Please refine your search or enter a different location.';
+          document.getElementById('quickTiaError').style.display = 'block';
+        }
         return;
       }
     }
 
     document.getElementById('quickTiaError').style.display = 'block';
+  }
+
+  function addSearchMarker(lat, lon, label) {
+    // Clear previous search markers
+    if (macroSearchMarkerLayer) {
+      macroMapInstance.removeLayer(macroSearchMarkerLayer);
+    }
+
+    // Create new marker layer for search result
+    macroSearchMarkerLayer = L.layerGroup().addTo(macroMapInstance);
+
+    // Add marker with custom styling
+    const marker = L.circleMarker([lat, lon], {
+      radius: 10,
+      fillColor: '#ff7043',
+      color: '#d84315',
+      weight: 3,
+      opacity: 1,
+      fillOpacity: 0.7
+    }).addTo(macroSearchMarkerLayer);
+
+    // Add popup with label
+    marker.bindPopup(`<b>${label}</b><br/>Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`, {
+      autoClose: false,
+      closeButton: true
+    }).openPopup();
+
+    // Pan and zoom to marker
+    macroMapInstance.setView([lat, lon], Math.max(macroMapInstance.getZoom(), 12));
+  }
+
+  function showNotification(message) {
+    // Create or reuse notification element
+    let notif = document.getElementById('quickTiaNotification');
+    if (!notif) {
+      notif = document.createElement('div');
+      notif.id = 'quickTiaNotification';
+      notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-weight: bold;
+      `;
+      document.body.appendChild(notif);
+    }
+
+    notif.textContent = message;
+    notif.style.display = 'block';
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      notif.style.display = 'none';
+    }, 3000);
   }
 
   function displayQuickTiaExactMatch(siteId, siteData) {
