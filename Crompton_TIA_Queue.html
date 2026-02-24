@@ -686,7 +686,7 @@
   function getFilteredMacroSiteEntries() {
     const entries = Object.entries(macroSitesData);
     if (macroSourceFilter === 'ALL') return entries;
-    return entries.filter(([, site]) => (site && site.source) === macroSourceFilter);
+    return entries.filter(([, site]) => site && site.source && site.source === macroSourceFilter);
   }
 
   function initMacroMap() {
@@ -767,12 +767,15 @@
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
+      console.log(`Fetching: ${url}`);
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return await response.json();
+      const data = await response.json();
+      console.log(`Fetched from ${url}: ${data.features ? data.features.length : 0} features`);
+      return data;
     } catch (err) {
-      console.warn('Fetch failed:', err.message);
+      console.error(`Fetch failed for ${url}:`, err.message, err);
       return null;
     }
   }
@@ -780,6 +783,8 @@
   function parseMacroTrafficData(jsonData, sourceName = 'TMR') {
     const sites = {};
     const features = jsonData.features || [];
+    let featureCount = 0;
+    let siteCount = 0;
 
     const normalizeDirectionKey = (rawDirection) => {
       if (!rawDirection) return null;
@@ -794,12 +799,16 @@
     };
 
     features.forEach(feature => {
+      featureCount++;
       const props = feature.properties;
       if (!props) return;
 
       const rawSiteId = props['SITE_ID'] || props['site_id'] || props['OBJECTID'] || props['ID'] || props['id'] || props['Id'] || props['SITE'] || props['Site'] || '';
       const siteId = String(rawSiteId || '').trim();
-      if (!siteId) return;
+      if (!siteId) {
+        if (sourceName === 'Ipswich') console.warn(`Ipswich feature ${featureCount}: No siteId found in props:`, Object.keys(props));
+        return;
+      }
       
       const suburb = props['SUBURB'] || props['Suburb'] || '';
       const rawDescription = props['DESCRIPTION'] || props['LOCATION'] || props['COUNTER_LOCATION_BETWEEN'] || props['Site Description'] || '';
@@ -1045,6 +1054,7 @@
       site.d2_direction_label = finalAgLabel ? `Against Gazettal (${finalAgLabel})` : 'Against Gazettal';
     });
 
+    console.log(`${sourceName}: Processed ${features.length} features, created ${Object.keys(sites).length} unique sites`);
     return sites;
   }
 
@@ -1078,7 +1088,7 @@
 
     const tmrSites = tmrData ? parseMacroTrafficData(tmrData, 'TMR') : {};
     const goldCoastSites = goldCoastData ? parseMacroTrafficData(goldCoastData, 'Gold Coast') : {};
-    const ipswichSites = ipswichData ? parseMacroTrafficData(ipswichData, 'Ipswich') : {};
+    const ipswichSites = ipswichData ? parseMacroTrafficData(ipswichData, 'Ipswich') : (console.warn('ipswichData is null/falsy'), {});
     const loganSites = loganData ? parseMacroTrafficData(loganData, 'Logan') : {};
     const toowoomSites = toowoombaData ? parseMacroTrafficData(toowoombaData, 'Toowoomba') : {};
 
