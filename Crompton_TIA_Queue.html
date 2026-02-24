@@ -326,6 +326,85 @@
     <h1>TMR Macro TIA+Queue Analysis</h1>
     <p class="subtitle">TMR database-integrated directional traffic, queue metrics, and capacity checks with automated parameters.</p>
 
+    <!-- ===== QUICK TIA ADDRESS SEARCH (TOP) ===== -->
+    <div class="card" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #1976d2;">
+      <h2 style="color: #1565c0; margin-top: 0;">🚗 Quick TIA Analysis - Any Address</h2>
+      <p style="color: #0d47a1; margin: 0 0 12px 0; font-size: 0.95em;">
+        Enter a road name. System finds exact datapoint or uses 3+ nearby references within 5km radius.
+      </p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 180px; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <input type="text" id="quickTiaInput" placeholder="eg. Brisbane Road, Bellbird Park, Rockhampton" 
+                 style="width: 100%; border: 2px solid #1976d2; padding: 10px; border-radius: 4px; font-size: 1em;" />
+        </div>
+        <button onclick="performQuickTIASearch()" style="background: #1976d2; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.95em;">
+          🔍 Search
+        </button>
+      </div>
+      
+      <div id="quickTiaPanel" style="display: none; background: white; border: 1px solid #1976d2; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+        <h3 style="margin: 0 0 10px 0; color: #1565c0; border-bottom: 2px solid #1976d2; padding-bottom: 8px;">📍 Analysis Results</h3>
+        
+        <div id="quickTiaMatchInfo" style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 10px; margin-bottom: 10px; border-radius: 3px;">
+          <strong style="color: #1565c0;">Match Type:</strong> <span id="quickTiaMatchType">-</span><br>
+          <strong style="color: #1565c0;">Road/Location:</strong> <span id="quickTiaMatchRoad">-</span>
+        </div>
+
+        <!-- For Exact Match -->
+        <div id="quickTiaExactMatch" style="display: none;">
+          <div style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+            <h4 style="margin: 0 0 8px 0; color: #2e7d32;">✓ Exact Data Found</h4>
+            <div style="font-size: 0.9em; line-height: 1.6;">
+              <div><strong>VADT:</strong> <span id="quickTiaExactVADT">-</span> vehicles/day</div>
+              <div><strong>D1 VADT:</strong> <span id="quickTiaExactD1">-</span></div>
+              <div><strong>D2 VADT:</strong> <span id="quickTiaExactD2">-</span></div>
+            </div>
+          </div>
+          <button onclick="useExactTIAData()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            ✓ Use This Data
+          </button>
+        </div>
+
+        <!-- For Multiple References -->
+        <div id="quickTiaMultipleRefs" style="display: none;">
+          <h4 style="margin: 0 0 10px 0; color: #d32f2f;">⊙ Using 3+ Reference Points (within 5km)</h4>
+          <div id="quickTiaRefList" style="background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+          
+          <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+            <label style="color: #e65100; font-weight: bold;">What % of traffic to consider from references?</label>
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 8px;">
+              <input type="range" id="quickTiaPercent" min="10" max="100" value="50" step="5" style="width: 100%; cursor: pointer;" />
+              <input type="number" id="quickTiaPercentVal" value="50" min="10" max="100" step="5" style="width: 60px; padding: 4px; border: 1px solid #ffb74d; border-radius: 3px;" />
+              <span style="color: #e65100; font-weight: bold;">%</span>
+            </div>
+            <p style="font-size: 0.8em; color: #666; margin: 6px 0 0 0; line-height: 1.4;">
+              Use slider to set confidence level. 50% = baseline. 100% = use all reference traffic. Impacts AADT calculation.
+            </p>
+          </div>
+
+          <div id="quickTiaCalcResult" style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+            <h5 style="margin: 0 0 8px 0; color: #2e7d32;">Calculated AADT (Average of References)</h5>
+            <div style="font-size: 0.9em; line-height: 1.6;">
+              <div><strong>Avg VADT (100%):</strong> <span id="quickTiaCalcAvgVADT">-</span> vehicles/day</div>
+              <div><strong>AADT to use (with %):</strong> <span id="quickTiaCalcAdjVADT">-</span> vehicles/day</div>
+              <div><strong>Calculated D1 VADT:</strong> <span id="quickTiaCalcD1">-</span></div>
+              <div><strong>Calculated D2 VADT:</strong> <span id="quickTiaCalcD2">-</span></div>
+            </div>
+          </div>
+
+          <button onclick="useCalculatedTIAData()" style="background: #1976d2; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            ✓ Use Calculated Data
+          </button>
+        </div>
+      </div>
+
+      <div id="quickTiaError" style="display: none; background: #ffebee; border: 1px solid #ef5350; border-radius: 6px; padding: 10px; color: #c30000;">
+        <strong>❌ No matches found</strong><br>
+        <span style="font-size: 0.9em;">Try searching by different road name or manually select from database below.</span>
+      </div>
+    </div>
+
     <!-- Site Selection Card -->
     <div class="card">
       <h2>1. Select Site or Manual Entry</h2>
@@ -2438,6 +2517,214 @@
   // Allow Enter key to trigger search
   document.getElementById('tiaSearchInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') performTIASearch();
+  });
+
+  // ===== QUICK TIA SEARCH FUNCTIONS =====
+  
+  // Sync percentage slider and input
+  const percSlider = document.getElementById('quickTiaPercent');
+  const percInput = document.getElementById('quickTiaPercentVal');
+  if (percSlider && percInput) {
+    percSlider.addEventListener('input', (e) => {
+      percInput.value = e.target.value;
+      updateTiaCalculations();
+    });
+    percInput.addEventListener('change', (e) => {
+      percSlider.value = e.target.value;
+      updateTIACalculations();
+    });
+  }
+
+  function performQuickTIASearch() {
+    const searchInput = document.getElementById('quickTiaInput').value.trim();
+    if (!searchInput) {
+      alert('Please enter a road name or location');
+      return;
+    }
+
+    document.getElementById('quickTiaError').style.display = 'none';
+    document.getElementById('quickTiaPanel').style.display = 'none';
+
+    const sites = Object.entries(macroSitesData);
+    const searchLower = searchInput.toLowerCase();
+
+    // Step 1: Try exact road match
+    const exactMatches = sites.filter(([, data]) => 
+      data.road_name && data.road_name.toLowerCase().includes(searchLower) &&
+      data.latitude && data.longitude
+    );
+
+    if (exactMatches.length > 0) {
+      // Use exact match
+      const [siteId, siteData] = exactMatches[0];
+      displayQuickTiaExactMatch(siteId, siteData);
+      return;
+    }
+
+    // Step 2: Try description/suburb match
+    const descMatches = sites.filter(([, data]) =>
+      (data.description && data.description.toLowerCase().includes(searchLower)) &&
+      data.latitude && data.longitude
+    );
+
+    if (descMatches.length > 0) {
+      // Find nearest point for reference, then get 3+ within 5km
+      const [refId, refData] = descMatches[0];
+      const refLat = Number(refData.latitude);
+      const refLon = Number(refData.longitude);
+      
+      const nearby = sites.filter(([, data]) => {
+        if (!data.latitude || !data.longitude) return false;
+        const dist = haversineDistance(refLat, refLon, Number(data.latitude), Number(data.longitude));
+        return dist <= 5000; // 5km radius
+      }).slice(0, 5); // Get up to 5 points
+
+      if (nearby.length >= 1) {
+        displayQuickTiaMultipleRefs(searchInput, nearby);
+        return;
+      }
+    }
+
+    // Step 3: Fallback - find nearest sites with 5km radius
+    if (sites.length > 0) {
+      const [refId, refData] = sites[0];
+      const refLat = Number(refData.latitude);
+      const refLon = Number(refData.longitude);
+      
+      const nearby = sites.filter(([, data]) => {
+        if (!data.latitude || !data.longitude) return false;
+        const dist = haversineDistance(refLat, refLon, Number(data.latitude), Number(data.longitude));
+        return dist <= 5000;
+      }).slice(0, 5);
+
+      if (nearby.length >= 1) {
+        displayQuickTiaMultipleRefs(searchInput, nearby);
+        return;
+      }
+    }
+
+    document.getElementById('quickTiaError').style.display = 'block';
+  }
+
+  function displayQuickTiaExactMatch(siteId, siteData) {
+    document.getElementById('quickTiaMatchType').textContent = '✓ Exact Road Match';
+    document.getElementById('quickTiaMatchRoad').textContent = siteData.road_name || siteData.description;
+    
+    document.getElementById('quickTiaExactVADT').textContent = siteData.vadt.toLocaleString();
+    document.getElementById('quickTiaExactD1').textContent = siteData.d1_vadt.toLocaleString();
+    document.getElementById('quickTiaExactD2').textContent = siteData.d2_vadt.toLocaleString();
+
+    document.getElementById('quickTiaExactMatch').style.display = 'block';
+    document.getElementById('quickTiaMultipleRefs').style.display = 'none';
+    
+    // Store for later use
+    window.selectedTiaData = {
+      type: 'exact',
+      siteId: siteId,
+      vadt: siteData.vadt,
+      d1_vadt: siteData.d1_vadt,
+      d2_vadt: siteData.d2_vadt,
+      lat: siteData.latitude,
+      lon: siteData.longitude,
+      road: siteData.road_name
+    };
+
+    document.getElementById('quickTiaPanel').style.display = 'block';
+  }
+
+  function displayQuickTiaMultipleRefs(searchTerm, nearbyArray) {
+    document.getElementById('quickTiaMatchType').textContent = '⊙ Multiple References (5km radius)';
+    document.getElementById('quickTiaMatchRoad').textContent = searchTerm;
+    
+    const refList = document.getElementById('quickTiaRefList');
+    refList.innerHTML = '';
+    
+    const refArray = nearbyArray.map(([siteId, data]) => ({
+      siteId,
+      road: data.road_name || data.description,
+      vadt: data.vadt,
+      d1_vadt: data.d1_vadt,
+      d2_vadt: data.d2_vadt,
+      lat: data.latitude,
+      lon: data.longitude
+    }));
+
+    refArray.forEach((site, idx) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85em;';
+      div.innerHTML = `<strong>${idx + 1}.</strong> ${site.road} - <strong>${site.vadt.toLocaleString()}</strong> VADT`;
+      refList.appendChild(div);
+    });
+
+    // Calculate averages
+    const avgVADT = Math.round(refArray.reduce((sum, s) => sum + s.vadt, 0) / refArray.length);
+    const avgD1 = Math.round(refArray.reduce((sum, s) => sum + s.d1_vadt, 0) / refArray.length);
+    const avgD2 = Math.round(refArray.reduce((sum, s) => sum + s.d2_vadt, 0) / refArray.length);
+
+    window.selectedTiaData = {
+      type: 'references',
+      references: refArray,
+      avgVADT: avgVADT,
+      avgD1: avgD1,
+      avgD2: avgD2
+    };
+
+    document.getElementById('quickTiaCalcAvgVADT').textContent = avgVADT.toLocaleString();
+    updateTiaCalculations();
+
+    document.getElementById('quickTiaExactMatch').style.display = 'none';
+    document.getElementById('quickTiaMultipleRefs').style.display = 'block';
+    document.getElementById('quickTiaPanel').style.display = 'block';
+  }
+
+  function updateTiaCalculations() {
+    if (!window.selectedTiaData || window.selectedTiaData.type !== 'references') return;
+
+    const percent = Number(document.getElementById('quickTiaPercent').value) / 100;
+    const adjVADT = Math.round(window.selectedTiaData.avgVADT * percent);
+    const adjD1 = Math.round(window.selectedTiaData.avgD1 * percent);
+    const adjD2 = Math.round(window.selectedTiaData.avgD2 * percent);
+
+    document.getElementById('quickTiaCalcAdjVADT').textContent = adjVADT.toLocaleString();
+    document.getElementById('quickTiaCalcD1').textContent = adjD1.toLocaleString();
+    document.getElementById('quickTiaCalcD2').textContent = adjD2.toLocaleString();
+  }
+
+  function useExactTIAData() {
+    if (!window.selectedTiaData || !window.selectedTiaData.siteId) return;
+    
+    // Auto-fill the main form
+    document.getElementById('macroSiteSearch').value = window.selectedTiaData.siteId;
+    document.getElementById('D1_VADT').value = window.selectedTiaData.d1_vadt;
+    document.getElementById('D2_VADT').value = window.selectedTiaData.d2_vadt;
+    document.getElementById('VADT').value = window.selectedTiaData.vadt;
+    
+    // Scroll to form
+    document.querySelector('.card:nth-of-type(2)').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function useCalculatedTIAData() {
+    if (!window.selectedTiaData || window.selectedTiaData.type !== 'references') return;
+
+    const percent = Number(document.getElementById('quickTiaPercent').value) / 100;
+    const adjD1 = Math.round(window.selectedTiaData.avgD1 * percent);
+    const adjD2 = Math.round(window.selectedTiaData.avgD2 * percent);
+    const adjVADT = adjD1 + adjD2;
+
+    // Auto-fill the main form
+    document.getElementById('D1_VADT').value = adjD1;
+    document.getElementById('D2_VADT').value = adjD2;
+    document.getElementById('VADT').value = adjVADT;
+    document.getElementById('macroSiteSearch').value = `Calculated (${percent * 100}% of references)`;
+    
+    // Scroll to form
+    const allCards = document.querySelectorAll('.card');
+    allCards[1].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Allow Enter key on quick search
+  document.getElementById('quickTiaInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') performQuickTIASearch();
   });
 
 </script>
