@@ -335,11 +335,12 @@
           <div style="margin-bottom: 8px;">
             <label for="macroSourceFilter" style="color: #2e7d32; font-size: 0.8em; margin-bottom: 4px;">Data Source</label>
             <select id="macroSourceFilter" style="border: 2px solid #4caf50; background-color: #f0fdf4;">
-              <option value="ALL" selected>All Sources (TMR + Gold Coast + Ipswich + Logan)</option>
+              <option value="ALL" selected>All Sources (TMR + Gold Coast + Ipswich + Logan + Toowoomba)</option>
               <option value="TMR">TMR Only</option>
               <option value="Gold Coast">Gold Coast Only</option>
               <option value="Ipswich">Ipswich Only</option>
               <option value="Logan">Logan Only</option>
+              <option value="Toowoomba">Toowoomba Only</option>
             </select>
           </div>
           <input type="text" id="macroSiteSearch" list="macroSitesList" placeholder="Type Site ID or Name to autofill..." style="border: 2px solid #4caf50; background-color: #f0fdf4;" />
@@ -672,6 +673,7 @@
   const GITHUB_GOLDCOAST_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/goldcoast.geojson';
   const GITHUB_IPSWICH_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/Ipswich.geojson';
   const GITHUB_LOGAN_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/main/logan.geojson';
+  const GITHUB_TOOWOOMBA_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/toowoomba.geojson';
 
   let macroSitesData = {};
   let selectedMacroSite = null;
@@ -728,13 +730,13 @@
       macroMapInstance.fitBounds(points, { padding: [24, 24] });
       const info = document.getElementById('macroMapInfo');
       if (info) {
-        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan' : macroSourceFilter;
+        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan + Toowoomba' : macroSourceFilter;
         info.textContent = `${points.length} sites loaded for ${label}. Click a marker to select a site.`;
       }
     } else {
       const info = document.getElementById('macroMapInfo');
       if (info) {
-        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan' : macroSourceFilter;
+        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan + Toowoomba' : macroSourceFilter;
         info.textContent = `No mappable sites found for ${label}.`;
       }
     }
@@ -1027,22 +1029,24 @@
   }
 
   async function loadMacroSitesData() {
-    console.log('Loading Macro sites from GitHub (TMR + Gold Coast + Ipswich + Logan)...');
-    const [tmrData, goldCoastData, ipswichData, loganData] = await Promise.all([
+    console.log('Loading Macro sites from GitHub (TMR + Gold Coast + Ipswich + Logan + Toowoomba)...');
+    const [tmrData, goldCoastData, ipswichData, loganData, toowoombaData] = await Promise.all([
       fetchGitHubData(GITHUB_TMR_URL),
       fetchGitHubData(GITHUB_GOLDCOAST_URL),
       fetchGitHubData(GITHUB_IPSWICH_URL),
-      fetchGitHubData(GITHUB_LOGAN_URL)
+      fetchGitHubData(GITHUB_LOGAN_URL),
+      fetchGitHubData(GITHUB_TOOWOOMBA_URL)
     ]);
 
     const tmrSites = tmrData ? parseMacroTrafficData(tmrData, 'TMR') : {};
     const goldCoastSites = goldCoastData ? parseMacroTrafficData(goldCoastData, 'Gold Coast') : {};
     const ipswichSites = ipswichData ? parseMacroTrafficData(ipswichData, 'Ipswich') : {};
     const loganSites = loganData ? parseMacroTrafficData(loganData, 'Logan') : {};
+    const toowoomSites = toowoombaData ? parseMacroTrafficData(toowoombaData, 'Toowoomba') : {};
 
-    macroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites);
+    macroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites, toowoomSites);
 
-    console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites (TMR: ${Object.keys(tmrSites).length}, Gold Coast: ${Object.keys(goldCoastSites).length}, Ipswich: ${Object.keys(ipswichSites).length}, Logan: ${Object.keys(loganSites).length})`);
+    console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites (TMR: ${Object.keys(tmrSites).length}, Gold Coast: ${Object.keys(goldCoastSites).length}, Ipswich: ${Object.keys(ipswichSites).length}, Logan: ${Object.keys(loganSites).length}, Toowoomba: ${Object.keys(toowoomSites).length})`);
     document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
     populateMacroSitesDatalist();
     initMacroMap();
@@ -1050,7 +1054,7 @@
 
     const mapInfo = document.getElementById('macroMapInfo');
     if (mapInfo) {
-      mapInfo.textContent = `${Object.keys(macroSitesData).length} combined sites loaded (TMR + Gold Coast + Ipswich + Logan). Click a marker to select a site.`;
+      mapInfo.textContent = `${Object.keys(macroSitesData).length} combined sites loaded (TMR + Gold Coast + Ipswich + Logan + Toowoomba). Click a marker to select a site.`;
     }
   }
 
