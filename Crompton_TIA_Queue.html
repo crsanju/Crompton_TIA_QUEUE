@@ -357,7 +357,7 @@
           <div style="font-weight:700;">Road Name:</div><div id="macroDetailRoadName">-</div>
           <div style="font-weight:700;">Description:</div><div id="macroDetailDescription">-</div>
           <div style="font-weight:700;">Coordinates:</div><div id="macroDetailCoords">-</div>
-          <div style="font-weight:700;">Google Maps:</div><div>📍 <a id="macroMapLink" href="#" target="_blank" style="color:#0056b3; text-decoration:none;">View on Google Maps</a></div>
+          <div style="font-weight:700;">Google Maps:</div><div>📍 <a id="macroMapLink" href="javascript:void(0)" target="_blank" style="color:#0056b3; text-decoration:none;">View on Google Maps</a></div>
           <div style="font-weight:700;">Count Year:</div><div id="macroDetailCountYear">-</div>
           <div style="font-weight:700;">Growth Rate:</div><div id="macroDetailGrowthRate">-</div>
           <div style="font-weight:700;">HV%:</div><div id="macroDetailHV">-</div>
@@ -1187,7 +1187,7 @@
       document.getElementById('macroMapLink').href = `https://www.google.com/maps?q=${lat},${lon}`;
     } else {
       setText('macroDetailCoords', 'N/A');
-      document.getElementById('macroMapLink').href = '#';
+      document.getElementById('macroMapLink').href = 'javascript:void(0)';
     }
 
     // Auto-fill DATABASE fields (green)
