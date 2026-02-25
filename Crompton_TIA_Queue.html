@@ -151,10 +151,108 @@
       background-size: 1em;
       padding-right: 32px;
     }
-+
-+    @media print {
-+      .copyright-footer { display: none !important; }
-+    }
+/* ===== PROFESSIONAL PRINT STYLES ===== */
+    @media print {
+      /* 1. Force background colors to print (Crucial for VCR tables & Work Window) */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body { 
+        background: white; 
+        padding: 0; 
+        color: #000;
+        font-size: 11pt;
+      }
+
+      .container { 
+        box-shadow: none !important; 
+        border: none !important; 
+        padding: 0 !important;
+        max-width: 100%;
+      }
+
+      /* 2. Hide purely interactive UI elements */
+      .navbar, .home-button, button, .copy-table-btn, 
+      #quickSearchCard, #formulaTraceSection, .leaflet-control-container,
+      input[type="range"], .tooltip::after, .tooltip-label::after, .tooltip-label::before { 
+        display: none !important; 
+      }
+
+      /* Hide the database search inputs, keep only the details */
+      #macroSourceFilter, #macroSiteSearch, label[for="macroSourceFilter"], 
+      #detourSiteSearch, #detourSiteSelect {
+        display: none !important;
+      }
+
+      /* 3. Convert inputs and dropdowns into plain text for the report */
+      input, select {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        color: #000 !important;
+        font-weight: bold;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+      
+      /* Remove dropdown arrows */
+      select { background-image: none !important; }
+
+      /* 4. Layout & Page Breaks */
+      .card { 
+        page-break-inside: avoid; 
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        margin-bottom: 20px !important;
+        padding: 15px !important;
+        background: #fff !important;
+      }
+
+      /* Allow the main assumption grids to break if absolutely necessary, but keep rows together */
+      .grid, .grid-2, .kpi-grid, .assumptions-grid {
+        page-break-inside: avoid;
+      }
+
+      /* 5. Typography Formatting */
+      h1 { font-size: 20pt; color: #000; text-align: center; margin-top: 0; }
+      h2 { font-size: 14pt; color: #000; border-bottom: 2px solid #000; padding-bottom: 4px; page-break-after: avoid; }
+      h3 { font-size: 12pt; color: #333; page-break-after: avoid; }
+      
+      table { font-size: 9pt; width: 100% !important; border-collapse: collapse; }
+      th { background: #eee !important; color: #000 !important; border: 1px solid #aaa !important; }
+      td { border: 1px solid #aaa !important; }
+
+      /* 6. Fix Map Printing */
+      #macroMap { 
+        height: 250px !important; 
+        border: 1px solid #000 !important; 
+        margin-top: 8px; 
+        page-break-inside: avoid; 
+      }
+
+      /* 7. Ensure Header is visible */
+      .print-header { 
+        display: block !important; 
+        text-align: center; 
+        margin-bottom: 30px; 
+        border-bottom: 3px double #000;
+        padding-bottom: 10px;
+      }
+      .print-header h2 { border: none; font-size: 24pt; margin: 0; }
+      .print-header p { margin: 5px 0; font-size: 11pt; color: #444; }
+
+      /* Force details blocks to open for printing */
+      details { display: block !important; }
+      details summary { display: none !important; }
+      details > * { display: block !important; }
+
+      /* Custom fixes for the new cards */
+      #wwTimeline div { border-right: 1px solid #fff !important; } /* Keeps timeline blocks distinct */
+    }
 
     .tooltip {
       position: relative;
@@ -819,6 +917,256 @@
       </div>
     </div>
 
+    <div class="card" id="delayCard" style="border: 2px solid #0288d1;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #01579b;">
+        ⏱️ Average Vehicle Delay (Little's Law)
+      </h2>
+      <p style="font-size: 0.85em; color: #666; margin: 4px 0 12px 0;">
+        Translates queue lengths into average wait times per vehicle using standard M/M/c queueing theory.
+      </p>
+
+      <div class="grid-2">
+        <div class="table-wrap">
+          <table style="width: 100%;">
+            <thead>
+              <tr><th colspan="2" style="background: #2e7d32; color: white;">🟢 Gazettal (D1) Delay</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="rowhead">AM Peak</td><td id="delayD1AM">-</td></tr>
+              <tr><td class="rowhead">Off-Peak (OP)</td><td id="delayD1OP">-</td></tr>
+              <tr><td class="rowhead">PM Peak</td><td id="delayD1PM">-</td></tr>
+              <tr><td class="rowhead">Evening (EV)</td><td id="delayD1EV">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table style="width: 100%;">
+            <thead>
+              <tr><th colspan="2" style="background: #c30000; color: white;">🔴 Against Gazettal (D2) Delay</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="rowhead">AM Peak</td><td id="delayD2AM">-</td></tr>
+              <tr><td class="rowhead">Off-Peak (OP)</td><td id="delayD2OP">-</td></tr>
+              <tr><td class="rowhead">PM Peak</td><td id="delayD2PM">-</td></tr>
+              <tr><td class="rowhead">Evening (EV)</td><td id="delayD2EV">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="speedDelayCard" style="border: 2px solid #546e7a; background: #eceff1;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #37474f;">
+        📉 Speed Reduction Travel Time Impact
+      </h2>
+      <p style="font-size: 0.85em; color: #555; margin: 4px 0 12px 0;">
+        Calculates the baseline time penalty added to every vehicle passing through the work zone due to reduced speed limits, assuming free-flowing conditions (no queuing).
+      </p>
+
+      <div class="grid" style="margin-bottom: 12px;">
+        <div style="background: #ffffff; border: 1px solid #b0bec5; border-radius: 6px; padding: 10px;">
+          <label style="color: #455a64;" class="tooltip" data-tip="Existing posted speed limit.">Normal Speed (km/h)</label>
+          <input type="number" id="srNormSpeed" value="80" step="10" min="10" oninput="calculateSpeedDelay()" style="border: 1px solid #b0bec5;" />
+        </div>
+        <div style="background: #ffffff; border: 1px solid #b0bec5; border-radius: 6px; padding: 10px;">
+          <label style="color: #455a64;" class="tooltip" data-tip="Reduced speed limit during roadworks.">Work Speed (km/h)</label>
+          <input type="number" id="srWorkSpeed" value="40" step="10" min="10" oninput="calculateSpeedDelay()" style="border: 1px solid #b0bec5;" />
+        </div>
+        <div style="background: #ffffff; border: 1px solid #b0bec5; border-radius: 6px; padding: 10px;">
+          <label style="color: #455a64;" class="tooltip" data-tip="Total length of the reduced speed zone, including advance warning signs.">Zone Length (m)</label>
+          <input type="number" id="srLength" value="1000" step="50" min="50" oninput="calculateSpeedDelay()" style="border: 1px solid #b0bec5;" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <div style="background: #ffffff; border-left: 5px solid #ffb300; padding: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 0.8em; color: #666; font-weight: bold; text-transform: uppercase;">Added Delay Per Vehicle</div>
+          <div id="srPerVehicle" style="font-size: 1.6em; font-weight: bold; color: #ff8f00; margin-top: 4px;">-</div>
+          <div id="srTransitText" style="font-size: 0.8em; color: #777; margin-top: 4px;">-</div>
+        </div>
+        
+        <div style="background: #ffffff; border-left: 5px solid #d32f2f; padding: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 0.8em; color: #666; font-weight: bold; text-transform: uppercase;" class="tooltip" data-tip="Delay per vehicle multiplied by the total daily traffic volume (VADT).">Total Daily Network Delay</div>
+          <div id="srTotalHours" style="font-size: 1.6em; font-weight: bold; color: #c62828; margin-top: 4px;">-</div>
+          <div style="font-size: 0.8em; color: #777; margin-top: 4px;">Lost hours per day</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Average Delay card -->
+    <div class="card">
+      <h2>Average Vehicle Delay</h2>
+      <label for="delayHorizon">Time horizon</label>
+      <select id="delayHorizon">
+        <option value="30">30&nbsp;min</option>
+        <option value="60" selected>60&nbsp;min</option>
+        <option value="120">120&nbsp;min</option>
+      </select>
+
+      <div class="table-wrap" style="margin-top:12px;">
+        <table id="delayTable">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Delay (s/veh)</th>
+            </tr>
+          </thead>
+          <tbody id="delayBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="workWindowCard" style="display: none; border: 2px solid #1f5e63;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0;">
+        ⏱️ Work Window Optimizer (Auto-Scheduler)
+        <div style="font-size: 0.8em; font-weight: normal; display: flex; align-items: center; gap: 8px; background: #f0fdf4; padding: 6px 12px; border-radius: 8px; border: 1px solid #81c784;">
+          <label style="margin:0; color:#2e7d32; font-weight: bold;" class="tooltip" data-tip="Maximum Volume-to-Capacity Ratio permitted during roadworks.">Max Allowable VCR:</label>
+          <input type="number" id="wwMaxVcr" value="0.85" step="0.05" min="0.5" max="1.5" style="width: 70px; padding: 4px 8px; font-size:1em; border: 1px solid #4caf50; border-radius: 4px;" onchange="generateWorkWindow()" />
+        </div>
+      </h2>
+      <p style="font-size: 0.85em; color: #666; margin: 4px 0 16px 0;">
+        Displays permitted working hours based on hourly traffic volumes. Calculates <strong>Single Lane Closure (SLC)</strong> for multi-lane roads, or <strong>Single Lane Reversible Flow (SLRF)</strong> for single-lane roads.
+      </p>
+      
+      <div id="wwTimeline" style="display: flex; width: 100%; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+        </div>
+      
+      <div style="display: flex; width: 100%; justify-content: space-between; font-size: 0.75em; color: #666; margin-top: 4px; padding: 0 4px;">
+        <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+      </div>
+
+      <div id="wwSummary" style="margin-top: 12px; font-weight: bold; text-align: center; padding: 10px; border-radius: 6px; background: #f9f9f9; border: 1px dashed #ccc;">
+        Waiting for calculation...
+      </div>
+    </div>
+
+    <div class="card" id="stopGoCard" style="border: 2px solid #fb8c00;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #e65100;">
+        🚦 Stop/Go Shuttle Simulator
+      </h2>
+      <p style="font-size: 0.85em; color: #666; margin: 4px 0 12px 0;">
+        Calculates signal timings and queues for single-lane reversible flow operations (portable traffic lights or Stop/Go). Based on the peak hourly volume of your selected profile.
+      </p>
+      
+      <div class="grid" style="margin-bottom: 12px;">
+        <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 6px; padding: 10px;">
+          <label style="color: #e65100;" class="tooltip" data-tip="Total distance between the two Stop/Go boards or portable traffic lights.">Work Zone Length (m)</label>
+          <input type="number" id="sgLength" value="300" step="10" min="10" oninput="calculateStopGo()" style="border: 1px solid #ffb74d; background: #fff8e1;" />
+        </div>
+        <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 6px; padding: 10px;">
+          <label style="color: #e65100;" class="tooltip" data-tip="Posted speed limit through the work zone during the closure.">Work Zone Speed (km/h)</label>
+          <input type="number" id="sgSpeed" value="40" step="10" min="10" oninput="calculateStopGo()" style="border: 1px solid #ffb74d; background: #fff8e1;" />
+        </div>
+        <div style="background: #fff3e0; border: 1px solid #ffb74d; border-radius: 6px; padding: 10px;">
+          <label style="color: #e65100;" class="tooltip" data-tip="Target maximum time for a full cycle (Green 1 + Clearance + Green 2 + Clearance). Usually 120s - 300s.">Max Cycle Time (sec)</label>
+          <input type="number" id="sgCycle" value="240" step="10" min="60" oninput="calculateStopGo()" style="border: 1px solid #ffb74d; background: #fff8e1;" />
+        </div>
+      </div>
+
+      <div id="sgResults" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center;">
+        <div style="background: #f1f8e9; border: 1px solid #8bc34a; border-radius: 8px; padding: 10px;">
+          <div style="font-size: 0.8em; color: #33691e; font-weight: bold; text-transform: uppercase;">D1 Green Time</div>
+          <div id="sgD1Green" style="font-size: 1.5em; font-weight: bold; color: #2e7d32;">-</div>
+          <div id="sgD1Queue" style="font-size: 0.85em; color: #555; margin-top: 4px;">Max Queue: -</div>
+        </div>
+        <div style="background: #ffebee; border: 1px solid #ef5350; border-radius: 8px; padding: 10px;">
+          <div style="font-size: 0.8em; color: #b71c1c; font-weight: bold; text-transform: uppercase;" class="tooltip" data-tip="Time required to safely clear the one-lane section before releasing the other side.">All-Red Clearance</div>
+          <div id="sgClearance" style="font-size: 1.5em; font-weight: bold; color: #c30000;">-</div>
+          <div style="font-size: 0.85em; color: #555; margin-top: 4px;">Applied twice per cycle</div>
+        </div>
+        <div style="background: #f1f8e9; border: 1px solid #8bc34a; border-radius: 8px; padding: 10px;">
+          <div style="font-size: 0.8em; color: #33691e; font-weight: bold; text-transform: uppercase;">D2 Green Time</div>
+          <div id="sgD2Green" style="font-size: 1.5em; font-weight: bold; color: #2e7d32;">-</div>
+          <div id="sgD2Queue" style="font-size: 0.85em; color: #555; margin-top: 4px;">Max Queue: -</div>
+        </div>
+      </div>
+      
+      <div id="sgWarning" style="display: none; margin-top: 10px; padding: 8px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 6px; font-size: 0.9em; text-align: center; font-weight: bold;">
+        ⚠️ Warning message here
+      </div>
+    </div>
+
+    <div class="card" id="detourCard" style="border: 2px solid #8e24aa;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #6a1b9a;">
+        🔄 Detailed Detour Route Capacity
+      </h2>
+      <p style="font-size: 0.85em; color: #666; margin: 4px 0 12px 0;">
+        Merges the 24-hour hourly profile of the primary site with the detour site to identify specific peak-period failures.
+      </p>
+      
+      <div class="grid" style="margin-bottom: 12px; grid-template-columns: 2fr 1fr;">
+        <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px;">
+          <label style="color: #6a1b9a;" class="tooltip" data-tip="Automatically lists the closest distinct roads within 5km.">Select Detour Route (Auto-Scanned)</label>
+          <select id="detourSiteSelect" style="border: 1px solid #ce93d8; background: #faf0e6; font-weight: bold; color: #4a148c;" onchange="calculateDetourOverlay()">
+            <option value="">-- Select a Primary Site First --</option>
+          </select>
+        </div>
+        <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px;">
+          <label style="color: #6a1b9a;">Diversion Rate (%)</label>
+          <input type="number" id="detourDiversionRate" value="80" step="5" min="0" max="100" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #faf0e6;" />
+        </div>
+      </div>
+
+      <div id="detourResults" style="display: none;">
+        <h4 style="margin: 10px 0; color: #333; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 8px;" id="detourRouteName">-</h4>
+        
+        <div class="table-wrap">
+          <table style="width: 100%;">
+            <thead>
+              <tr>
+                <th style="background: #6a1b9a;">Period</th>
+                <th style="background: #6a1b9a;">Base Detour VCR</th>
+                <th style="background: #6a1b9a;">Added Diverted Vol</th>
+                <th style="background: #6a1b9a;">New Detour VCR</th>
+              </tr>
+            </thead>
+            <tbody id="detourDetailedBody">
+              </tbody>
+          </table>
+        </div>
+        <p style="font-size: 0.85em; color: #666; margin: 10px 0 0 0; text-align: center;" id="detourWarningText"></p>
+      </div>
+    </div>
+
+    <div class="card" id="pedestrianCard" style="border: 2px solid #00897b; background: #e0f2f1;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #004d40;">
+        🚶 Pedestrian Detour Impact
+      </h2>
+      <p style="font-size: 0.85em; color: #555; margin: 4px 0 12px 0;">
+        Calculates the additional travel time for pedestrians forced to use an alternative route or crossing due to a footpath closure.
+      </p>
+
+      <div class="grid" style="margin-bottom: 12px;">
+        <div style="background: #ffffff; border: 1px solid #80cbc4; border-radius: 6px; padding: 10px;">
+          <label style="color: #00695c;" class="tooltip" data-tip="Distance of the original uninterrupted pedestrian path.">Normal Path Length (m)</label>
+          <input type="number" id="pedNormDist" value="100" step="10" min="0" oninput="calculatePedestrianDelay()" style="border: 1px solid #80cbc4;" />
+        </div>
+        <div style="background: #ffffff; border: 1px solid #80cbc4; border-radius: 6px; padding: 10px;">
+          <label style="color: #00695c;" class="tooltip" data-tip="Total distance of the new detour path.">Detour Path Length (m)</label>
+          <input type="number" id="pedDetourDist" value="250" step="10" min="0" oninput="calculatePedestrianDelay()" style="border: 1px solid #80cbc4;" />
+        </div>
+        <div style="background: #ffffff; border: 1px solid #80cbc4; border-radius: 6px; padding: 10px;">
+          <label style="color: #00695c;" class="tooltip" data-tip="Total estimated wait time at any signalized crossings or refuges along the detour.">Total Signal Wait (sec)</label>
+          <input type="number" id="pedSignalWait" value="45" step="5" min="0" oninput="calculatePedestrianDelay()" style="border: 1px solid #80cbc4;" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <div style="background: #ffffff; border-left: 5px solid #00897b; padding: 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="font-size: 0.8em; color: #666; font-weight: bold; text-transform: uppercase;">Added Delay Per Pedestrian</div>
+          <div id="pedAddedDelay" style="font-size: 1.6em; font-weight: bold; color: #00695c; margin-top: 4px;">-</div>
+          <div id="pedTransitText" style="font-size: 0.8em; color: #777; margin-top: 4px;">Based on 1.2 m/s walk speed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>VCR / LOS Analysis</h2>
+
+    <div class="card">
+      <h2>VCR / LOS Analysis</h2>
+
     <div class="card">
       <h2>VCR / LOS Analysis</h2>
 
@@ -888,11 +1236,15 @@
 
   let macroSitesData = {};
   let selectedMacroSite = null;
+  // store the most recent period profiles so auxiliary calculators can access them
+  let lastD1Profile = null;
+  let lastD2Profile = null;
   let macroMapInstance = null;
   let macroSiteLayer = null;
   let macroSearchMarkerLayer = null;
   let macroReferenceLinkLayer = null;
   let selectedMacroMarker = null;
+  let detourLinkLayer = null;
   let macroSourceFilter = 'ALL';
   const macroMarkersById = {};
 
@@ -1707,6 +2059,8 @@
     
     // Render charts with database data
     renderMacroCharts(data);
+    // Trigger smart detour scan for the newly selected site
+    populateDetourDropdown();
     
     console.log(`Selected site: ${siteId}, VADT: ${vadt}, DTCA: ${data.dtca_auto}, D1: ${data.d1_vadt}, D2: ${data.d2_vadt}`);
   }
@@ -2592,6 +2946,9 @@
     const d2Daily = dtca === 'YES' ? num('D2_VADT') : num('VADT') / 2;
     const d1Profile = buildPeriodProfile(1, d1Daily, getHVPercent(1), getRTPercent(1), d1.lanes, rtr === 'YES');
     const d2Profile = buildPeriodProfile(2, d2Daily, getHVPercent(2), getRTPercent(2), d2.lanes, rtr === 'YES');
+    // persist for other routines
+    lastD1Profile = d1Profile;
+    lastD2Profile = d2Profile;
 
     const base1Peak = (d1.peakLVPL + d1.peakHVPL + d1.peakRTPL) / dv;
     const base1Off  = (d1.offLVPL + d1.offHVPL + d1.offRTPL) / dv;
@@ -2881,6 +3238,483 @@
         traceBody.appendChild(tr);
       });
     }
+
+    // Trigger Work Window Optimizer
+    generateWorkWindow();
+    // Trigger Stop/Go Simulator
+    calculateStopGo();
+    // Trigger Detour Overlay Simulator
+    calculateDetourOverlay();
+    // Trigger Average Vehicle Delay
+    updateDelayCard(d1Profile, d2Profile, d1.lanes, d2.lanes, dv);
+    // Trigger Average Delay Calculator
+    calculateDelay();
+    // Trigger Speed Reduction Impact
+    calculateSpeedDelay();
+    // Trigger Pedestrian Delay Calculator
+    calculatePedestrianDelay();
+  }
+
+  // ===== AVERAGE VEHICLE DELAY CALCULATION =====
+  function calculateDelay() {
+    const horizon = Number(document.getElementById('delayHorizon').value) || 60; // minutes
+    const body = document.getElementById('delayBody');
+    if (!body || !d2Profile) return;
+
+    const periods = ['AM','OP','PM','EV'];
+    body.innerHTML = '';
+
+    periods.forEach(period => {
+      const data = d2Profile[period];
+      if (!data) return;
+      // simple approximation: convert queue length to vehicles (7.5m/veh),
+      // assume those vehicles are delayed for the length of the selected horizon,
+      // then spread that total delay over all vehicles that pass in the period.
+      const queueMeters = data.queue.q5 || 0;
+      const queuedVeh = queueMeters / 7.5;
+      const totalVeh = data.total || 1;
+      const totalDelaySec = queuedVeh * horizon * 60;
+      const delayPerVeh = totalDelaySec / totalVeh;
+      body.innerHTML += `
+        <tr>
+          <td>${period}</td>
+          <td>${delayPerVeh.toFixed(1)}</td>
+        </tr>`;
+    });
+  }
+
+  // ===== STOP/GO SHUTTLE SIMULATOR LOGIC =====
+  function calculateStopGo() {
+    const site = selectedMacroSite ? macroSitesData[selectedMacroSite] : null;
+    
+    const length = Number(document.getElementById('sgLength').value) || 300;
+    const speedKmh = Number(document.getElementById('sgSpeed').value) || 40;
+    const cycleTime = Number(document.getElementById('sgCycle').value) || 240;
+    
+    // Convert speed to m/s to find clearance time
+    const speedMs = speedKmh / 3.6;
+    const clearanceTime = Math.ceil(length / speedMs);
+    
+    // We need 2 clearance phases per cycle (one for each direction to clear)
+    const totalClearance = clearanceTime * 2;
+    const availableGreen = cycleTime - totalClearance;
+    
+    const warningEl = document.getElementById('sgWarning');
+    
+    if (availableGreen < 20) {
+      document.getElementById('sgClearance').textContent = `${clearanceTime}s`;
+      document.getElementById('sgD1Green').textContent = 'Error';
+      document.getElementById('sgD2Green').textContent = 'Error';
+      warningEl.textContent = `⚠️ Cycle time too short! Clearance alone takes ${totalClearance}s. Increase Max Cycle Time or reduce Work Zone Length.`;
+      warningEl.style.display = 'block';
+      return;
+    } else {
+      warningEl.style.display = 'none';
+    }
+
+    // Find the absolute Peak Hour Volume for D1 and D2 to stress-test the signals
+    let v1 = 0; let v2 = 0;
+    if (site && site.directions_weekday) {
+      const gaz = site.directions_weekday['GAZETTAL'] || [];
+      const ag = site.directions_weekday['AGAINST GAZETTAL'] || [];
+      v1 = gaz.length ? Math.max(...gaz.map(v => Number(v)||0)) : num('D1_VADT') * 0.09;
+      v2 = ag.length ? Math.max(...ag.map(v => Number(v)||0)) : num('D2_VADT') * 0.09;
+    } else {
+      v1 = num('D1_VADT') * 0.09; // Fallback to 9% of daily volume if no profile
+      v2 = num('D2_VADT') * 0.09;
+    }
+    
+    // Prevent divide by zero
+    if (v1 + v2 === 0) { v1 = 1; v2 = 1; }
+    
+    // Proportionally split the green time
+    let g1 = Math.round(availableGreen * (v1 / (v1 + v2)));
+    let g2 = availableGreen - g1;
+    
+    // Enforce minimum green times (10 seconds)
+    if (g1 < 10) { g1 = 10; g2 = availableGreen - 10; }
+    if (g2 < 10) { g2 = 10; g1 = availableGreen - 10; }
+
+    // Calculate maximum queue during the red phase
+    // Red phase duration for D1 = D2 Green + 2x Clearance
+    const red1 = g2 + totalClearance;
+    const red2 = g1 + totalClearance;
+    
+    // Vehicles arriving during the red phase (Arrival rate per second * Red seconds)
+    const vehQ1 = (v1 / 3600) * red1;
+    const vehQ2 = (v2 / 3600) * red2;
+    
+    // Calculate blended vehicle length based on your inputs
+    const hv1 = getHVPercent(1); const rt1 = getRTPercent(1); const lv1 = Math.max(0, 1 - hv1 - rt1);
+    const hv2 = getHVPercent(2); const rt2 = getRTPercent(2); const lv2 = Math.max(0, 1 - hv2 - rt2);
+    
+    // Using your existing queue lengths: LV=6m, HV=20m, RT=63m
+    const space1 = (lv1 * 6) + (hv1 * 20) + (rt1 * 63);
+    const space2 = (lv2 * 6) + (hv2 * 20) + (rt2 * 63);
+    
+    // Factor in Road Train Route multiplier if active
+    const rtrFactor = txt('RTR').toUpperCase() === 'YES' ? 1.5 : 1;
+    
+    const q1 = Math.ceil(vehQ1 * space1 * rtrFactor);
+    const q2 = Math.ceil(vehQ2 * space2 * rtrFactor);
+
+    // Update the UI
+    document.getElementById('sgClearance').textContent = `${clearanceTime}s`;
+    document.getElementById('sgD1Green').textContent = `${g1}s`;
+    document.getElementById('sgD2Green').textContent = `${g2}s`;
+    
+    document.getElementById('sgD1Queue').textContent = `Max Queue: ${q1}m`;
+    document.getElementById('sgD2Queue').textContent = `Max Queue: ${q2}m`;
+  }
+
+  // ===== SMART DETOUR SCANNER LOGIC =====
+  function populateDetourDropdown() {
+    const selectEl = document.getElementById('detourSiteSelect');
+    if (!selectEl) return;
+
+    let pLat, pLon, primaryRoadStd;
+
+    // 1. Check if a specific database site is selected
+    if (selectedMacroSite && macroSitesData[selectedMacroSite]) {
+      const primarySite = macroSitesData[selectedMacroSite];
+      pLat = Number(primarySite.latitude);
+      pLon = Number(primarySite.longitude);
+      primaryRoadStd = standardizeRoadName(primarySite.road_name || primarySite.description);
+    } 
+    // 2. Fall back to the Address Search location if no database site is picked
+    else if (window.selectedTiaData && window.selectedTiaData.lat && window.selectedTiaData.lon) {
+      pLat = Number(window.selectedTiaData.lat);
+      pLon = Number(window.selectedTiaData.lon);
+      primaryRoadStd = standardizeRoadName(window.selectedTiaData.road);
+    } 
+    // 3. If neither, lock the dropdown
+    else {
+      selectEl.innerHTML = '<option value="">-- Select a Primary Site or Search Address --</option>';
+      return;
+    }
+
+    if (!pLat || !pLon) {
+      selectEl.innerHTML = '<option value="">-- Location lacks coordinates --</option>';
+      return;
+    }
+
+    // Calculate distances to all other sites
+    let nearbySites = [];
+    Object.entries(macroSitesData).forEach(([id, data]) => {
+      if (id === primaryId) return; // Skip the site we are working on
+      
+      // Skip if it's the exact same road name (a detour needs to be a different road)
+      const primaryRoadStd = standardizeRoadName(primarySite.road_name || primarySite.description);
+      const dataRoadStd = standardizeRoadName(data.road_name || data.description);
+      if (primaryRoadStd && dataRoadStd && primaryRoadStd === dataRoadStd) return;
+
+      const lat = Number(data.latitude);
+      const lon = Number(data.longitude);
+      
+      if (lat && lon) {
+        const dist = haversineDistance(pLat, pLon, lat, lon);
+        // Keep sites within a 5km radius
+        if (dist <= 5000) {
+          nearbySites.push({ id, data, dist });
+        }
+      }
+    });
+
+    // Sort closest to furthest
+    nearbySites.sort((a, b) => a.dist - b.dist);
+
+    // Filter to get unique road names (we only need the best counter per detour route)
+    const uniqueRoads = [];
+    const seenRoads = new Set();
+    
+    for (const site of nearbySites) {
+      const road = standardizeRoadName(site.data.road_name || site.data.description);
+      if (!seenRoads.has(road) && road.length > 0) {
+        seenRoads.add(road);
+        uniqueRoads.push(site);
+        if (uniqueRoads.length >= 15) break; // Limit to top 15 distinct nearby roads
+      }
+    }
+
+    // Populate the dropdown
+    selectEl.innerHTML = '<option value="">-- Select a nearby road --</option>';
+    if (uniqueRoads.length === 0) {
+      selectEl.innerHTML = '<option value="">-- No nearby data points found --</option>';
+      return;
+    }
+
+    uniqueRoads.forEach(site => {
+      const distKm = (site.dist / 1000).toFixed(2);
+      const roadDisplay = site.data.road_name || site.data.description;
+      const sourceTag = site.data.source ? ` [${site.data.source}]` : '';
+      
+      const opt = document.createElement('option');
+      opt.value = site.id;
+      opt.textContent = `${distKm}km away ➔ ${roadDisplay}${sourceTag}`;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  // ===== DETOUR ROUTE CAPACITY OVERLAY LOGIC =====
+  // ===== DETAILED DETOUR ROUTE CAPACITY LOGIC =====
+  function calculateDetourOverlay() {
+    const primarySiteId = document.getElementById('macroSiteSearch').value.trim() || selectedMacroSite;
+    const detourSiteId = document.getElementById('detourSiteSelect').value;
+    const diversionRate = (Number(document.getElementById('detourDiversionRate').value) || 80) / 100;
+    const resultsPanel = document.getElementById('detourResults');
+    
+    if (!detourSiteId || !macroSitesData[detourSiteId]) {
+      resultsPanel.style.display = 'none';
+      return;
+    }
+    
+    const primarySite = macroSitesData[primarySiteId];
+    const detourSite = macroSitesData[detourSiteId];
+    resultsPanel.style.display = 'block';
+    document.getElementById('detourRouteName').textContent = `Detour Route: ${detourSite.road_name || detourSite.description}`;
+    // --- MAP VISUALIZATION: DRAW DETOUR LINK ---
+    if (macroMapInstance && typeof L !== 'undefined') {
+      // Clear previous detour links
+      if (detourLinkLayer) {
+        macroMapInstance.removeLayer(detourLinkLayer);
+      }
+      detourLinkLayer = L.layerGroup().addTo(macroMapInstance);
+
+      const pLat = Number(primarySite.latitude);
+      const pLon = Number(primarySite.longitude);
+      const dLat = Number(detourSite.latitude);
+      const dLon = Number(detourSite.longitude);
+
+      if (pLat && pLon && dLat && dLon) {
+        // Draw dashed purple line connecting primary site to detour site
+        const detourLine = L.polyline([[pLat, pLon], [dLat, dLon]], {
+          color: '#8e24aa', // Matches the purple UI of the Detour Card
+          weight: 3,
+          opacity: 0.8,
+          dashArray: '8, 8'
+        }).addTo(detourLinkLayer);
+
+        // Add a distinct marker for the detour destination
+        L.circleMarker([dLat, dLon], {
+          radius: 8,
+          color: '#6a1b9a',
+          fillColor: '#ce93d8',
+          fillOpacity: 0.9,
+          weight: 2
+        }).bindTooltip(`Detour: ${detourSite.road_name || detourSite.description}`).addTo(detourLinkLayer);
+
+        // Animate the map to perfectly frame both the primary site and the detour
+        macroMapInstance.fitBounds(detourLine.getBounds(), { padding: [50, 50], maxZoom: 16 });
+      }
+    }
+    // --- END MAP VISUALIZATION ---
+    
+    // Helper to get a 24h combined profile (D1 + D2)
+    const getCombinedProfile = (site, fallbackVadt) => {
+      let combined = new Array(24).fill(0);
+      if (site && site.directions_weekday) {
+        const gaz = site.directions_weekday['GAZETTAL'] || new Array(24).fill(0);
+        const ag = site.directions_weekday['AGAINST GAZETTAL'] || new Array(24).fill(0);
+        for(let i=0; i<24; i++) combined[i] = (Number(gaz[i])||0) + (Number(ag[i])||0);
+      }
+      // If no profile exists, create a flat one based on VADT to prevent crashing
+      if (combined.reduce((a,b)=>a+b, 0) === 0 && fallbackVadt > 0) {
+        const hrVol = fallbackVadt / 24;
+        combined = new Array(24).fill(hrVol);
+      }
+      return combined;
+    };
+
+    const primaryProfile = getCombinedProfile(primarySite, num('VADT'));
+    const detourProfile = getCombinedProfile(detourSite, Number(detourSite.vadt)||0);
+    
+    const detourLanes = Math.max(1, (detourSite.d1_lanes || 1) + (detourSite.d2_lanes || 1));
+    let detourCapacity = (Number(detourSite.vadt || 5000) * 0.12) / detourLanes;
+    if (detourCapacity < 500) detourCapacity = 500; // Minimum lane capacity floor
+    const totalDetourCapacity = detourCapacity * detourLanes; // Total bidirectional capacity per hour
+
+    const periods = [
+      { key: 'AM (6-9)', hours: [6, 7, 8, 9] },
+      { key: 'OP (10-15)', hours: [10, 11, 12, 13, 14, 15] },
+      { key: 'PM (16-18)', hours: [16, 17, 18] },
+      { key: 'EV (Other)', hours: [0, 1, 2, 3, 4, 5, 19, 20, 21, 22, 23] }
+    ];
+
+    const tbody = document.getElementById('detourDetailedBody');
+    tbody.innerHTML = '';
+    let maxNewVcr = 0;
+
+    periods.forEach(p => {
+      // Find the highest hourly volume within this period for both base and primary
+      let maxBaseVol = 0;
+      let maxPrimaryVol = 0;
+      
+      p.hours.forEach(h => {
+        if (detourProfile[h] > maxBaseVol) maxBaseVol = detourProfile[h];
+        if (primaryProfile[h] > maxPrimaryVol) maxPrimaryVol = primaryProfile[h];
+      });
+
+      const divertedVol = maxPrimaryVol * diversionRate;
+      const newVol = maxBaseVol + divertedVol;
+
+      const baseVcr = maxBaseVol / totalDetourCapacity;
+      const newVcr = newVol / totalDetourCapacity;
+      if (newVcr > maxNewVcr) maxNewVcr = newVcr;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="rowhead">${p.key}</td>
+        <td style="background: ${vcrColor(baseVcr)}; font-weight: bold;">${baseVcr.toFixed(2)} (${losLabel(baseVcr)})</td>
+        <td style="color: #6a1b9a;">+${Math.round(divertedVol).toLocaleString()} vph</td>
+        <td style="background: ${vcrColor(newVcr)}; font-weight: bold;">${newVcr.toFixed(2)} (${losLabel(newVcr)})</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const warningText = document.getElementById('detourWarningText');
+    if (maxNewVcr > 1.0) {
+      warningText.innerHTML = `⚠️ <strong>Warning:</strong> The detour route will operate over capacity during at least one period.`;
+      warningText.style.color = '#c30000';
+    } else if (maxNewVcr > 0.85) {
+      warningText.innerHTML = `⚠️ <strong>Caution:</strong> The detour route will experience heavy congestion.`;
+      warningText.style.color = '#e65100';
+    } else {
+      warningText.innerHTML = `✅ The detour route has sufficient capacity across all periods.`;
+      warningText.style.color = '#2e7d32';
+    }
+  }
+
+  // ===== AVERAGE VEHICLE DELAY LOGIC =====
+  function calculateErlangCDelay(hourlyVolume, capacityPerLane, lanes) {
+    if (hourlyVolume <= 0) return 0;
+    
+    // Utilization factor (rho)
+    const rho = hourlyVolume / (lanes * capacityPerLane);
+    if (rho >= 0.99) return Infinity; // Operating over capacity
+
+    // Helper: Factorial
+    const fact = (n) => n <= 1 ? 1 : n * fact(n - 1);
+
+    // Erlang C Probability of Waiting (Pw)
+    const erlangNum = Math.pow(rho * lanes, lanes) / fact(lanes) * (1 / (1 - rho));
+    let sumDenom = 0;
+    for (let n = 0; n < lanes; n++) {
+      sumDenom += Math.pow(rho * lanes, n) / fact(n);
+    }
+    const erlangDen = erlangNum + sumDenom;
+    const pw = erlangNum / erlangDen;
+
+    // Correct M/M/c Queue Length (Lq)
+    const Lq = (pw * rho) / (1 - rho); 
+    
+    // Little's Law: Delay in hours (Wq) = Lq / Arrival Rate
+    const Wq_hours = Lq / hourlyVolume;
+    
+    // Return delay in seconds
+    return Wq_hours * 3600; 
+  }
+
+  function updateDelayCard(d1Profile, d2Profile, d1Lanes, d2Lanes, dv) {
+    const formatDelay = (seconds) => {
+      if (!isFinite(seconds) || seconds > 3600) return '<span style="color:#c30000; font-weight:bold;">Over Capacity</span>';
+      if (seconds < 1) return '0s';
+      const m = Math.floor(seconds / 60);
+      const s = Math.round(seconds % 60);
+      return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    };
+
+    const periods = ['AM', 'OP', 'PM', 'EV'];
+    
+    periods.forEach(p => {
+      // Reconstruct total hourly volume from the per-lane metric
+      const d1Hourly = d1Profile[p].hourlyPerLane * d1Lanes;
+      const d1Delay = calculateErlangCDelay(d1Hourly, dv, d1Lanes);
+      const elD1 = document.getElementById(`delayD1${p}`);
+      if (elD1) elD1.innerHTML = formatDelay(d1Delay);
+
+      const d2Hourly = d2Profile[p].hourlyPerLane * d2Lanes;
+      const d2Delay = calculateErlangCDelay(d2Hourly, dv, d2Lanes);
+      const elD2 = document.getElementById(`delayD2${p}`);
+      if (elD2) elD2.innerHTML = formatDelay(d2Delay);
+    });
+  }
+
+  // ===== SPEED REDUCTION TRAVEL TIME IMPACT LOGIC =====
+  function calculateSpeedDelay() {
+    const vadt = Number(document.getElementById('VADT').value) || 0;
+    const length = Number(document.getElementById('srLength').value) || 1000;
+    const normSpeedKmh = Number(document.getElementById('srNormSpeed').value) || 80;
+    const workSpeedKmh = Number(document.getElementById('srWorkSpeed').value) || 40;
+
+    const perVehicleEl = document.getElementById('srPerVehicle');
+    const totalHoursEl = document.getElementById('srTotalHours');
+    const transitTextEl = document.getElementById('srTransitText');
+
+    // Handle invalid inputs or no speed reduction
+    if (workSpeedKmh >= normSpeedKmh || workSpeedKmh <= 0 || normSpeedKmh <= 0) {
+      perVehicleEl.textContent = '0s';
+      totalHoursEl.textContent = '0 hrs';
+      transitTextEl.textContent = 'No delay from speed reduction.';
+      return;
+    }
+
+    // Convert speeds from km/h to m/s
+    const normSpeedMs = normSpeedKmh / 3.6;
+    const workSpeedMs = workSpeedKmh / 3.6;
+
+    // Calculate transit times in seconds
+    const normTimeSec = length / normSpeedMs;
+    const workTimeSec = length / workSpeedMs;
+
+    // Delay is the difference
+    const delaySec = workTimeSec - normTimeSec;
+
+    // Format per-vehicle delay
+    if (delaySec < 60) {
+      perVehicleEl.textContent = `+${Math.round(delaySec)}s`;
+    } else {
+      const m = Math.floor(delaySec / 60);
+      const s = Math.round(delaySec % 60);
+      perVehicleEl.textContent = `+${m}m ${s}s`;
+    }
+
+    // Details text
+    transitTextEl.textContent = `Transit time increases from ${Math.round(normTimeSec)}s to ${Math.round(workTimeSec)}s`;
+
+    // Calculate total daily delay in hours
+    const totalDelayHours = (delaySec * vadt) / 3600;
+    totalHoursEl.textContent = totalDelayHours > 0 ? `${Math.round(totalDelayHours).toLocaleString()} hrs` : '0 hrs';
+  }
+
+  // ===== PEDESTRIAN DETOUR DELAY LOGIC =====
+  function calculatePedestrianDelay() {
+    const normDist = Number(document.getElementById('pedNormDist').value) || 0;
+    const detourDist = Number(document.getElementById('pedDetourDist').value) || 0;
+    const signalWait = Number(document.getElementById('pedSignalWait').value) || 0;
+    
+    // Standard walking speed: 1.2 meters per second
+    const walkSpeed = 1.2; 
+
+    // Calculate times in seconds
+    const normTimeSec = normDist / walkSpeed;
+    const detourWalkTimeSec = detourDist / walkSpeed;
+    const totalDetourTimeSec = detourWalkTimeSec + signalWait;
+
+    // Delay is the difference
+    const delaySec = Math.max(0, totalDetourTimeSec - normTimeSec);
+
+    const delayEl = document.getElementById('pedAddedDelay');
+    const textEl = document.getElementById('pedTransitText');
+
+    if (delaySec < 60) {
+      delayEl.textContent = `+${Math.round(delaySec)}s`;
+    } else {
+      const m = Math.floor(delaySec / 60);
+      const s = Math.round(delaySec % 60);
+      delayEl.textContent = `+${m}m ${s}s`;
+    }
+
+    textEl.textContent = `Transit time increases from ${Math.round(normTimeSec)}s to ${Math.round(totalDetourTimeSec)}s`;
   }
 
   // Auto-calculation removed: user must click "Calculate All" button
@@ -2890,6 +3724,21 @@
   //   el.addEventListener('change', calculateAll);
   //   el.addEventListener('input', calculateAll);
   // });
+  
+  // detour inputs also update overlay
+  ['detourSiteSearch','detourDiversionRate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', calculateDetourOverlay);
+    el.addEventListener('input', calculateDetourOverlay);
+  });
+
+  // delay horizon control
+  const delayEl = document.getElementById('delayHorizon');
+  if (delayEl) {
+    delayEl.addEventListener('change', calculateDelay);
+    delayEl.addEventListener('input', calculateDelay);
+  }
 
   ['RTR', 'DRTPA', 'RTP'].forEach(id => {
     const el = document.getElementById(id);
@@ -2914,6 +3763,118 @@
   // Initial calculation removed: calculateAll();
 
   // ===== TIA ANALYSIS TOOL FUNCTIONS =====
+  // ===== WORK WINDOW OPTIMIZER LOGIC =====
+  function generateWorkWindow() {
+    const site = selectedMacroSite ? macroSitesData[selectedMacroSite] : null;
+    if (!site) return;
+
+    const workWindowCard = document.getElementById('workWindowCard');
+    if (workWindowCard) workWindowCard.style.display = 'block';
+
+    const maxVcr = Number(document.getElementById('wwMaxVcr').value) || 0.85;
+    const dv = calculateDV(); // Uses your existing DV formula
+    const d1Lanes = Math.max(1, num('D1_Lanes'));
+    const d2Lanes = Math.max(1, num('D2_Lanes'));
+    
+    // Fallback profile generator (same logic as your chart renderer)
+    const buildSyntheticHourly = (dailyTotal) => {
+      const total = Math.max(0, Math.round(Number(dailyTotal) || 0));
+      const hourly = new Array(24).fill(0);
+      if (total <= 0) return hourly;
+      const blocks = [
+        { hours: [6, 7, 8, 9], share: 0.20 },
+        { hours: [10, 11, 12, 13, 14, 15], share: 0.40 },
+        { hours: [16, 17, 18], share: 0.20 },
+        { hours: [0, 1, 2, 3, 4, 5, 19, 20, 21, 22, 23], share: 0.20 }
+      ];
+      let assigned = 0;
+      blocks.forEach((block, blockIndex) => {
+        const blockTotal = blockIndex === blocks.length - 1 ? (total - assigned) : Math.round(total * block.share);
+        assigned += blockTotal;
+        const perHour = Math.floor(blockTotal / block.hours.length);
+        let remainder = blockTotal - (perHour * block.hours.length);
+        block.hours.forEach((hour, idx) => { hourly[hour] = perHour + (idx < remainder ? 1 : 0); });
+      });
+      return hourly;
+    };
+
+    // Grab or build 24h profiles
+    let gazData = site.directions_weekday['GAZETTAL'] || new Array(24).fill(0);
+    let agData = site.directions_weekday['AGAINST GAZETTAL'] || new Array(24).fill(0);
+    if (gazData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) gazData = buildSyntheticHourly(num('D1_VADT'));
+    if (agData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) agData = buildSyntheticHourly(num('D2_VADT'));
+
+    const timelineEl = document.getElementById('wwTimeline');
+    timelineEl.innerHTML = '';
+    let permittedHoursCount = 0;
+    let permittedBlocks = [];
+
+    // Loop through 24 hours
+    for (let h = 0; h < 24; h++) {
+      const vol1 = Number(gazData[h]) || 0;
+      const vol2 = Number(agData[h]) || 0;
+      let worstVcr = 0;
+
+      // Match your SLRF vs SLC logic
+      if (d1Lanes === 1 && d2Lanes === 1) {
+        // SLRF: Both directions share 1 lane
+        worstVcr = (vol1 + vol2) / dv;
+      } else {
+        // SLC: Close 1 lane in whichever direction
+        const d1SlcVcr = d1Lanes > 1 ? (vol1 / (d1Lanes - 1)) / dv : vol1 / dv;
+        const d2SlcVcr = d2Lanes > 1 ? (vol2 / (d2Lanes - 1)) / dv : vol2 / dv;
+        worstVcr = Math.max(d1SlcVcr, d2SlcVcr);
+      }
+
+      const isPermitted = worstVcr <= maxVcr;
+      if (isPermitted) permittedHoursCount++;
+
+      // Create the visual block
+      const block = document.createElement('div');
+      block.style.flex = '1';
+      block.style.display = 'flex';
+      block.style.flexDirection = 'column';
+      block.style.justifyContent = 'center';
+      block.style.alignItems = 'center';
+      block.style.borderRight = h === 23 ? 'none' : '1px solid rgba(255,255,255,0.4)';
+      block.style.transition = 'opacity 0.2s';
+      block.style.cursor = 'help';
+      block.title = `Hour: ${h}:00 - ${h+1}:00\nWorst VCR: ${worstVcr.toFixed(2)}\nStatus: ${isPermitted ? 'Permitted' : 'Restricted'}`;
+      
+      if (isPermitted) {
+        block.style.backgroundColor = worstVcr > (maxVcr - 0.1) ? '#ffb300' : '#4caf50'; // Yellow if close to limit, Green if safe
+        block.style.color = '#fff';
+        block.innerHTML = `<span style="font-size: 10px; opacity: 0.8;">${h}</span>`;
+        permittedBlocks.push(h);
+      } else {
+        block.style.backgroundColor = '#ef5350'; // Red
+        block.style.color = 'rgba(255,255,255,0.5)';
+        block.innerHTML = `<span style="font-size: 10px;">${h}</span>`;
+      }
+
+      timelineEl.appendChild(block);
+    }
+
+    // Generate smart text summary
+    const summaryEl = document.getElementById('wwSummary');
+    if (permittedHoursCount === 24) {
+      summaryEl.innerHTML = `<span style="color: #2e7d32;">✅ Permitted 24 hours a day (Max VCR does not exceed ${maxVcr})</span>`;
+    } else if (permittedHoursCount === 0) {
+      summaryEl.innerHTML = `<span style="color: #c30000;">❌ Not permitted at any time (VCR exceeds ${maxVcr} all day)</span>`;
+    } else {
+      // Group consecutive hours for a clean text output
+      let windows = [];
+      let start = permittedBlocks[0];
+      for (let i = 1; i <= permittedBlocks.length; i++) {
+        if (permittedBlocks[i] !== permittedBlocks[i - 1] + 1) {
+          windows.push(`${start}:00 to ${permittedBlocks[i - 1] + 1}:00`);
+          start = permittedBlocks[i];
+        }
+      }
+      summaryEl.innerHTML = `<span style="color: #1f5e63;">🕒 Permitted Work Windows: <strong>${windows.join(' & ')}</strong></span>`;
+    }
+  }
+
   
   // Haversine distance calculation (meters)
   function haversineDistance(lat1, lon1, lat2, lon2) {
@@ -3500,7 +4461,10 @@
       references: refArray,
       avgVADT: avgVADT,
       avgD1: avgD1,
-      avgD2: avgD2
+      avgD2: avgD2,
+      lat: centerLat,    // <-- ADD THIS
+      lon: centerLon,    // <-- ADD THIS
+      road: searchTerm   // <-- ADD THIS
     };
 
     updateTiaCalculations();
@@ -3559,6 +4523,7 @@
     
     // Scroll to form
     document.querySelector('.card:nth-of-type(2)').scrollIntoView({ behavior: 'smooth' });
+    populateDetourDropdown(); // trigger updated detour options
   }
 
   function useCalculatedTIAData() {
@@ -3596,6 +4561,7 @@
     // Scroll to form
     const allCards = document.querySelectorAll('.card');
     allCards[1].scrollIntoView({ behavior: 'smooth' });
+    populateDetourDropdown(); // refresh detour list after using calculated data
   }
 
   // Allow Enter key on quick search
