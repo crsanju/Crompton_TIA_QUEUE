@@ -1841,10 +1841,29 @@
 
   function addBaseLayerToMap(mapInstance) {
     if (!mapInstance || typeof L === 'undefined') return;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19
-    }).addTo(mapInstance);
+    });
+
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      maxZoom: 19
+    });
+
+    streetLayer.addTo(mapInstance);
+
+    if (!mapInstance._cromptonBaseLayerControl) {
+      mapInstance._cromptonBaseLayerControl = L.control.layers(
+        {
+          'Street': streetLayer,
+          'Satellite': satelliteLayer
+        },
+        null,
+        { position: 'topright', collapsed: true }
+      ).addTo(mapInstance);
+    }
   }
 
   function getFilteredMacroSiteEntries() {
