@@ -853,9 +853,37 @@
     #detourListContainer::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     #detourListContainer::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 4px; }
     #detourListContainer::-webkit-scrollbar-thumb:hover { background: #ab47bc; }
+
+    .company-logo-watermark {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      width: min(180px, 24vw);
+      max-height: 64px;
+      object-fit: contain;
+      opacity: 0.14;
+      z-index: 999;
+      pointer-events: none;
+      user-select: none;
+      filter: grayscale(100%);
+    }
+
+    @media print {
+      .company-logo-watermark { display: none !important; }
+    }
+
+    @media (max-width: 760px) {
+      .company-logo-watermark {
+        width: min(130px, 32vw);
+        opacity: 0.12;
+        right: 10px;
+        top: 10px;
+      }
+    }
   </style>
 </head>
 <body>
+  <img class="company-logo-watermark" src="./crompton-logo.png" alt="Crompton logo" />
   <div class="container">
     <div class="print-header">
       <h2>Crompton TIA+ Queue Length Analysis Report</h2>
