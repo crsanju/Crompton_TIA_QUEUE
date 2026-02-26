@@ -88,6 +88,20 @@
     }
     .home-button::before { content: '🏠'; }
 
+    .logout-button {
+      width: auto;
+      margin-top: 0;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      background: linear-gradient(135deg, #5f5f5f 0%, #3f3f3f 100%);
+      box-shadow: 0 8px 16px rgba(31, 31, 31, 0.24);
+    }
+
+    .logout-button:hover {
+      box-shadow: 0 12px 18px rgba(31, 31, 31, 0.28);
+    }
+
     h1 {
       text-align: center;
       margin: 12px 0 8px;
@@ -939,10 +953,91 @@
         opacity: 0.04;
       }
     }
+
+    body.app-locked {
+      overflow: hidden;
+    }
+
+    body.app-locked .container {
+      filter: blur(2px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #loginGate {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7, 20, 22, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .login-card {
+      width: min(420px, 94vw);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+      padding: 22px;
+    }
+
+    .login-logo {
+      width: min(230px, 62vw);
+      display: block;
+      margin: 0 auto 14px;
+      object-fit: contain;
+    }
+
+    .login-title {
+      margin: 0 0 6px;
+      text-align: center;
+      color: var(--brand-2);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .login-note {
+      margin: 0 0 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .login-error {
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: #b00020;
+      min-height: 1.2em;
+    }
+
+    @media print {
+      #loginGate { display: none !important; }
+    }
   </style>
 </head>
-<body>
+<body class="app-locked">
   <div class="company-logo-watermark-layer" aria-hidden="true"></div>
+  <div id="loginGate" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <img class="login-logo" src="./logo.jpeg" alt="Crompton logo" />
+      <h2 id="loginTitle" class="login-title">Crompton Login</h2>
+      <p class="login-note">Please sign in to access the Traffic Impact Assessment tool.</p>
+      <form id="loginForm">
+        <label for="loginUser">Username</label>
+        <input id="loginUser" name="loginUser" type="text" placeholder="Enter username" autocomplete="username" required />
+
+        <label for="loginPassword" style="margin-top:10px;">Password</label>
+        <input id="loginPassword" name="loginPassword" type="password" placeholder="Enter password" autocomplete="current-password" required />
+
+        <button type="submit">Login</button>
+        <div id="loginError" class="login-error" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
   <div class="container">
     <img class="company-logo-prominent company-logo-prominent-light" src="./logo.jpeg" alt="Crompton logo" />
     <img class="company-logo-prominent company-logo-prominent-dark" src="https://cromptonconcepts.sharepoint.com/:i:/g/IQCIAS3nE53LTZq0oRs0BxUrAbh8svEyp-63IEc5o5sg_L8?e=CVlWTb" onerror="this.onerror=null;this.src='./logo.jpeg';" alt="Crompton logo" />
@@ -954,9 +1049,12 @@
     
     <div class="navbar">
       <a class="home-button" href="#" onclick="window.location.reload(); return false;">Home</a>
-      <span style="margin-left:auto; font-size:0.9em; color:#666;">
-        <strong>Sites Loaded:</strong> <span id="sitesLoadedCount">0</span>
-      </span>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:0.9em; color:#666;">
+          <strong>Sites Loaded:</strong> <span id="sitesLoadedCount">0</span>
+        </span>
+        <button id="logoutBtn" type="button" class="logout-button">Logout</button>
+      </div>
     </div>
     <h1 class="main-report-heading">Traffic Impact Assessment</h1>
     <p class="subtitle">database-integrated directional traffic, queue metrics, and capacity checks</p>
@@ -1823,6 +1921,65 @@
 </div>
 </div>
 <script>
+  const AUTH_SESSION_KEY = 'crompton_tia_auth';
+
+  function setupLoginGate() {
+    const loginGate = document.getElementById('loginGate');
+    const loginForm = document.getElementById('loginForm');
+    const loginUser = document.getElementById('loginUser');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginError = document.getElementById('loginError');
+    if (!loginGate || !loginForm || !loginUser || !loginPassword || !loginError) return;
+
+    const allowedUsers = {
+      admin: 'Packer4551',
+      users: 'Crompton123'
+    };
+
+    function unlockApplication() {
+      document.body.classList.remove('app-locked');
+      loginGate.style.display = 'none';
+    }
+
+    if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'true') {
+      unlockApplication();
+      return;
+    }
+
+    loginUser.focus();
+
+    loginForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const usernameKey = String(loginUser.value || '').trim().toLowerCase();
+      const enteredPassword = String(loginPassword.value || '').trim();
+      const expectedPassword = allowedUsers[usernameKey];
+
+      if (expectedPassword && enteredPassword === expectedPassword) {
+        sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+        unlockApplication();
+        loginError.textContent = '';
+        return;
+      }
+
+      loginError.textContent = 'Invalid username or password.';
+      loginPassword.value = '';
+      loginPassword.focus();
+    });
+  }
+
+  function setupLogoutButton() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener('click', function () {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      window.location.reload();
+    });
+  }
+
+  setupLoginGate();
+  setupLogoutButton();
+
   // ===== GITHUB CONFIG & DATA LOADING =====
   const GITHUB_TMR_URL = 'https://raw.githubusercontent.com/crsanju/Cromton_Traffic_Analysis/main/tmr.geojson';
   const GITHUB_GOLDCOAST_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/goldcoast.geojson';
