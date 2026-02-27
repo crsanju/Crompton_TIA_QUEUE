@@ -86,7 +86,7 @@
       transform: translateY(-1px);
       box-shadow: 0 12px 18px rgba(15, 47, 50, 0.28);
     }
-    .home-button::before { content: '🏠'; }
+    .home-button::before { content: '??'; }
 
     .logout-button {
       width: auto;
@@ -159,7 +159,7 @@
     }
 
     details.card > summary::after {
-      content: '▾';
+      content: '?';
       position: absolute;
       right: 12px;
       top: 50%;
@@ -205,9 +205,7 @@
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.02), 0 1px 0 rgba(255,255,255,0.8);
     }
 
-    input::placeholder {
-      color: #8a8f96;
-    }
+    input::placeholder { color: #8a8f96; }
 
     input:focus, select:focus {
       outline: none;
@@ -229,123 +227,6 @@
       background-position: right 10px center;
       background-size: 1em;
       padding-right: 32px;
-    }
-/* ===== PROFESSIONAL PRINT STYLES ===== */
-    @media print {
-      /* 1. Force background colors to print (Crucial for VCR tables & Work Window) */
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      body { 
-        background: white; 
-        padding: 0; 
-        color: #000;
-        font-size: 10.5pt;
-        line-height: 1.28;
-      }
-
-      .container { 
-        box-shadow: none !important; 
-        border: none !important; 
-        padding: 0 !important;
-        max-width: 100%;
-      }
-
-      /* 2. Hide purely interactive UI elements */
-      .navbar, .home-button, button, .copy-table-btn, .copyright-footer,
-      #selfDiagnosticsCard, #printCustomizationCard, .leaflet-control-container,
-      input[type="range"], .tooltip::after, .tooltip-label::after, .tooltip-label::before { 
-        display: none !important; 
-      }
-
-      /* Hide the database search inputs, keep only the details */
-      #macroSourceFilter, #macroSiteSearch, label[for="macroSourceFilter"], 
-      #detourSiteSearch, #detourSiteSelect {
-        display: none !important;
-      }
-
-      /* 3. Convert inputs and dropdowns into plain text for the report */
-      input, select {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        color: #000 !important;
-        font-weight: bold;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-      }
-      
-      /* Remove dropdown arrows */
-      select { background-image: none !important; }
-
-      /* 4. Layout & Page Breaks */
-      .card { 
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-        border: 1px solid #ddd !important;
-        box-shadow: none !important;
-        margin: 6px 0 !important;
-        padding: 15px !important;
-        background: #fff !important;
-      }
-
-      /* Allow the main assumption grids to break if absolutely necessary, but keep rows together */
-      .grid, .grid-2, .kpi-grid, .assumptions-grid {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-      }
-
-      /* 5. Typography Formatting */
-      h1 { font-size: 18pt; color: #000; text-align: center; margin-top: 0; }
-      h2 { font-size: 13pt; color: #000; border-bottom: 2px solid #000; padding-bottom: 4px; page-break-after: avoid; }
-      h3 { font-size: 11pt; color: #333; page-break-after: avoid; }
-      
-      table { font-size: 8.6pt; width: 100% !important; border-collapse: collapse; }
-      th, td { padding: 6px 6px !important; line-height: 1.2 !important; }
-      th { background: #eee !important; color: #000 !important; border: 1px solid #aaa !important; }
-      td { border: 1px solid #aaa !important; }
-
-      /* 6. Fix Map Printing */
-      #macroMap { 
-        height: 200px !important; 
-        border: 1px solid #000 !important; 
-        margin-top: 8px; 
-        page-break-inside: avoid; 
-      }
-      #detourMap {
-        min-height: 0 !important;
-        height: 220px !important;
-        page-break-inside: avoid;
-      }
-
-      /* 7. Ensure Header is visible */
-      .print-header { 
-        display: block !important; 
-        text-align: center; 
-        margin-bottom: 30px; 
-        border-bottom: 3px double #000;
-        padding-bottom: 10px;
-      }
-      .print-header h2 { border: none; font-size: 24pt; margin: 0; }
-      .print-header p { margin: 5px 0; font-size: 11pt; color: #444; }
-      .main-report-heading, .subtitle { display: none !important; }
-
-      /* Force details blocks to open for printing */
-      details { display: block !important; }
-      details summary { display: none !important; }
-      details > * { display: block !important; }
-
-      /* Keep report sections flowing without large blank gaps */
-      .card h2, .card h3, .card p { margin-top: 0 !important; margin-bottom: 6px !important; }
-      .table-wrap { margin: 4px 0 !important; }
-      .exclude-from-print { display: none !important; }
-
-      /* Custom fixes for the new cards */
-      #wwTimeline div { border-right: 1px solid #fff !important; } /* Keeps timeline blocks distinct */
     }
 
     .tooltip {
@@ -373,9 +254,20 @@
       z-index: 10;
     }
 
-    .tooltip:hover::after {
-      opacity: 1;
-      visibility: visible;
+    .tooltip:hover::after { opacity: 1; visibility: visible; }
+
+    .route-node-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      font-size: 14px;
+      line-height: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+      transform: translate(-8px, -8px);
+      pointer-events: none;
     }
 
     button {
@@ -399,12 +291,7 @@
       box-shadow: 0 10px 18px rgba(31, 94, 99, 0.28);
     }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(140px, 1fr));
-      gap: 10px;
-      margin-top: 8px;
-    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(140px, 1fr)); gap: 10px; margin-top: 8px; }
 
     .kpi {
       border: 1px solid var(--line);
@@ -423,11 +310,7 @@
       letter-spacing: 0.4px;
     }
 
-    .kpi-value {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--brand-2);
-    }
+    .kpi-value { font-size: 1.05rem; font-weight: 700; color: var(--brand-2); }
 
     .table-wrap {
       overflow-x: auto;
@@ -445,577 +328,304 @@
       margin-bottom: 10px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
-
-    .chart-panel canvas {
-      width: 100%;
-    }
-
+    .chart-panel canvas { width: 100%; }
     .chart-canvas-280 { max-height: 280px; }
     .chart-canvas-300 { max-height: 300px; }
     .chart-canvas-350 { max-height: 350px; }
     .chart-canvas-360 { max-height: 360px; }
     .chart-canvas-250 { max-height: 250px; }
 
-    .table-actions {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin: 8px 0;
+    .table-actions { display: flex; justify-content: flex-end; align-items: center; margin: 8px 0; }
+    .copy-table-btn, .vcr-toggle-btn, .queue-toggle-btn, .hourly-queue-toggle-btn, .hourly-vcr-toggle-btn {
+      box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+      height: 31px; padding: 6px 10px; border-radius: 4px; font-size: 0.82rem; line-height: 1.2;
     }
-
-    .copy-table-btn,
-    .vcr-toggle-btn,
-    .queue-toggle-btn,
-    .hourly-queue-toggle-btn,
-    .hourly-vcr-toggle-btn {
-      box-sizing: border-box;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 31px;
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 0.82rem;
-      line-height: 1.2;
-    }
-
     .copy-table-btn {
-      width: auto;
-      margin: 1px 0 0 0;
-      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
-      color: #fff;
-      border: 1px solid transparent;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: none;
+      width: auto; margin: 1px 0 0 0; background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+      color: #fff; border: 1px solid transparent; cursor: pointer; font-weight: 600; box-shadow: none;
     }
-
-    .copy-table-btn:hover {
-      filter: brightness(1.03);
-      transform: translateY(-1px);
-    }
+    .copy-table-btn:hover { filter: brightness(1.03); transform: translateY(-1px); }
 
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th, td { border:1px solid #dbe2ea; padding:8px; text-align:center; }
-    th {
-      background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
-      color:#fff;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      letter-spacing: 0.2px;
-    }
+    th { background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%); color:#fff; position: sticky; top: 0; z-index: 1; letter-spacing: 0.2px; }
     tbody tr:nth-child(even) td { background: #f8fbfb; }
     tbody tr:hover td { background: #eef6f6; }
-    .rowhead {
-      text-align:left;
-      font-weight:700;
-      background:#f4f3f0;
-      position: sticky;
-      left: 0;
-      z-index: 1;
-    }
+    .rowhead { text-align:left; font-weight:700; background:#f4f3f0; position: sticky; left: 0; z-index: 1; }
     .status-yes { background:#d1fae5; }
     .status-no { background:#fee2e2; }
     .hidden { display:none; }
+    .table-note { margin: 8px 0 0; color: var(--muted); font-size: 0.82rem; }
 
-    .table-note {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
-    .dir-heading {
-      margin: 12px 0 8px 0;
-      font-size: 1.05em;
-      font-weight: 700;
-      letter-spacing: 0.1px;
-    }
-
-    .dir-heading-spaced {
-      margin-top: 20px;
-    }
-
-    .dir-heading-negative {
-      color: #c30000;
-    }
-
-    .dir-heading-positive {
-      color: #2e7d32;
-    }
+    .dir-heading { margin: 12px 0 8px 0; font-size: 1.05em; font-weight: 700; letter-spacing: 0.1px; }
+    .dir-heading-spaced { margin-top: 20px; }
+    .dir-heading-negative { color: #c30000; }
+    .dir-heading-positive { color: #2e7d32; }
 
     .print-toggle-btn {
-      width: auto !important;
-      margin-top: 0 !important;
-      padding: 5px 10px !important;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      line-height: 1;
+      width: auto !important; margin-top: 0 !important; padding: 5px 10px !important;
+      border-radius: 999px; font-size: 0.78rem; font-weight: 700; line-height: 1;
       background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
       box-shadow: 0 3px 8px rgba(27, 94, 32, 0.24);
     }
-
     .print-toggle-btn.is-off {
       background: linear-gradient(135deg, #757575 0%, #424242 100%);
       box-shadow: 0 3px 8px rgba(66, 66, 66, 0.22);
     }
+    .section-print-toggle { position: static; z-index: 2; }
+    .section-print-toggle-row { display: flex; justify-content: flex-end; align-items: center; margin: -2px 0 8px 0; min-height: 26px; }
 
-    .section-print-toggle {
-      position: static;
-      z-index: 2;
-    }
+    .diag-card { border: 1px dashed #90a4ae; background: #f8fbfd; }
+    .diag-summary { margin: 0 0 8px 0; font-weight: 700; color: #1f5e63; }
+    .diag-pass { color: #1b5e20; font-weight: 700; }
+    .diag-fail { color: #b71c1c; font-weight: 700; }
+    .diag-btn { width: auto; margin-top: 0; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.22); background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); }
+    .diag-note { font-size: 0.8rem; color: #607d8b; margin: 6px 0 0 0; }
 
-    .section-print-toggle-row {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin: -2px 0 8px 0;
-      min-height: 26px;
-    }
+    .print-custom-card { border: 1px dashed #90a4ae; background: #f9fcfe; }
+    .print-custom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .print-custom-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px 0; }
+    .print-custom-actions button { width: auto; margin-top: 0; padding: 6px 10px; font-size: 0.78rem; border-radius: 999px; box-shadow: 0 3px 8px rgba(31, 94, 99, 0.22); background: linear-gradient(135deg, #1f5e63 0%, #0f2f32 100%); }
+    .print-custom-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+    .print-custom-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid #dde6ec; border-radius: 8px; padding: 6px 8px; background: #ffffff; }
+    .print-custom-name { font-size: 0.82rem; color: #29434e; line-height: 1.25; overflow-wrap: anywhere; }
+    .print-scope-badge { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; color: #455a64; background: #ecf3f7; border: 1px solid #d3e2ea; }
+    .print-mini-toggle { width: auto !important; margin-top: 0 !important; padding: 4px 8px !important; border-radius: 999px; font-size: 0.74rem; line-height: 1; background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); box-shadow: 0 2px 6px rgba(27, 94, 32, 0.24); white-space: nowrap; }
+    .print-mini-toggle.is-off { background: linear-gradient(135deg, #757575 0%, #424242 100%); box-shadow: 0 2px 6px rgba(66, 66, 66, 0.22); }
 
-    .diag-card {
-      border: 1px dashed #90a4ae;
-      background: #f8fbfd;
-    }
+    #macroMap { height: 320px; width: 100%; border: 2px solid #0056b3; border-radius: 8px; margin-top: 10px; }
 
-    .diag-summary {
-      margin: 0 0 8px 0;
-      font-weight: 700;
-      color: #1f5e63;
-    }
-
-    .diag-pass {
-      color: #1b5e20;
-      font-weight: 700;
-    }
-
-    .diag-fail {
-      color: #b71c1c;
-      font-weight: 700;
-    }
-
-    .diag-btn {
-      width: auto;
-      margin-top: 0;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      box-shadow: 0 4px 10px rgba(13, 71, 161, 0.22);
-      background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-    }
-
-    .diag-note {
-      font-size: 0.8rem;
-      color: #607d8b;
-      margin: 6px 0 0 0;
-    }
-
-    .print-custom-card {
-      border: 1px dashed #90a4ae;
-      background: #f9fcfe;
-    }
-
-    .print-custom-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .print-custom-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 0 0 10px 0;
-    }
-
-    .print-custom-actions button {
-      width: auto;
-      margin-top: 0;
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      border-radius: 999px;
-      box-shadow: 0 3px 8px rgba(31, 94, 99, 0.22);
-      background: linear-gradient(135deg, #1f5e63 0%, #0f2f32 100%);
-    }
-
-    .print-custom-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 260px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .print-custom-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #dde6ec;
-      border-radius: 8px;
-      padding: 6px 8px;
-      background: #ffffff;
-    }
-
-    .print-custom-name {
-      font-size: 0.82rem;
-      color: #29434e;
-      line-height: 1.25;
-      overflow-wrap: anywhere;
-    }
-
-    .print-scope-badge {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 1px 6px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #455a64;
-      background: #ecf3f7;
-      border: 1px solid #d3e2ea;
-    }
-
-    .print-mini-toggle {
-      width: auto !important;
-      margin-top: 0 !important;
-      padding: 4px 8px !important;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      line-height: 1;
-      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
-      box-shadow: 0 2px 6px rgba(27, 94, 32, 0.24);
-      white-space: nowrap;
-    }
-
-    .print-mini-toggle.is-off {
-      background: linear-gradient(135deg, #757575 0%, #424242 100%);
-      box-shadow: 0 2px 6px rgba(66, 66, 66, 0.22);
-    }
-
-    #macroMap {
-      height: 320px;
-      width: 100%;
-      border: 2px solid #0056b3;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 1180px) {
-      .grid, .kpi-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
-    }
-
+    @media (max-width: 1180px) { .grid, .kpi-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); } }
     @media (max-width: 760px) {
       body { padding: 12px; }
       .container { padding: 14px; }
-      .grid, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
-        .assumptions-grid { grid-template-columns: 1fr; }
+      .grid, .grid-2, .kpi-grid, .assumptions-grid { grid-template-columns: 1fr; }
       table { font-size: 12px; }
-    }
-
-    /* Print Styles */
-    @media print {
-      body { background: white; padding: 0; font-size: 10.5pt; line-height: 1.28; }
-      .container { box-shadow: none; border: none; }
-      .navbar, .home-button, button, .copy-table-btn, .copyright-footer { display: none !important; }
-      #selfDiagnosticsCard, #printCustomizationCard { display: none !important; }
-        .leaflet-control-container { display: none !important; }
-      .card {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-        margin: 6px 0 !important;
-      }
-        #macroMap { height: 200px !important; border: 1px solid #9aa4ab; margin-top: 8px; page-break-inside: avoid; }
-        #detourMap { min-height: 0 !important; height: 220px !important; page-break-inside: avoid; }
-      h1 { font-size: 18pt; color: #000; }
-      h2 { font-size: 13pt; page-break-after: avoid; }
-      h3 { font-size: 11pt; page-break-after: avoid; }
-      table { font-size: 8.6pt; }
-      th, td { padding: 6px 6px !important; line-height: 1.2 !important; }
-      th { background: #333 !important; color: white !important; }
-      .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
-      .print-header h2 { margin: 0; }
-      .print-header p { margin: 5px 0; font-size: 10pt; color: #666; }
-      .main-report-heading, .subtitle { display: none !important; }
-      details { display: block !important; }
-      details summary { display: none !important; }
-      details > * { display: block !important; }
-      .card h2, .card h3, .card p { margin-top: 0 !important; margin-bottom: 6px !important; }
-      .table-wrap { margin: 4px 0 !important; }
-      .exclude-from-print { display: none !important; }
+      .company-logo-prominent { width: min(220px, 62vw); top: 10px; opacity: 1; }
+      .company-logo-watermark-layer { background-size: 120px auto; opacity: 0.04; }
     }
 
     .print-header { display: none; }
-    
-    .print-btn {
-      background: #4caf50;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9em;
-      margin-left: 10px;
-      transition: background 0.2s;
-    }
-    
-    .print-btn:hover {
-      background: #45a049;
-    }
-
-    .report-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 14px;
-    }
-
-    .report-actions .print-btn {
-      margin-left: 0;
-    }
+    .print-btn { background: #4caf50; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; margin-left: 10px; transition: background 0.2s; }
+    .print-btn:hover { background: #45a049; }
+    .report-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+    .report-actions .print-btn { margin-left: 0; }
 
     @media (prefers-reduced-motion: reduce) {
-      .card,
-      .home-button,
-      button,
-      .copy-table-btn,
-      details.card > summary::after {
-        transition: none !important;
-      }
-      .card:hover,
-      .home-button:hover,
-      button:hover,
-      .copy-table-btn:hover {
-        transform: none !important;
-      }
+      .card, .home-button, button, .copy-table-btn, details.card > summary::after { transition: none !important; }
+      .card:hover, .home-button:hover, button:hover, .copy-table-btn:hover { transform: none !important; }
     }
 
-    .source-pill {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-size: 0.82em;
-      font-weight: 700;
-      border: 1px solid transparent;
-    }
+    .source-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.82em; font-weight: 700; border: 1px solid transparent; }
+    .source-tmr { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+    .source-gold-coast { background: #fff3e0; color: #ef6c00; border-color: #ffcc80; }
+    .source-ipswich { background: #f3e5f5; color: #7b1fa2; border-color: #ce93d8; }
+    .source-logan { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+    .source-custom-address { background: #ede7f6; color: #5e35b1; border-color: #b39ddb; }
+    
+    .quality-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.82em; font-weight: 700; border: 1px solid transparent; }
+    .quality-measured { background: #e8f5e9; color: #1b5e20; border-color: #81c784; }
+    .quality-derived { background: #fff8e1; color: #ef6c00; border-color: #ffcc80; }
+    .quality-estimated { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+    
+    .assumptions-grid { display: grid; grid-template-columns: repeat(3, minmax(200px, 1fr)); gap: 10px; }
+    .assumption-item { background: #f7fbfc; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+    .assumption-key { font-size: 0.74rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.35px; margin-bottom: 2px; }
+    .assumption-value { font-size: 0.9rem; color: var(--brand-2); font-weight: 700; }
 
-    .source-tmr {
-      background: #e3f2fd;
-      color: #1565c0;
-      border-color: #90caf9;
-    }
-
-    .source-gold-coast {
-      background: #fff3e0;
-      color: #ef6c00;
-      border-color: #ffcc80;
-    }
-
-    .source-ipswich {
-      background: #f3e5f5;
-      color: #7b1fa2;
-      border-color: #ce93d8;
-    }
-
-    .source-logan {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border-color: #a5d6a7;
-    }
-    .source-custom-address {
-      background: #ede7f6;
-      color: #5e35b1;
-      border-color: #b39ddb;
-    }
-      .quality-pill {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 999px;
-        font-size: 0.82em;
-        font-weight: 700;
-        border: 1px solid transparent;
-      }
-      .quality-measured { background: #e8f5e9; color: #1b5e20; border-color: #81c784; }
-      .quality-derived { background: #fff8e1; color: #ef6c00; border-color: #ffcc80; }
-      .quality-estimated { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
-      .assumptions-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(200px, 1fr));
-        gap: 10px;
-      }
-      .assumption-item {
-        background: #f7fbfc;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 8px 10px;
-      }
-      .assumption-key {
-        font-size: 0.74rem;
-        color: var(--muted);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.35px;
-        margin-bottom: 2px;
-      }
-      .assumption-value {
-        font-size: 0.9rem;
-        color: var(--brand-2);
-        font-weight: 700;
-      }
-
-    /* Detour List Hover Styles */
-    .detour-list-item {
-      padding: 10px 12px;
-      border: 1px solid #ce93d8;
-      border-radius: 6px;
-      background: #fff;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .detour-list-item:hover {
-      background: #f3e5f5;
-      border-color: #8e24aa;
-      transform: translateX(2px);
-    }
-    .detour-list-item.selected {
-      background: #e1bee7;
-      border-color: #8e24aa;
-      box-shadow: 0 2px 4px rgba(142, 36, 170, 0.2);
-    }
-    /* Custom Scrollbar for the list */
+    .detour-list-item { padding: 10px 12px; border: 1px solid #ce93d8; border-radius: 6px; background: #fff; cursor: pointer; transition: all 0.2s ease; }
+    .detour-list-item:hover { background: #f3e5f5; border-color: #8e24aa; transform: translateX(2px); }
+    .detour-list-item.selected { background: #e1bee7; border-color: #8e24aa; box-shadow: 0 2px 4px rgba(142, 36, 170, 0.2); }
     #detourListContainer::-webkit-scrollbar { width: 6px; }
     #detourListContainer::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     #detourListContainer::-webkit-scrollbar-thumb { background: #ce93d8; border-radius: 4px; }
     #detourListContainer::-webkit-scrollbar-thumb:hover { background: #ab47bc; }
 
-    .company-logo-prominent {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 12px;
-      width: min(340px, 40vw);
-      max-height: 110px;
-      object-fit: contain;
-      opacity: 1;
-      z-index: 180;
-      pointer-events: none;
-      user-select: none;
-      filter: saturate(1) contrast(1.12);
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      padding: 0;
-      box-shadow: none;
-      mix-blend-mode: multiply;
-    }
+    .company-logo-prominent { position: absolute; left: 50%; transform: translateX(-50%); top: 12px; width: min(340px, 40vw); max-height: 110px; object-fit: contain; opacity: 1; z-index: 180; pointer-events: none; user-select: none; filter: saturate(1) contrast(1.12); background: transparent; border: none; border-radius: 0; padding: 0; box-shadow: none; mix-blend-mode: multiply; }
+    .company-logo-prominent-dark { display: none; }
+    @media (prefers-color-scheme: dark) { .company-logo-prominent-light { display: block; } .company-logo-prominent-dark { display: none; } }
 
-    .company-logo-prominent-dark {
-      display: none;
-    }
+    .company-logo-watermark-layer { position: fixed; inset: 0; z-index: 120; pointer-events: none; user-select: none; background-image: var(--watermark-logo); background-repeat: repeat; background-size: 180px auto; background-position: 40px 60px; opacity: 0.05; }
 
-    @media (prefers-color-scheme: dark) {
-      .company-logo-prominent-light {
-        display: none;
-      }
-      .company-logo-prominent-dark {
-        display: block;
-      }
-    }
+    body.app-locked { overflow: hidden; }
+    body.app-locked .container { filter: blur(2px); pointer-events: none; user-select: none; }
+    #loginGate { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(7, 20, 22, 0.5); backdrop-filter: blur(4px); }
+    .login-card { width: min(420px, 94vw); background: #ffffff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16); padding: 22px; }
+    .login-logo { width: min(230px, 62vw); display: block; margin: 0 auto 14px; object-fit: contain; }
+    .login-title { margin: 0 0 6px; text-align: center; color: var(--brand-2); font-size: 1.2rem; font-weight: 700; }
+    .login-note { margin: 0 0 14px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+    .login-error { margin-top: 10px; font-size: 0.88rem; color: #b00020; min-height: 1.2em; }
 
-    .company-logo-watermark-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 120;
-      pointer-events: none;
-      user-select: none;
-      background-image: var(--watermark-logo);
-      background-repeat: repeat;
-      background-size: 180px auto;
-      background-position: 40px 60px;
-      opacity: 0.05;
-    }
-
+    /* =========================================================================================
+       ???  PROFESSIONAL PRINT REPORT STYLES (PRINT ONLY) - ALL UI ELEMENTS HIDDEN HERE
+       ========================================================================================= */
     @media print {
-      .company-logo-prominent,
-      .company-logo-watermark-layer { display: none !important; }
-    }
-
-    @media (max-width: 760px) {
-      .company-logo-prominent {
-        width: min(220px, 62vw);
-        top: 10px;
-        opacity: 1;
+      /* 1. Global Reset & Color Optimization */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        transition: none !important;
       }
-      .company-logo-watermark-layer {
-        background-size: 120px auto;
-        opacity: 0.04;
+      body { 
+        background: white !important; 
+        padding: 0 !important; 
+        color: #000 !important;
+        font-size: 10.5pt !important;
+        line-height: 1.3 !important;
       }
-    }
+      .container { 
+        box-shadow: none !important; 
+        border: none !important; 
+        padding: 0 !important;
+        max-width: 100% !important;
+        background: white !important;
+      }
 
-    body.app-locked {
-      overflow: hidden;
-    }
+      /* 2. Hide ALL App UI, Controls, and Interactive Elements */
+      .navbar, button, .copy-table-btn, .print-btn, .logout-button,
+      input[type="range"], .leaflet-control-container,
+      .section-print-toggle-row, .print-toggle-btn, .table-actions,
+      #loginGate, .company-logo-watermark-layer, .company-logo-prominent, 
+      .tooltip::after, .copyright-footer,
+      #macroSiteSearchPanel, #macroLocationHelp, #macroMapStatusWrap,
+      a[href^="javascript:"], #pedMeasureGoogleLink, #pedMeasureMetroLink, /* Hides Map Measure Links */
+      .exclude-from-print { 
+        display: none !important; 
+      }
 
-    body.app-locked .container {
-      filter: blur(2px);
-      pointer-events: none;
-      user-select: none;
-    }
+      /* Hide the sticky calc button container */
+      #calcBtn, #calcStickyContainer { display: none !important; }
 
-    #loginGate {
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(7, 20, 22, 0.5);
-      backdrop-filter: blur(4px);
-    }
+      /* Hide instructional paragraphs (keep table notes) */
+      .card > p:not(.table-note) { display: none !important; }
 
-    .login-card {
-      width: min(420px, 94vw);
-      background: #ffffff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
-      padding: 22px;
-    }
+      /* Hide UI-specific search components inside Optional Features */
+      #detourNearbyRoadsList, #pedNearbyRoadsList, 
+      #detourListContainer, select#detourSiteSelect,
+      input#pedMetroDebugUrl, label[for="pedMetroDebugUrl"] { display: none !important; }
 
-    .login-logo {
-      width: min(230px, 62vw);
-      display: block;
-      margin: 0 auto 14px;
-      object-fit: contain;
-    }
+      /* Hide the radius sliders and scan buttons completely */
+      #quickTiaNearbyRoadsRadius,
+      #quickTiaNearbyRoadsRadiusInput,
+      #detourNearbyRoadRadius,
+      #detourNearbyRoadRadiusInput,
+      #pedNearbyRoadRadius,
+      #pedNearbyRoadRadiusInput,
+      #detourNearbyRoadScanBtn,
+      #pedNearbyRoadScanBtn {
+        display: none !important;
+      }
 
-    .login-title {
-      margin: 0 0 6px;
-      text-align: center;
-      color: var(--brand-2);
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
+      /* 3. Reformat Details/Summary into standard headings */
+      details { display: block !important; }
+      details.card > summary { 
+        display: block !important; 
+        border: none !important; 
+        background: none !important; 
+        padding: 0 0 5px 0 !important; 
+        font-size: 14pt !important; 
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important; 
+        border-radius: 0 !important; 
+        margin-bottom: 12px !important;
+        pointer-events: none !important;
+      }
+      details.card > summary::after { display: none !important; }
+      details > * { display: block !important; }
 
-    .login-note {
-      margin: 0 0 14px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
+      /* 4. Flatten Inputs & Selects to look like plain text */
+      input, select {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #000 !important;
+        font-weight: bold !important;
+        font-size: 10.5pt !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        width: auto !important;
+      }
+      select { background-image: none !important; }
+      
+      /* 5. Clean up Cards and Grids (Convert chunky boxes to clean lists) */
+      .card { 
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 0 24px 0 !important;
+        page-break-inside: auto !important;
+      }
+      fieldset { border: none !important; padding: 0 !important; margin: 0 0 15px 0 !important; background: transparent !important; }
+      legend { display: none !important; } /* Hides "You Must Fill These" */
 
-    .login-error {
-      margin-top: 10px;
-      font-size: 0.88rem;
-      color: #b00020;
-      min-height: 1.2em;
-    }
+      .grid, .grid-2 { 
+        display: grid !important; 
+        gap: 4px 15px !important; 
+        border: 1px solid #ccc !important;
+        padding: 10px !important;
+        border-radius: 4px !important;
+        background: #fafafa !important;
+        page-break-inside: auto !important;
+      }
+      .grid > div, .grid-2 > div {
+        background: transparent !important;
+        border: none !important;
+        padding: 4px 0 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+      }
+      .grid > div:last-child, .grid-2 > div:last-child { border-bottom: none !important; }
+      
+      /* Reset label styles inside print grids */
+      .grid label, .grid-2 label { 
+        color: #333 !important; 
+        font-size: 10pt !important; 
+        font-weight: normal !important; 
+        margin: 0 !important; 
+      }
 
-    @media print {
-      #loginGate { display: none !important; }
+      /* 6. Typography Formatting */
+      h1 { font-size: 18pt !important; color: #000 !important; text-align: center !important; margin-top: 0 !important; }
+      h2 { font-size: 13pt !important; color: #000 !important; border-bottom: 2px solid #000 !important; padding-bottom: 4px !important; page-break-after: avoid !important; }
+      h3 { font-size: 11pt !important; color: #333 !important; page-break-after: avoid !important; margin-top: 15px !important; }
+      
+      /* 7. Tables */
+      table { font-size: 9pt !important; width: 100% !important; border-collapse: collapse !important; }
+      th, td { padding: 6px !important; line-height: 1.2 !important; border: 1px solid #aaa !important; }
+      th { background: #eee !important; color: #000 !important; border: 1px solid #aaa !important; }
+      
+      /* 8. Fix Map & Chart Page Breaks */
+      #macroMap { height: 320px !important; border: 1px solid #000 !important; margin-top: 8px !important; page-break-inside: avoid !important; }
+      #detourMap { min-height: 0 !important; height: 300px !important; border: 1px solid #000 !important; page-break-inside: avoid !important; }
+      .chart-panel, .table-wrap, canvas, #vizCanvasContainer { page-break-inside: avoid !important; }
+
+      /* 9. Header Visibility */
+      .print-header { 
+        display: block !important; 
+        text-align: center !important; 
+        margin-bottom: 30px !important; 
+        border-bottom: 3px double #000 !important;
+        padding-bottom: 15px !important;
+      }
+      .print-header .report-logo { display: block !important; margin: 0 auto 10px auto !important; max-width: 220px !important; height: auto !important; }
+      .print-header h2 { border: none !important; font-size: 20pt !important; margin: 0 0 5px 0 !important; }
+      .print-header p { margin: 3px 0 !important; font-size: 10pt !important; color: #444 !important; }
+      .main-report-heading, .subtitle { display: none !important; }
+
+      /* 10. Specific Module Cleanups */
+      #detourCard > div[style*="flex"] > div:first-child { display: none !important; }
+      #detourCard > div[style*="flex"] { display: block !important; } 
+      #detourResults { display: block !important; border-top: none !important; margin-top: 15px !important; }
+      
+      #pedestrianCard .grid { display: grid !important; } 
+      #austroadsVizCard .grid { display: none !important; } 
+      #stopGoCard .grid { display: grid !important; } 
     }
   </style>
 </head>
@@ -1042,7 +652,8 @@
     <img class="company-logo-prominent company-logo-prominent-light" src="./logo.jpeg" alt="Crompton logo" />
     <img class="company-logo-prominent company-logo-prominent-dark" src="https://cromptonconcepts.sharepoint.com/:i:/g/IQCIAS3nE53LTZq0oRs0BxUrAbh8svEyp-63IEc5o5sg_L8?e=CVlWTb" onerror="this.onerror=null;this.src='./logo.jpeg';" alt="Crompton logo" />
     <div class="print-header">
-      <h2>Traffic Impact Assessment Report</h2>
+      <img class="report-logo" src="./logo.jpeg" alt="Crompton logo" />
+      <h2 id="printReportTitle">Traffic Impact Assessment Report</h2>
       <p>Generated: <span id="printDate"></span></p>
       <p>Crompton Traffic Analysis System</p>
     </div>
@@ -1084,6 +695,19 @@
           <strong style="color: #1565c0;">Road/Location:</strong> <span id="quickTiaMatchRoad">-</span>
         </div>
 
+        <div id="quickTiaNearbyRoads" style="display: none; background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+          <h4 style="margin: 0 0 8px 0; color: #6a1b9a;">🛣️ All Nearby Roads</h4>
+          <p style="font-size: 0.8em; color: #8e24aa; margin: 0 0 8px 0;">Streets within <span id="quickTiaNearbyRoadsRadiusValue">0.2</span> km of the searched address:</p>
+          <div style="display: flex; align-items: center; gap: 8px; margin: 0 0 10px 0;">
+            <span style="font-size: 0.78em; color: #6a1b9a; min-width: 34px;">0.2 km</span>
+            <input type="range" id="quickTiaNearbyRoadsRadius" min="200" max="3000" step="100" value="200" style="flex: 1; margin: 0;" />
+            <input type="number" id="quickTiaNearbyRoadsRadiusInput" min="200" max="3000" step="100" value="200" style="width: 84px; margin: 0; border: 1px solid #ce93d8; border-radius: 4px; padding: 4px 6px; font-size: 0.78em; color: #6a1b9a; background: #fff;" title="Nearby road radius (meters)" />
+            <span style="font-size: 0.78em; color: #6a1b9a; min-width: 34px; text-align: right;">3.0 km</span>
+          </div>
+          <div id="quickTiaNearbyRoadsList" style="font-size: 0.85em; color: #4a148c; display: flex; flex-wrap: wrap; gap: 6px;">
+          </div>
+        </div>
+
         <!-- For Exact Match -->
         <div id="quickTiaExactMatch" style="display: none;">
           <div style="background: #e8f5e9; border: 1px solid #4caf50; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
@@ -1118,7 +742,7 @@
             </div>
           </div>
 
-          <button onclick="useCalculatedTIAData()" style="background: #1976d2; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+          <button id="quickTiaUseCalculatedBtn" onclick="useCalculatedTIAData()" style="background: #1976d2; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s ease, box-shadow 0.2s ease;">
             ✓ Use Calculated Data
           </button>
         </div>
@@ -1132,8 +756,8 @@
 
     <!-- Site Selection Card -->
     <div class="card">
-      <h2>1. Select Site from Map or Manual Entry (Site ID)</h2>
-      <div class="grid-2" style="margin-bottom: 12px; grid-template-columns: 1fr;">
+      <h2 id="siteSelectionHeading">1. Select Site from Map or Manual Entry (Site ID)</h2>
+      <div id="macroSiteSearchPanel" class="grid-2" style="margin-bottom: 12px; grid-template-columns: 1fr;">
         <div style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 10px;">
           <label style="color: #2e7d32;">Search & Select from Database</label>
           <div style="margin-bottom: 8px;">
@@ -1174,9 +798,9 @@
 
       <div style="margin-top: 10px;">
         <h3 style="margin: 0 0 6px 0; color: #1f5e63; font-size: 1rem;">Site Location </h3>
-        <p style="font-size: 0.85em; color:#555; margin: 0 0 8px 0;">Select a site from search or click a marker to auto-fill inputs.</p>
+        <p id="macroLocationHelp" style="font-size: 0.85em; color:#555; margin: 0 0 8px 0;">Select a site from search or click a marker to auto-fill inputs.</p>
         <div id="macroMap"></div>
-        <div style="background:#e3f2fd; border:1px solid #64b5f6; border-radius:6px; padding:8px; margin-top:8px;">
+        <div id="macroMapStatusWrap" style="background:#e3f2fd; border:1px solid #64b5f6; border-radius:6px; padding:8px; margin-top:8px;">
           <p style="margin:0; font-size:0.85em; color:#1565c0;">
             <strong>Map Status:</strong> <span id="macroMapInfo">Waiting for site data...</span>
           </p>
@@ -1320,7 +944,7 @@
         </div>
       </fieldset>
 
-      <div style="position: sticky; bottom: 20px; z-index: 100; margin-top: 20px;">
+      <div id="calcStickyContainer" style="position: sticky; bottom: 20px; z-index: 100; margin-top: 20px;">
         <button id="calcBtn" style="padding: 16px; font-size: 1.1em; font-weight: bold; background: var(--brand); color: white; border: none; border-radius: 12px; cursor: pointer; width: 100%; box-shadow: 0 8px 20px rgba(31, 94, 99, 0.3); transition: transform 0.1s, box-shadow 0.1s;">
           🚀 Calculate All Metrics
         </button>
@@ -1617,13 +1241,43 @@
       </div>
     </div>
 
+    <div class="card" id="austroadsVizCard" style="border: 2px solid #3f51b5; background: #e8eaf6;">
+      <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #1a237e;">
+        🗺️ AustRoads Management Visualization
+        <button type="button" class="print-toggle-btn" data-target-card="austroadsVizCard" aria-pressed="true">Include in Print: Yes</button>
+      </h2>
+      <p style="font-size: 0.85em; color: #555; margin: 4px 0 12px 0;">
+        Select a generic temporary management template to visualize the work zone layout and estimated queue impact based on your calculated traffic volumes.
+      </p>
+
+      <div class="grid" style="margin-bottom: 15px;">
+        <div style="background: #ffffff; border: 1px solid #9fa8da; border-radius: 6px; padding: 10px;">
+          <label style="color: #1a237e;">Management Template</label>
+          <select id="vizTemplate" onchange="updateManagementViz()" style="border: 1px solid #9fa8da;">
+            <option value="none">-- Select Template --</option>
+            <option value="slc">Single Lane Closure (Multi-lane Road)</option>
+            <option value="slrf">Stop/Go Shuttle (Single Lane Road)</option>
+            <option value="sidetrack">Side-track / Deviation</option>
+          </select>
+        </div>
+        <div id="vizQueueInfo" style="background: #ffffff; border-left: 5px solid #3f51b5; padding: 10px; border-radius: 6px; display: none;">
+          <div style="font-size: 0.75em; color: #666; font-weight: bold; text-transform: uppercase;">Estimated Queue Overlay</div>
+          <div id="vizQueueValue" style="font-size: 1.2em; font-weight: bold; color: #1a237e;">-</div>
+        </div>
+      </div>
+
+      <div id="vizCanvasContainer" style="position: relative; width: 100%; height: 350px; background: #cfd8dc; border-radius: 8px; overflow: hidden; display: none; border: 2px solid #90a4ae;">
+        <canvas id="managementVizCanvas" width="1200" height="350" style="width: 100%; height: 100%;"></canvas>
+      </div>
+    </div>
+
     <div class="card" id="detourCard" style="border: 2px solid #8e24aa;">
       <h2 style="display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-bottom: 0; color: #6a1b9a;">
         🔄 Detailed Detour Route Capacity
         <button type="button" class="print-toggle-btn" data-target-card="detourCard" aria-pressed="true">Include in Print: Yes</button>
       </h2>
       <p style="font-size: 0.85em; color: #666; margin: 4px 0 12px 0;">
-        Merges the 24-hour hourly profile of the primary site with the detour site to identify specific peak-period failures.
+        Merges the 24-hour hourly profile of the primary site with selected detour roads to identify specific peak-period failures.
       </p>
       
       <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
@@ -1632,10 +1286,64 @@
           <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px;">
             <label style="color: #6a1b9a; font-weight: bold;">Diversion Rate (%)</label>
             <input type="number" id="detourDiversionRate" value="80" step="5" min="0" max="100" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #faf0e6; width: 100%;" />
+            <div style="font-size: 0.76em; color: #8e24aa; margin-top: 4px;">Auto-set by closure mode (full road or one-way closure).</div>
+          </div>
+
+          <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px;">
+            <label style="color: #6a1b9a; font-weight: bold;">Closure Type</label>
+            <select id="detourClosureType" onchange="updateDetourClosureUi(); calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #faf0e6; width: 100%;">
+              <option value="full">Full Road Detour (Both Directions Closed)</option>
+              <option value="oneway" selected>One Way Detour (Single Direction Closed)</option>
+            </select>
+            <div id="detourClosedDirectionWrap" style="margin-top: 8px; display: none;">
+              <label style="color: #6a1b9a; font-weight: bold;">Closed Direction</label>
+              <select id="detourClosedDirection" onchange="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #faf0e6; width: 100%;">
+                <option value="D1">Direction 1 (D1)</option>
+                <option value="D2">Direction 2 (D2)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 15px; background: #f0f4f8; border: 1px solid #b0bec5; padding: 10px; border-radius: 8px;">
+            <div>
+              <label style="color: #37474f;">📍 Measurement Mode</label>
+              <select id="routeMeasureMode" style="border: 1px solid #90a4ae;">
+                <option value="manual_entry">⌨️ Manual Entry</option>
+                <option value="drop_points">📌 Drop Points</option>
+                <option value="autocalculate" selected>🚗 Auto Calculate</option>
+              </select>
+              <div id="routeMeasureModeHelp" style="font-size: 0.76em; color: #546e7a; margin-top: 4px;">Click two or more points on the map to auto-calculate route length.</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+              <label style="color: #37474f;">📏 Total Distance</label>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <span id="routeDistanceDisplay" style="font-size: 1.4em; font-weight: bold; color: #1565c0;">0 m</span>
+                <button type="button" onclick="clearRouteMeasurement()" style="width: auto; margin: 0; padding: 6px 12px; background: #e53935; font-size: 0.8em;">Clear Map</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px;">
+            <label style="color: #6a1b9a; font-weight: bold; margin-bottom: 8px;">Nearby Street Name Finder</label>
+            <p style="font-size: 0.8em; color: #8e24aa; margin: 0 0 8px 0;">Select one or more streets to define the traffic detour path.</p>
+            <div style="display: flex; align-items: center; gap: 8px; margin: 0 0 8px 0;">
+              <span style="font-size: 0.78em; color: #6a1b9a; min-width: 32px;">0.2</span>
+              <input type="range" id="detourNearbyRoadRadius" min="200" max="3000" step="100" value="200" style="flex: 1; margin: 0;" />
+              <input type="number" id="detourNearbyRoadRadiusInput" min="200" max="3000" step="100" value="200" style="width: 84px; margin: 0; border: 1px solid #ce93d8; border-radius: 4px; padding: 4px 6px; font-size: 0.78em; color: #6a1b9a; background: #fff;" title="Detour nearby road radius (meters)" />
+              <span id="detourNearbyRoadRadiusValue" style="font-size: 0.78em; color: #6a1b9a; min-width: 54px; text-align: right;">0.2 km</span>
+              <button type="button" id="detourNearbyRoadScanBtn" onclick="scanDetourNearbyRoads()" style="width: auto; margin-top: 0; padding: 6px 10px; font-size: 0.85em; background: #8e24aa; box-shadow: none;">Scan</button>
+            </div>
+            <div id="detourSelectedRoadsSummary" style="font-size: 0.8em; color: #6a1b9a; margin: 0 0 8px 0;">Selected path: -</div>
+            <div id="detourNearbyRoadsList" style="font-size: 0.85em; color: #4a148c; display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto;">
+              <span style="color: #8e24aa;">Select a primary site/search, then scan.</span>
+            </div>
           </div>
           
           <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px; flex-grow: 1; display: flex; flex-direction: column; height: 320px;">
-            <label style="color: #6a1b9a; font-weight: bold; margin-bottom: 8px;">Select Detour Route (Auto-Scanned)</label>
+            <label style="color: #6a1b9a; font-weight: bold; margin-bottom: 4px;">Select Detour Route Segments (Auto-Scanned)</label>
+            <p style="font-size: 0.78em; color: #8e24aa; margin: 0 0 8px 0;">Click multiple roads/counters to build a detour path.</p>
+            <div id="detourSegmentsSelectedSummary" style="font-size: 0.8em; color: #6a1b9a; margin: 0 0 8px 0;">Selected segments: -</div>
             <div id="detourListContainer" style="overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
               <div style="padding: 10px; text-align: center; color: #666; font-style: italic;">-- Select a Primary Site First --</div>
             </div>
@@ -1650,6 +1358,46 @@
 
       <div id="detourResults" style="display: none; margin-top: 15px; border-top: 2px dashed #ce93d8; padding-top: 15px;">
         <h4 style="margin: 0 0 10px 0; color: #333; text-align: center;" id="detourRouteName">-</h4>
+        <div id="detourSelectedPathDisplay" style="font-size: 0.85em; color: #6a1b9a; text-align: center; margin: 0 0 10px 0;">Selected path: -</div>
+
+        <div id="detourManualVpdPanel" style="display: none; background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+          <label style="color: #6a1b9a; font-weight: bold;">Manual Inputs for Selected Roads (when no nearby counter is found)</label>
+          <div style="font-size: 0.76em; color: #8e24aa; margin-top: 4px;">Base VPD is auto-estimated from counters within 5 km using existing custom-address logic. Future VPD = Base VPD + diverted VPD share.</div>
+          <div id="detourManualVpdRows" style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <div id="detourRoadVpdSummary" style="display: none; background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px; margin-bottom: 10px;"></div>
+
+        <div style="background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+          <label style="color: #6a1b9a; font-weight: bold;">Estimated Detour Delay Inputs</label>
+          <div class="grid-2" style="margin-top: 8px; gap: 8px;">
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;">Detour Length (km)</label>
+              <input type="number" id="detourRouteLengthKm" value="0.4" step="0.1" min="0" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;">Average Speed (km/h)</label>
+              <input type="number" id="detourAvgSpeedKmh" value="55" step="1" min="1" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;"># Controlled Intersections</label>
+              <input type="number" id="detourControlledIntCount" value="0" step="1" min="0" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;"># Uncontrolled Intersections</label>
+              <input type="number" id="detourUncontrolledIntCount" value="4" step="1" min="0" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;">Delay @ Controlled (s)</label>
+              <input type="number" id="detourControlledDelaySec" value="60" step="5" min="0" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+            <div style="background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">
+              <label style="color: #6a1b9a; font-size: 0.78em;">Delay @ Uncontrolled (s)</label>
+              <input type="number" id="detourUncontrolledDelaySec" value="10" step="5" min="0" oninput="calculateDetourOverlay()" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+            </div>
+          </div>
+          <div id="detourDelayEstimate" style="font-size: 0.82em; color: #4a148c; margin-top: 8px; background: #fff; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px;">Estimated delay per diverted vehicle: -</div>
+        </div>
         
         <div class="table-wrap">
           <table style="width: 100%;">
@@ -1676,7 +1424,19 @@
       <div style="background: #ffffff; border: 1px solid #80cbc4; border-radius: 6px; padding: 10px; margin: 10px 0 12px 0;">
         <label for="pedDetourRouteName" style="color: #00695c;">New Detour Route Name</label>
         <input type="text" id="pedDetourRouteName" placeholder="Enter new detour route name" style="border: 1px solid #80cbc4;" />
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+          <span style="font-size: 0.78em; color: #00695c; min-width: 32px;">0.2</span>
+          <input type="range" id="pedNearbyRoadRadius" min="200" max="3000" step="100" value="200" style="flex: 1; margin: 0;" />
+          <input type="number" id="pedNearbyRoadRadiusInput" min="200" max="3000" step="100" value="200" style="width: 84px; margin: 0; border: 1px solid #80cbc4; border-radius: 4px; padding: 4px 6px; font-size: 0.78em; color: #00695c; background: #fff;" title="Pedestrian nearby road radius (meters)" />
+          <span id="pedNearbyRoadRadiusValue" style="font-size: 0.78em; color: #00695c; min-width: 54px; text-align: right;">0.2 km</span>
+          <button type="button" id="pedNearbyRoadScanBtn" onclick="scanPedNearbyRoads()" style="width: auto; margin-top: 0; padding: 6px 10px; font-size: 0.85em; background: #00897b; box-shadow: none;">Scan</button>
+        </div>
+        <div id="pedSelectedRoadsSummary" style="font-size: 0.8em; color: #00695c; margin-top: 8px;">Selected path: -</div>
+        <div id="pedNearbyRoadsList" style="font-size: 0.82em; color: #00695c; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; max-height: 120px; overflow-y: auto;">
+          <span style="color: #4db6ac;">Scan map to choose pedestrian detour streets.</span>
+        </div>
       </div>
+      <h4 id="pedDetourDelayTitle" style="margin: 0 0 10px 0; color: #00695c; text-align: center;">Estimated Delay - Detour route (-)</h4>
       <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px 0;">
         <a id="pedMeasureGoogleLink" href="javascript:void(0)" target="_blank" rel="noopener noreferrer" style="background: #1a73e8; color: #fff; text-decoration: none; border-radius: 6px; padding: 8px 12px; font-size: 0.88em; font-weight: 700;">📏 Measure Distance (Google Maps)</a>
         <a id="pedMeasureMetroLink" href="javascript:void(0)" target="_blank" rel="noopener noreferrer" style="background: #6a1b9a; color: #fff; text-decoration: none; border-radius: 6px; padding: 8px 12px; font-size: 0.88em; font-weight: 700;">📏 Measure Distance (MetroMaps)</a>
@@ -1784,6 +1544,15 @@
       </p>
 
       <h3 style="margin: 10px 0 8px 0; color: #1f5e63; font-size: 1.0em;">1. QUEUE LENGTH (Hourly Basis)</h3>
+      <div style="display: flex; align-items: center; gap: 8px; margin: 0 0 8px 0; max-width: 360px;">
+        <label for="hourlyQueueDurationSelect" style="margin: 0; color: #1f5e63; font-weight: 700; white-space: nowrap;">Queue Wait Time</label>
+        <select id="hourlyQueueDurationSelect" style="border: 1px solid #90a4ae; background: #f8fbff;">
+          <option value="q2" selected>2 minutes (Default)</option>
+          <option value="q5">5 minutes</option>
+          <option value="q10">10 minutes</option>
+          <option value="q15">15 minutes</option>
+        </select>
+      </div>
       <div id="hourlyQueueTableView">
         <div class="table-wrap">
           <table id="hourlyQueueTable">
@@ -1791,9 +1560,9 @@
               <tr>
                 <th>Hour</th>
                 <th>Hour Type</th>
-                <th>D1 Max Queue (m)</th>
-                <th>D2 Max Queue (m)</th>
-                <th>Network Max Queue (m)</th>
+                <th id="hourlyQueueD1Header">D1 Queue (2 min wait) (m)</th>
+                <th id="hourlyQueueD2Header">D2 Queue (2 min wait) (m)</th>
+                <th id="hourlyQueueNetworkHeader">Network Queue (2 min wait) (m)</th>
               </tr>
             </thead>
             <tbody id="hourlyQueueBody"></tbody>
@@ -1916,7 +1685,7 @@
     </div>
   </div>
 
-  <div class="copyright-footer" style="text-align: center; color: #7a7a7a; font-size: 0.85em; padding: 14px 0 18px 0;">Copyright@SANJU BHANDARI 2026</div>
+  <div class="copyright-footer" style="text-align: center; color: #7a7a7a; font-size: 0.85em; padding: 14px 0 18px 0;">Copyright@SANJU BHANDARI, CROMPTON CONCEPTS 2026</div>
 </div>
 </div>
 </div>
@@ -1993,6 +1762,7 @@
   // store the most recent period profiles so auxiliary calculators can access them
   let lastD1Profile = null;
   let lastD2Profile = null;
+  let lastWorkWindowHourlyProfiles = null;
   let macroMapInstance = null;
   let macroSiteLayer = null;
   let macroSearchMarkerLayer = null;
@@ -2002,8 +1772,50 @@
   let detourMapInstance = null;
   let detourMapLayer = null;
   let detourRoadPreviewLayer = null;
+  let routePoints = [];
+  let routeMarkers = [];
+  let activeRouteLayer = null;
   let macroSourceFilter = 'ALL';
   const macroMarkersById = {};
+
+  /**
+   * Queries OpenStreetMap for all road names within a specific radius of lat/lon
+   */
+  async function getAllRoadsFromMap(lat, lon, radiusMeters = 200) {
+    // Overpass QL query: find all ways with a 'highway' and 'name' tag within the radius
+    const query = `
+      [out:json][timeout:15];
+      way(around:${radiusMeters},${lat},${lon})[highway][name];
+      out tags;
+    `;
+
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Overpass API error: ${response.status}`);
+
+      const data = await response.json();
+      const uniqueRoads = new Set();
+
+      // Extract unique road names from the OSM tags
+      if (data && data.elements) {
+        data.elements.forEach(el => {
+          if (el.tags && el.tags.name) {
+            // Standardize casing (e.g., "brisbane road" -> "Brisbane Road")
+            uniqueRoads.add(el.tags.name.trim());
+          }
+        });
+      }
+
+      // Return sorted array
+      return Array.from(uniqueRoads).sort();
+
+    } catch (error) {
+      console.error("Failed to fetch nearby map roads:", error);
+      return []; // Return empty array on failure so it doesn't break the app
+    }
+  }
 
   function updatePedestrianMapLinks(lat, lon) {
     const googleLink = document.getElementById('pedMeasureGoogleLink');
@@ -3200,6 +3012,55 @@
   }
 
   // ===== PRINT FUNCTIONALITY =====
+  function formatAddressForReport(rawAddress) {
+    let address = String(rawAddress || '').replace(/\s+/g, ' ').trim();
+    if (!address || address === '-') return '';
+
+    address = address.replace(/^\s*address\s*[:\-]\s*/i, '').trim();
+
+    const hasAustralia = /\baustralia\b/i.test(address);
+    const hasAuStateOrPostcode = /\b(NSW|QLD|VIC|TAS|SA|WA|NT|ACT)\b/i.test(address) || /\b\d{4}\b/.test(address);
+    if (!hasAustralia && hasAuStateOrPostcode) {
+      address = `${address}, Australia`;
+    }
+
+    return address.toUpperCase();
+  }
+
+  function getReportAddressForPrint() {
+    const resolvedAddress = String(window.lastQuickTiaResolvedAddress || '').trim();
+    if (resolvedAddress) {
+      const formattedResolved = formatAddressForReport(resolvedAddress);
+      if (formattedResolved) return formattedResolved;
+    }
+
+    const quickAddress = String((document.getElementById('quickTiaSearchAddress') && document.getElementById('quickTiaSearchAddress').textContent) || '').trim();
+    if (quickAddress && quickAddress !== '-') {
+      const formattedQuick = formatAddressForReport(quickAddress);
+      if (formattedQuick) return formattedQuick;
+    }
+
+    const quickInput = String((document.getElementById('quickTiaInput') && document.getElementById('quickTiaInput').value) || '').trim();
+    if (quickInput) {
+      const formattedInput = formatAddressForReport(quickInput);
+      if (formattedInput) return formattedInput;
+    }
+
+    const detailRoad = String((document.getElementById('macroDetailRoadName') && document.getElementById('macroDetailRoadName').textContent) || '').trim();
+    if (detailRoad && detailRoad !== '-') {
+      const formattedRoad = formatAddressForReport(detailRoad);
+      if (formattedRoad) return formattedRoad;
+    }
+
+    const macroSearch = String((document.getElementById('macroSiteSearch') && document.getElementById('macroSiteSearch').value) || '').trim();
+    if (macroSearch) {
+      const formattedSearch = formatAddressForReport(macroSearch);
+      if (formattedSearch) return formattedSearch;
+    }
+
+    return 'Traffic Impact Assessment Report';
+  }
+
   function printReport() {
     document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-AU', {
       year: 'numeric',
@@ -3208,6 +3069,8 @@
       hour: '2-digit',
       minute: '2-digit'
     });
+    const printTitleEl = document.getElementById('printReportTitle');
+    if (printTitleEl) printTitleEl.textContent = getReportAddressForPrint();
     if (macroMapInstance) {
       if (selectedMacroSite && macroSitesData[selectedMacroSite]) {
         const site = macroSitesData[selectedMacroSite];
@@ -3404,6 +3267,7 @@
       addBaseLayerToMap(detourMapInstance);
       detourMapLayer = L.layerGroup().addTo(detourMapInstance);
       detourRoadPreviewLayer = L.layerGroup().addTo(detourMapInstance);
+      setupRouteMeasurement(detourMapInstance);
     }
     // --------------------------------
 
@@ -4167,11 +4031,12 @@
     }
   }
 
-  function renderHourlyQueueChart({ labels, d1Max, d2Max, networkMax }) {
+  function renderHourlyQueueChart({ labels, d1Max, d2Max, networkMax, queueLabel }) {
     const maxVal = Math.max(...[...d1Max, ...d2Max, ...networkMax].filter(v => Number.isFinite(v)), 0);
     const maxY = Math.max(200, Math.ceil((maxVal + 40) / 20) * 20);
     const d1Colors = labels.map((_, idx) => isPeakTrafficHour(idx) ? 'rgba(255,143,0,0.45)' : 'rgba(46,125,50,0.35)');
     const d2Colors = labels.map((_, idx) => isPeakTrafficHour(idx) ? 'rgba(230,74,25,0.45)' : 'rgba(198,40,40,0.35)');
+    const qLabel = String(queueLabel || '2 min');
     const ctx = document.getElementById('hourlyQueueChart');
     if (!ctx) return;
     if (hourlyQueueChartInstance) hourlyQueueChartInstance.destroy();
@@ -4180,9 +4045,9 @@
       data: {
         labels,
         datasets: [
-          { label: 'D1 Max Queue', data: d1Max, backgroundColor: d1Colors, borderColor: '#2e7d32', borderWidth: 1, borderRadius: 3 },
-          { label: 'D2 Max Queue', data: d2Max, backgroundColor: d2Colors, borderColor: '#c62828', borderWidth: 1, borderRadius: 3 },
-          { type: 'line', label: 'Network Max Queue', data: networkMax, borderColor: '#1565c0', pointRadius: 0, borderWidth: 2 },
+          { label: `D1 Queue (${qLabel})`, data: d1Max, backgroundColor: d1Colors, borderColor: '#2e7d32', borderWidth: 1, borderRadius: 3 },
+          { label: `D2 Queue (${qLabel})`, data: d2Max, backgroundColor: d2Colors, borderColor: '#c62828', borderWidth: 1, borderRadius: 3 },
+          { type: 'line', label: `Network Queue (${qLabel})`, data: networkMax, borderColor: '#1565c0', pointRadius: 0, borderWidth: 2 },
           { type: 'line', label: 'Watch 200m', data: labels.map(() => 200), borderColor: '#6d4c41', borderDash: [6, 4], pointRadius: 0, borderWidth: 2 },
           { type: 'line', label: 'High 400m', data: labels.map(() => 400), borderColor: '#ad1457', borderDash: [2, 3], pointRadius: 0, borderWidth: 2 }
         ]
@@ -4508,6 +4373,33 @@
     return `${v.toFixed(3)} (${losLabel(v)})`;
   }
 
+  function getSelectedHourlyQueueDurationKey() {
+    const el = document.getElementById('hourlyQueueDurationSelect');
+    const key = String((el && el.value) || 'q2').toLowerCase();
+    return ['q2', 'q5', 'q10', 'q15'].includes(key) ? key : 'q2';
+  }
+
+  function getHourlyQueueDurationMeta(queueKey) {
+    const key = String(queueKey || 'q2').toLowerCase();
+    const labelMap = {
+      q2: { label: '2 min wait', chart: '2 min' },
+      q5: { label: '5 min wait', chart: '5 min' },
+      q10: { label: '10 min wait', chart: '10 min' },
+      q15: { label: '15 min wait', chart: '15 min' }
+    };
+    return labelMap[key] || labelMap.q2;
+  }
+
+  function refreshHourlyQueueHeaders(meta) {
+    const m = meta || getHourlyQueueDurationMeta(getSelectedHourlyQueueDurationKey());
+    const d1Header = document.getElementById('hourlyQueueD1Header');
+    const d2Header = document.getElementById('hourlyQueueD2Header');
+    const networkHeader = document.getElementById('hourlyQueueNetworkHeader');
+    if (d1Header) d1Header.textContent = `D1 Queue (${m.label}) (m)`;
+    if (d2Header) d2Header.textContent = `D2 Queue (${m.label}) (m)`;
+    if (networkHeader) networkHeader.textContent = `Network Queue (${m.label}) (m)`;
+  }
+
   function getTrafficBucket(hour) {
     const h = Number(hour);
     if (h >= 7 && h < 9) return { key: 'AM', label: 'MORNING PEAK', peak: true };
@@ -4773,7 +4665,7 @@
   }
 
   function setupInlineSectionPrintBadges() {
-    const skipCardIds = new Set(['printCustomizationCard', 'selfDiagnosticsCard', 'optionalFeaturesSection']);
+    const skipCardIds = new Set([]);
     const cards = Array.from(document.querySelectorAll('.container .card'));
     cards.forEach((card, idx) => {
       if (!(card instanceof HTMLElement)) return;
@@ -5051,7 +4943,7 @@
     return nums.length ? Math.max(...nums) : null;
   }
 
-  function updateSummaryKpis({ dv, d1, d2, rtr, slrfPeak, worstVcr }){
+  function updateSummaryKpis({ dv, d1, d2, rtr, slrfPeak, worstVcr, d1PeakQueueQ2, d2PeakQueueQ2 }){
     const set = (id, value) => {
       const el = document.getElementById(id);
       if (el) el.textContent = value;
@@ -5059,8 +4951,10 @@
     };
 
     set('kpiDV', `${dv}`);
-    set('kpiD1PeakQueue', `${d1.q2qp} m`);
-    set('kpiD2PeakQueue', `${d2.q2qp} m`);
+    const resolvedD1PeakQueue = Number.isFinite(d1PeakQueueQ2) ? d1PeakQueueQ2 : d1.q2qp;
+    const resolvedD2PeakQueue = Number.isFinite(d2PeakQueueQ2) ? d2PeakQueueQ2 : d2.q2qp;
+    set('kpiD1PeakQueue', `${Math.round(resolvedD1PeakQueue)} m`);
+    set('kpiD2PeakQueue', `${Math.round(resolvedD2PeakQueue)} m`);
     set('kpiRoadTrain', rtr === 'YES' ? 'Active' : 'Inactive');
 
     const slrfText = (slrfPeak === null || Number.isNaN(slrfPeak) || slrfPeak < 0) ? 'N/A' : slrfPeak.toFixed(3);
@@ -5141,6 +5035,10 @@
     // persist for other routines
     lastD1Profile = d1Profile;
     lastD2Profile = d2Profile;
+    lastWorkWindowHourlyProfiles = {
+      d1: d1HourlyProfile,
+      d2: d2HourlyProfile
+    };
 
     const base1Peak = (d1.peakLVPL + d1.peakHVPL + d1.peakRTPL) / dv;
     const base1Off  = (d1.offLVPL + d1.offHVPL + d1.offRTPL) / dv;
@@ -5247,13 +5145,40 @@
       `;
     }
 
+    const derivePeriodQueueFromHourly = (hourlyProfile, fallbackProfile) => {
+      const out = {};
+      periods.forEach(period => {
+        const values = { q2: 0, q5: 0, q10: 0, q15: 0 };
+        period.hours.forEach(hour => {
+          const queue = (hourlyProfile && hourlyProfile[hour] && hourlyProfile[hour].queue) || null;
+          if (!queue) return;
+          values.q2 = Math.max(values.q2, Number(queue.q2) || 0);
+          values.q5 = Math.max(values.q5, Number(queue.q5) || 0);
+          values.q10 = Math.max(values.q10, Number(queue.q10) || 0);
+          values.q15 = Math.max(values.q15, Number(queue.q15) || 0);
+        });
+
+        if (!(values.q2 || values.q5 || values.q10 || values.q15) && fallbackProfile && fallbackProfile[period.key] && fallbackProfile[period.key].queue) {
+          values.q2 = Number(fallbackProfile[period.key].queue.q2) || 0;
+          values.q5 = Number(fallbackProfile[period.key].queue.q5) || 0;
+          values.q10 = Number(fallbackProfile[period.key].queue.q10) || 0;
+          values.q15 = Number(fallbackProfile[period.key].queue.q15) || 0;
+        }
+        out[period.key] = values;
+      });
+      return out;
+    };
+
+    const queuePeriodD1 = derivePeriodQueueFromHourly(d1HourlyProfile, d1Profile);
+    const queuePeriodD2 = derivePeriodQueueFromHourly(d2HourlyProfile, d2Profile);
+
     const queueGroupedBodyD2 = document.getElementById('queueGroupedBodyD2');
     if (queueGroupedBodyD2) {
       const queueRowsD2 = [
-        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q2) },
-        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q5) },
-        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q10) },
-        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => d2Profile[k].queue.q15) }
+        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD2[k].q2) },
+        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD2[k].q5) },
+        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD2[k].q10) },
+        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD2[k].q15) }
       ];
 
       queueGroupedBodyD2.innerHTML = queueRowsD2.map(row => {
@@ -5274,10 +5199,10 @@
     const queueGroupedBodyD1 = document.getElementById('queueGroupedBodyD1');
     if (queueGroupedBodyD1) {
       const queueRowsD1 = [
-        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q2) },
-        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q5) },
-        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q10) },
-        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => d1Profile[k].queue.q15) }
+        { label: 'Per 2 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD1[k].q2) },
+        { label: 'Per 5 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD1[k].q5) },
+        { label: 'Per 10 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD1[k].q10) },
+        { label: 'Per 15 minutes', values: ['AM','OP','PM','EV'].map(k => queuePeriodD1[k].q15) }
       ];
 
       queueGroupedBodyD1.innerHTML = queueRowsD1.map(row => {
@@ -5297,16 +5222,16 @@
 
     const queueKeys = ['AM', 'OP', 'PM', 'EV'];
     const queueSeriesD1 = Object.fromEntries(queueKeys.map(k => [k, {
-      q2: d1Profile[k].queue.q2,
-      q5: d1Profile[k].queue.q5,
-      q10: d1Profile[k].queue.q10,
-      q15: d1Profile[k].queue.q15
+      q2: queuePeriodD1[k].q2,
+      q5: queuePeriodD1[k].q5,
+      q10: queuePeriodD1[k].q10,
+      q15: queuePeriodD1[k].q15
     }]));
     const queueSeriesD2 = Object.fromEntries(queueKeys.map(k => [k, {
-      q2: d2Profile[k].queue.q2,
-      q5: d2Profile[k].queue.q5,
-      q10: d2Profile[k].queue.q10,
-      q15: d2Profile[k].queue.q15
+      q2: queuePeriodD2[k].q2,
+      q5: queuePeriodD2[k].q5,
+      q10: queuePeriodD2[k].q10,
+      q15: queuePeriodD2[k].q15
     }]));
 
     lastQueueChartData = {
@@ -5319,26 +5244,78 @@
     renderQueueCharts(lastQueueChartData);
 
     const periodKeys = ['AM','OP','PM','EV'];
-    const baseD1 = Object.fromEntries(periodKeys.map(k => [k, d1Profile[k].hourlyPerLane / dv]));
-    const baseD2 = Object.fromEntries(periodKeys.map(k => [k, d2Profile[k].hourlyPerLane / dv]));
+    const derivePeriodVcrFromHourly = (d1Hourly, d2Hourly, capacity, d1LaneCount, d2LaneCount, fallbackD1Profile, fallbackD2Profile) => {
+      const result = {
+        baseD1: {},
+        baseD2: {},
+        slcD1: {},
+        slcD2: {},
+        slrf: {}
+      };
 
-    const slcFromBase = (baseMap, laneCount) => {
-      const out = {};
-      periodKeys.forEach(k => {
-        if (laneCount === 2) out[k] = baseMap[k] * 2;
-        else if (laneCount > 2) out[k] = (baseMap[k] * laneCount) / (laneCount - 1);
-        else out[k] = null;
+      const toWorkVcr = (base, laneCount) => {
+        if (!Number.isFinite(base)) return null;
+        if (laneCount === 2) return base * 2;
+        if (laneCount > 2) return (base * laneCount) / (laneCount - 1);
+        return null;
+      };
+
+      periodKeys.forEach(periodKey => {
+        const periodDef = periods.find(p => p.key === periodKey);
+        const hours = periodDef ? periodDef.hours : [];
+
+        let maxBaseD1 = null;
+        let maxBaseD2 = null;
+        let maxSlcD1 = null;
+        let maxSlcD2 = null;
+        let maxSlrf = null;
+
+        hours.forEach(hour => {
+          const d1PerLane = Number(d1Hourly && d1Hourly[hour] && d1Hourly[hour].perLane);
+          const d2PerLane = Number(d2Hourly && d2Hourly[hour] && d2Hourly[hour].perLane);
+          const b1 = capacity > 0 && Number.isFinite(d1PerLane) ? (d1PerLane / capacity) : null;
+          const b2 = capacity > 0 && Number.isFinite(d2PerLane) ? (d2PerLane / capacity) : null;
+          const w1 = toWorkVcr(b1, d1LaneCount);
+          const w2 = toWorkVcr(b2, d2LaneCount);
+          const ws = (d1LaneCount === 1 && d2LaneCount === 1 && capacity > 0 && Number.isFinite(d1PerLane) && Number.isFinite(d2PerLane))
+            ? ((d1PerLane + d2PerLane) / capacity)
+            : null;
+
+          if (Number.isFinite(b1)) maxBaseD1 = maxBaseD1 === null ? b1 : Math.max(maxBaseD1, b1);
+          if (Number.isFinite(b2)) maxBaseD2 = maxBaseD2 === null ? b2 : Math.max(maxBaseD2, b2);
+          if (Number.isFinite(w1)) maxSlcD1 = maxSlcD1 === null ? w1 : Math.max(maxSlcD1, w1);
+          if (Number.isFinite(w2)) maxSlcD2 = maxSlcD2 === null ? w2 : Math.max(maxSlcD2, w2);
+          if (Number.isFinite(ws)) maxSlrf = maxSlrf === null ? ws : Math.max(maxSlrf, ws);
+        });
+
+        const fallbackB1 = fallbackD1Profile && fallbackD1Profile[periodKey] ? (fallbackD1Profile[periodKey].hourlyPerLane / capacity) : null;
+        const fallbackB2 = fallbackD2Profile && fallbackD2Profile[periodKey] ? (fallbackD2Profile[periodKey].hourlyPerLane / capacity) : null;
+        const fallbackW1 = toWorkVcr(fallbackB1, d1LaneCount);
+        const fallbackW2 = toWorkVcr(fallbackB2, d2LaneCount);
+        const fallbackWs = (d1LaneCount === 1 && d2LaneCount === 1 && fallbackD1Profile && fallbackD2Profile && fallbackD1Profile[periodKey] && fallbackD2Profile[periodKey] && capacity > 0)
+          ? ((fallbackD1Profile[periodKey].hourlyPerLane + fallbackD2Profile[periodKey].hourlyPerLane) / capacity)
+          : null;
+
+        result.baseD1[periodKey] = maxBaseD1 !== null ? maxBaseD1 : fallbackB1;
+        result.baseD2[periodKey] = maxBaseD2 !== null ? maxBaseD2 : fallbackB2;
+        result.slcD1[periodKey] = maxSlcD1 !== null ? maxSlcD1 : fallbackW1;
+        result.slcD2[periodKey] = maxSlcD2 !== null ? maxSlcD2 : fallbackW2;
+        result.slrf[periodKey] = maxSlrf !== null ? maxSlrf : fallbackWs;
+
+        if (!(d1LaneCount === 1 && d2LaneCount === 1)) {
+          result.slrf[periodKey] = null;
+        }
       });
-      return out;
+
+      return result;
     };
 
-    const slcD1 = slcFromBase(baseD1, d1.lanes);
-    const slcD2 = slcFromBase(baseD2, d2.lanes);
-    const slrf = {};
-    periodKeys.forEach(k => {
-      if (d1.lanes === 1 && d2.lanes === 1) slrf[k] = (d1Profile[k].hourlyPerLane + d2Profile[k].hourlyPerLane) / dv;
-      else slrf[k] = null;
-    });
+    const periodVcr = derivePeriodVcrFromHourly(d1HourlyProfile, d2HourlyProfile, dv, d1.lanes, d2.lanes, d1Profile, d2Profile);
+    const baseD1 = periodVcr.baseD1;
+    const baseD2 = periodVcr.baseD2;
+    const slcD1 = periodVcr.slcD1;
+    const slcD2 = periodVcr.slcD2;
+    const slrf = periodVcr.slrf;
 
     const vcrGroupedBodyD2 = document.getElementById('vcrGroupedBodyD2');
     if (vcrGroupedBodyD2) {
@@ -5431,6 +5408,9 @@
     const hourlyD1WorkVcr = [];
     const hourlyD2WorkVcr = [];
     const hourlyWorstWorkVcr = [];
+    const selectedHourlyQueueKey = getSelectedHourlyQueueDurationKey();
+    const selectedHourlyQueueMeta = getHourlyQueueDurationMeta(selectedHourlyQueueKey);
+    refreshHourlyQueueHeaders(selectedHourlyQueueMeta);
 
     let worstQueueHour = null;
     let worstQueueValue = -1;
@@ -5442,8 +5422,8 @@
       for (let hour = 0; hour < 24; hour += 1) {
         const d1Hour = d1HourlyProfile[hour] || { queue: { q2: 0, q5: 0, q10: 0, q15: 0 } };
         const d2Hour = d2HourlyProfile[hour] || { queue: { q2: 0, q5: 0, q10: 0, q15: 0 } };
-        const d1MaxQueue = Math.max(d1Hour.queue.q2, d1Hour.queue.q5, d1Hour.queue.q10, d1Hour.queue.q15);
-        const d2MaxQueue = Math.max(d2Hour.queue.q2, d2Hour.queue.q5, d2Hour.queue.q10, d2Hour.queue.q15);
+        const d1MaxQueue = Number(d1Hour.queue && d1Hour.queue[selectedHourlyQueueKey]) || 0;
+        const d2MaxQueue = Number(d2Hour.queue && d2Hour.queue[selectedHourlyQueueKey]) || 0;
         const networkMax = Math.max(d1MaxQueue, d2MaxQueue);
 
         if (networkMax > worstQueueValue) {
@@ -5542,7 +5522,8 @@
       labels: hourlyLabels,
       d1Max: hourlyD1MaxQueue,
       d2Max: hourlyD2MaxQueue,
-      networkMax: hourlyNetworkMaxQueue
+      networkMax: hourlyNetworkMaxQueue,
+      queueLabel: selectedHourlyQueueMeta.chart
     };
     renderHourlyQueueChart(lastHourlyQueueChartData);
 
@@ -5567,8 +5548,8 @@
       let worstPeriodQueue = -1;
       ['AM', 'OP', 'PM', 'EV'].forEach(period => {
         const values = [
-          d1Profile[period].queue.q2, d1Profile[period].queue.q5, d1Profile[period].queue.q10, d1Profile[period].queue.q15,
-          d2Profile[period].queue.q2, d2Profile[period].queue.q5, d2Profile[period].queue.q10, d2Profile[period].queue.q15
+          queuePeriodD1[period].q2, queuePeriodD1[period].q5, queuePeriodD1[period].q10, queuePeriodD1[period].q15,
+          queuePeriodD2[period].q2, queuePeriodD2[period].q5, queuePeriodD2[period].q10, queuePeriodD2[period].q15
         ].map(v => Number(v) || 0);
         const periodMax = Math.max(...values);
         if (periodMax > worstPeriodQueue) {
@@ -5607,13 +5588,23 @@
       }
     }
 
-    const worstVcr = maxValid([
-      base1Peak, base1Off, base2Peak, base2Off,
-      slc1Peak, slc1Off, slc2Peak, slc2Off,
-      slrfPeak, slrfOff
-    ]);
+    const d1PeakQueueQ2 = maxValid(periodKeys.map(k => Number(queuePeriodD1[k] && queuePeriodD1[k].q2)));
+    const d2PeakQueueQ2 = maxValid(periodKeys.map(k => Number(queuePeriodD2[k] && queuePeriodD2[k].q2)));
+    const alignedSlrfPeak = maxValid(periodKeys.map(k => Number(slrf[k])));
+    const worstVcr = maxValid(periodKeys.flatMap(k => [
+      Number(baseD1[k]), Number(baseD2[k]), Number(slcD1[k]), Number(slcD2[k]), Number(slrf[k])
+    ]));
 
-    updateSummaryKpis({ dv, d1, d2, rtr, slrfPeak, worstVcr });
+    updateSummaryKpis({
+      dv,
+      d1,
+      d2,
+      rtr,
+      slrfPeak: alignedSlrfPeak,
+      worstVcr,
+      d1PeakQueueQ2,
+      d2PeakQueueQ2
+    });
 
     const traceRows = [
       ['DTCA Path', dtca === 'YES' ? 'Directional VADT (D1_VADT / D2_VADT)' : '50/50 split from VADT'],
@@ -5652,6 +5643,8 @@
     calculateSpeedDelay();
     // Trigger Pedestrian Delay Calculator
     calculatePedestrianDelay();
+    // Trigger AustRoads visualization refresh
+    updateManagementViz();
   }
 
   // ===== STOP/GO SHUTTLE SIMULATOR LOGIC =====
@@ -5738,7 +5731,556 @@
     document.getElementById('sgD2Queue').textContent = `Max Queue: ${q2}m`;
   }
 
+  function updateManagementViz() {
+    const canvas = document.getElementById('managementVizCanvas');
+    const container = document.getElementById('vizCanvasContainer');
+    const queueInfo = document.getElementById('vizQueueInfo');
+    const templateEl = document.getElementById('vizTemplate');
+    const template = templateEl ? templateEl.value : 'none';
+
+    if (!canvas || !container || !queueInfo) return;
+
+    if (template === 'none') {
+      container.style.display = 'none';
+      queueInfo.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    queueInfo.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Get latest calculated queue for overlay (Default to AM Peak)
+    const d1AmQueue = Number(lastD1Profile && lastD1Profile.AM && lastD1Profile.AM.queue ? lastD1Profile.AM.queue.q2 : 0) || 0;
+    const d2AmQueue = Number(lastD2Profile && lastD2Profile.AM && lastD2Profile.AM.queue ? lastD2Profile.AM.queue.q2 : 0) || 0;
+    const peakQueue = Math.max(d1AmQueue, d2AmQueue);
+    const vizQueueValueEl = document.getElementById('vizQueueValue');
+    if (vizQueueValueEl) vizQueueValueEl.textContent = `${Math.round(peakQueue)}m (AM Peak)`;
+
+    // Road Base
+    ctx.fillStyle = '#546e7a';
+    ctx.fillRect(0, 100, 1200, 150);
+
+    // Markings
+    ctx.setLineDash([20, 15]);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 175); ctx.lineTo(1200, 175);
+    ctx.stroke();
+
+    if (template === 'slrf') {
+      drawStopGoTemplate(ctx, peakQueue);
+    } else if (template === 'slc') {
+      drawLaneClosureTemplate(ctx, peakQueue);
+    } else if (template === 'sidetrack') {
+      drawSidetrackTemplate(ctx, peakQueue);
+    }
+  }
+
+  function drawStopGoTemplate(ctx, queueLen) {
+    // Signs
+    drawSign(ctx, 100, 120, 'ROADWORK AHEAD', '#ffeb3b');
+    drawSign(ctx, 300, 120, 'PREPARE TO STOP', '#ffeb3b');
+
+    // Traffic Controller / Stop-Go Board
+    ctx.fillStyle = '#ff5722';
+    ctx.fillRect(500, 150, 10, 50); // Stop/Go Pole
+    ctx.beginPath();
+    ctx.arc(505, 140, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Work Zone
+    ctx.fillStyle = 'rgba(255, 152, 0, 0.3)';
+    ctx.fillRect(600, 100, 400, 150);
+    ctx.strokeStyle = '#e65100';
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(600, 100, 400, 150);
+
+    // Queue Visualization (Scaling 1px = 1m for visibility)
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.6)';
+    const visualQueue = Math.min(queueLen, 400);
+    ctx.fillRect(500 - visualQueue, 185, visualQueue, 40);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(`QUEUE: ${Math.round(queueLen)}m`, 500 - visualQueue + 5, 210);
+  }
+
+  function drawLaneClosureTemplate(ctx, queueLen) {
+    drawSign(ctx, 120, 120, 'LANE CLOSED', '#ffeb3b');
+    drawSign(ctx, 300, 120, 'MERGE LEFT', '#ffeb3b');
+
+    // Closed lane area
+    ctx.fillStyle = 'rgba(255, 152, 0, 0.28)';
+    ctx.fillRect(620, 100, 420, 72);
+    ctx.strokeStyle = '#e65100';
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(620, 100, 420, 72);
+
+    // Taper cones
+    ctx.setLineDash([]);
+    for (let i = 0; i < 8; i++) {
+      const x = 460 + (i * 22);
+      const y = 118 + (i * 6);
+      ctx.fillStyle = '#ff6f00';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 10, y + 18);
+      ctx.lineTo(x - 10, y + 18);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Queue
+    const visualQueue = Math.min(queueLen, 420);
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.6)';
+    ctx.fillRect(520 - visualQueue, 198, visualQueue, 35);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(`QUEUE: ${Math.round(queueLen)}m`, 520 - visualQueue + 5, 220);
+  }
+
+  function drawSidetrackTemplate(ctx, queueLen) {
+    drawSign(ctx, 120, 120, 'DETOUR AHEAD', '#ffeb3b');
+    drawSign(ctx, 300, 120, 'FOLLOW DIVERSION', '#ffeb3b');
+
+    // Sidetrack route
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#1e88e5';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(420, 195);
+    ctx.lineTo(520, 270);
+    ctx.lineTo(900, 270);
+    ctx.lineTo(1000, 195);
+    ctx.stroke();
+
+    // Work zone blocked section
+    ctx.fillStyle = 'rgba(255, 152, 0, 0.3)';
+    ctx.fillRect(560, 100, 260, 150);
+    ctx.strokeStyle = '#e65100';
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(560, 100, 260, 150);
+
+    const visualQueue = Math.min(queueLen, 320);
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.6)';
+    ctx.fillRect(420 - visualQueue, 185, visualQueue, 40);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(`QUEUE: ${Math.round(queueLen)}m`, 420 - visualQueue + 5, 210);
+  }
+
+  function drawSign(ctx, x, y, text, color) {
+    ctx.setLineDash([]);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 100, 40);
+    ctx.strokeStyle = '#000000';
+    ctx.strokeRect(x, y, 100, 40);
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, x + 50, y + 25);
+  }
+
   // ===== SMART DETOUR SCANNER LOGIC =====
+  let lastDetourRoadScanContext = null;
+  let lastPedRoadScanContext = null;
+  window.selectedDetourSiteIds = window.selectedDetourSiteIds || [];
+  window.selectedTrafficDetourRoadNames = window.selectedTrafficDetourRoadNames || [];
+  window.selectedPedDetourRoadName = window.selectedPedDetourRoadName || '';
+  window.selectedPedDetourRoadNames = window.selectedPedDetourRoadNames || [];
+  window.lastDetourPrimaryContextKey = window.lastDetourPrimaryContextKey || '';
+  window.detourManualRoadInputs = window.detourManualRoadInputs || {};
+
+  function getDetourPrimaryCoordinates() {
+    if (selectedMacroSite && macroSitesData[selectedMacroSite]) {
+      const primarySite = macroSitesData[selectedMacroSite];
+      const lat = Number(primarySite.latitude);
+      const lon = Number(primarySite.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    }
+
+    if (window.selectedTiaData && window.selectedTiaData.lat && window.selectedTiaData.lon) {
+      const lat = Number(window.selectedTiaData.lat);
+      const lon = Number(window.selectedTiaData.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    }
+
+    return null;
+  }
+
+  function getDetourNearbyRoadRadiusMeters() {
+    const sliderEl = document.getElementById('detourNearbyRoadRadius');
+    const radiusMeters = Number(sliderEl && sliderEl.value ? sliderEl.value : 200);
+    return Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 200;
+  }
+
+  function getDetourCounterMatchRadiusMeters() {
+    return getDetourNearbyRoadRadiusMeters();
+  }
+
+  function normalizeNearbyRoadRadiusMeters(rawValue) {
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) return 200;
+    const rounded = Math.round(parsed / 100) * 100;
+    return Math.min(3000, Math.max(200, rounded));
+  }
+
+  function getPedNearbyRoadRadiusMeters() {
+    const sliderEl = document.getElementById('pedNearbyRoadRadius');
+    const radiusMeters = Number(sliderEl && sliderEl.value ? sliderEl.value : 200);
+    return Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 200;
+  }
+
+  function updateDetourNearbyRoadRadiusLabel() {
+    const valueEl = document.getElementById('detourNearbyRoadRadiusValue');
+    if (!valueEl) return;
+    valueEl.textContent = `${(getDetourNearbyRoadRadiusMeters() / 1000).toFixed(1)} km`;
+  }
+
+  function updatePedNearbyRoadRadiusLabel() {
+    const valueEl = document.getElementById('pedNearbyRoadRadiusValue');
+    if (!valueEl) return;
+    valueEl.textContent = `${(getPedNearbyRoadRadiusMeters() / 1000).toFixed(1)} km`;
+  }
+
+  function getCurrentTrafficDetourRoadName() {
+    const selectedPath = Array.isArray(window.selectedTrafficDetourRoadNames)
+      ? window.selectedTrafficDetourRoadNames.map(v => String(v || '').trim()).filter(Boolean)
+      : [];
+    if (selectedPath.length) return selectedPath.join(' >> ');
+    if (Array.isArray(window.selectedDetourSiteIds) && window.selectedDetourSiteIds.length && macroSitesData[window.selectedDetourSiteIds[0]]) {
+      const site = macroSitesData[window.selectedDetourSiteIds[0]];
+      return String(site.road_name || site.description || '').trim();
+    }
+    return '';
+  }
+
+  function getCurrentPedDetourRoadName() {
+    const selectedPath = Array.isArray(window.selectedPedDetourRoadNames)
+      ? window.selectedPedDetourRoadNames.map(v => String(v || '').trim()).filter(Boolean)
+      : [];
+    if (selectedPath.length) return selectedPath.join(' >> ');
+    const selectedName = String(window.selectedPedDetourRoadName || '').trim();
+    if (selectedName) return selectedName;
+    const pedRouteInput = document.getElementById('pedDetourRouteName');
+    const typedName = String(pedRouteInput && pedRouteInput.value ? pedRouteInput.value : '').trim();
+    return typedName;
+  }
+
+  function updatePedestrianDetourDelayTitle() {
+    const titleEl = document.getElementById('pedDetourDelayTitle');
+    if (!titleEl) return;
+    const routeName = getCurrentPedDetourRoadName();
+    titleEl.textContent = `Estimated Delay - Detour route (${routeName || '-'})`;
+
+    const pedSummaryEl = document.getElementById('pedSelectedRoadsSummary');
+    if (pedSummaryEl) pedSummaryEl.textContent = `Selected path: ${routeName || '-'}`;
+  }
+
+  function updateTrafficSelectedRoadsSummary() {
+    const summaryEl = document.getElementById('detourSelectedRoadsSummary');
+    const routeName = getCurrentTrafficDetourRoadName();
+    if (summaryEl) summaryEl.textContent = `Selected path: ${routeName || '-'}`;
+
+    const segmentSummaryEl = document.getElementById('detourSegmentsSelectedSummary');
+    if (segmentSummaryEl) segmentSummaryEl.textContent = `Selected segments: ${routeName || '-'}`;
+
+    const reportPathEl = document.getElementById('detourSelectedPathDisplay');
+    if (reportPathEl) reportPathEl.textContent = `Selected path: ${routeName || '-'}`;
+  }
+
+  function getDetourManualRoadKey(roadName) {
+    const std = standardizeRoadName(roadName || '');
+    if (std) return std;
+    return String(roadName || '').trim().toLowerCase();
+  }
+
+  function getDetourManualRoadInput(roadName) {
+    const key = getDetourManualRoadKey(roadName);
+    if (!key) return null;
+    const existing = window.detourManualRoadInputs[key] || {};
+    const normalized = {
+      roadName: String(roadName || existing.roadName || '').trim(),
+      baseVpd: Number(existing.baseVpd) || 0,
+      lanes: Math.max(1, Number(existing.lanes) || 2),
+      estimateMeta: existing.estimateMeta || null
+    };
+    window.detourManualRoadInputs[key] = normalized;
+    return normalized;
+  }
+
+  function estimateDetourRoadBaseVpd(roadName, centerLat, centerLon) {
+    const lat = Number(centerLat);
+    const lon = Number(centerLon);
+    const radius = 5000;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return { baseVpd: 0, source: 'No primary location', refsCount: 0, areaType: 'N/A', areaFactorPercent: 100 };
+    }
+
+    const allSites = Object.entries(macroSitesData || {}).map(([id, data]) => {
+      const sLat = Number(data && data.latitude);
+      const sLon = Number(data && data.longitude);
+      const dist = (Number.isFinite(sLat) && Number.isFinite(sLon)) ? haversineDistance(lat, lon, sLat, sLon) : Infinity;
+      return { id, data, dist };
+    }).filter(item => Number.isFinite(item.dist) && item.dist <= radius && Number(item.data && item.data.vadt) > 0);
+
+    const sameRoadSites = allSites
+      .filter(item => isSameRoad(roadName, item.data && (item.data.road_name || item.data.description || '')))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 3);
+
+    const refsRaw = (sameRoadSites.length ? sameRoadSites : allSites.sort((a, b) => a.dist - b.dist).slice(0, 5));
+    const refs = refsRaw.map(item => ({
+      vadt: Number(item.data && item.data.vadt) || 0,
+      d1_vadt: Number(item.data && item.data.d1_vadt) || 0,
+      d2_vadt: Number(item.data && item.data.d2_vadt) || 0,
+      distance: Math.round(item.dist),
+      road: String((item.data && (item.data.road_name || item.data.description)) || '').trim(),
+      typePercent: 100
+    })).filter(r => r.vadt > 0);
+
+    if (!refs.length) {
+      return { baseVpd: 0, source: 'No refs within 5 km', refsCount: 0, areaType: 'N/A', areaFactorPercent: 100 };
+    }
+
+    const areaProfile = detectAreaProfile(roadName, refs);
+    refs.forEach(site => {
+      site.typePercent = calcReferenceTypePercent(areaProfile.type, site.vadt);
+    });
+
+    let totalInverseDist = 0;
+    refs.forEach(site => {
+      site.invDist = 1 / ((Number(site.distance) || 0) + 10);
+      totalInverseDist += site.invDist;
+    });
+    refs.forEach(site => {
+      site.autoWeight = totalInverseDist > 0 ? Math.round((site.invDist / totalInverseDist) * 100) : Math.round(100 / refs.length);
+    });
+    const weightSum = refs.reduce((sum, site) => sum + (Number(site.autoWeight) || 0), 0);
+    if (refs.length && weightSum !== 100) refs[0].autoWeight += (100 - weightSum);
+
+    const n = Math.max(1, refs.length);
+    const adjustedSum = refs.reduce((sum, site) => {
+      const percent = Math.max(0, Math.min(100, Number(site.autoWeight) || 0));
+      const typePercent = Math.max(0, Math.min(140, Number(site.typePercent) || 100));
+      return sum + ((percent / 100) * (typePercent / 100) * (Number(site.vadt) || 0));
+    }, 0);
+
+    const avgVadtRaw = adjustedSum / n;
+    const weightedAvgVADT = Math.round(avgVadtRaw);
+    const areaFactorPercent = Math.max(30, Math.min(130, Number(areaProfile.factorPercent) || 100));
+    const finalAvgVADT = Math.max(0, Math.round(weightedAvgVADT * (areaFactorPercent / 100)));
+
+    return {
+      baseVpd: finalAvgVADT,
+      source: sameRoadSites.length ? 'Estimated (same-road references)' : 'Estimated (nearby references)',
+      refsCount: refs.length,
+      areaType: areaProfile.type,
+      areaFactorPercent
+    };
+  }
+
+  function renderDetourManualVpdPanel(roads) {
+    const panelEl = document.getElementById('detourManualVpdPanel');
+    const bodyEl = document.getElementById('detourManualVpdRows');
+    if (!panelEl || !bodyEl) return;
+
+    const cleanRoads = Array.from(new Set((Array.isArray(roads) ? roads : []).map(r => String(r || '').trim()).filter(Boolean)));
+    if (!cleanRoads.length) {
+      panelEl.style.display = 'none';
+      bodyEl.innerHTML = '';
+      return;
+    }
+
+    panelEl.style.display = 'block';
+    bodyEl.innerHTML = '';
+
+    cleanRoads.forEach((roadName) => {
+      const key = getDetourManualRoadKey(roadName);
+      if (!key) return;
+      const inputData = getDetourManualRoadInput(roadName);
+      const baseEstimate = Math.max(0, Number(inputData.baseVpd) || 0);
+      const estimateMeta = inputData.estimateMeta || {};
+      const hasEstimate = baseEstimate > 0;
+
+      const row = document.createElement('div');
+      row.style.cssText = `display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr; gap: 8px; align-items: end; background: ${hasEstimate ? '#fff' : '#fff5f5'}; border: 1px solid ${hasEstimate ? '#e1bee7' : '#ef9a9a'}; border-radius: 6px; padding: 8px;`;
+      row.innerHTML = `
+        <div>
+          <label style="color: #6a1b9a; font-size: 0.75em;">Road</label>
+          <input type="text" value="${roadName.replace(/"/g, '&quot;')}" readonly style="border: 1px solid #ce93d8; background: #f8f2fb; width: 100%;" />
+          <div style="font-size: 0.72em; color: ${hasEstimate ? '#8e24aa' : '#c62828'}; margin-top: 2px;">${hasEstimate ? `${String(estimateMeta.source || 'Estimated')} • ${Number(estimateMeta.refsCount) || 0} refs • ${String(estimateMeta.areaType || 'Mixed')} (${Number(estimateMeta.areaFactorPercent) || 100}%)` : 'No reference counters within 5 km to estimate Base VPD.'}</div>
+        </div>
+        <div>
+          <label style="color: ${hasEstimate ? '#6a1b9a' : '#c62828'}; font-size: 0.75em;">Estimated Base VPD</label>
+          <input type="number" value="${baseEstimate}" readonly style="border: 1px solid ${hasEstimate ? '#ce93d8' : '#e53935'}; background: ${hasEstimate ? '#f8f2fb' : '#fff0f0'}; width: 100%;" />
+        </div>
+        <div>
+          <label style="color: #6a1b9a; font-size: 0.75em;">Profile Logic</label>
+          <input type="text" value="Auto from existing hourly logic" readonly style="border: 1px solid #ce93d8; background: #f8f2fb; width: 100%;" />
+        </div>
+        <div>
+          <label style="color: #6a1b9a; font-size: 0.75em;">Lanes *</label>
+          <input type="number" data-detour-manual-key="${key}" data-detour-manual-field="lanes" min="1" max="10" step="1" value="${Math.max(1, Number(inputData.lanes) || 2)}" style="border: 1px solid #ce93d8; background: #fff; width: 100%;" />
+        </div>
+      `;
+
+      bodyEl.appendChild(row);
+    });
+
+    bodyEl.querySelectorAll('input[data-detour-manual-key]').forEach((inputEl) => {
+      const syncInput = () => {
+        const key = String(inputEl.dataset.detourManualKey || '').trim();
+        const field = String(inputEl.dataset.detourManualField || '').trim();
+        if (!key || !field) return;
+        const existing = window.detourManualRoadInputs[key] || { baseVpd: 0, lanes: 2 };
+        let value = Number(inputEl.value);
+        if (!Number.isFinite(value)) value = 0;
+        if (field === 'lanes') value = Math.max(1, Math.round(value));
+        if (field === 'baseVpd') value = Math.max(0, Math.round(value));
+        existing[field] = value;
+        window.detourManualRoadInputs[key] = existing;
+        calculateDetourOverlay();
+      };
+      inputEl.addEventListener('input', syncInput);
+      inputEl.addEventListener('change', syncInput);
+    });
+  }
+
+  function applyTrafficDetourRoadName(roadName, chipEl) {
+    const clean = String(roadName || '').trim();
+    if (!clean) return;
+    const existing = Array.isArray(window.selectedTrafficDetourRoadNames) ? window.selectedTrafficDetourRoadNames : [];
+    const hasValue = existing.includes(clean);
+    const next = hasValue ? existing.filter(v => v !== clean) : [...existing, clean];
+
+    window.selectedTrafficDetourRoadNames = next;
+    if (chipEl) {
+      chipEl.style.background = hasValue ? 'white' : '#e1bee7';
+      chipEl.style.borderColor = hasValue ? '#e1bee7' : '#ba68c8';
+    }
+    updateTrafficSelectedRoadsSummary();
+    calculateDetourOverlay();
+  }
+
+  function applyPedDetourRoadName(roadName, chipEl) {
+    const clean = String(roadName || '').trim();
+    if (!clean) return;
+
+    const existing = Array.isArray(window.selectedPedDetourRoadNames) ? window.selectedPedDetourRoadNames : [];
+    const hasValue = existing.includes(clean);
+    const next = hasValue ? existing.filter(v => v !== clean) : [...existing, clean];
+
+    window.selectedPedDetourRoadNames = next;
+    window.selectedPedDetourRoadName = next.join(' >> ');
+    const pedRouteInput = document.getElementById('pedDetourRouteName');
+    if (pedRouteInput) pedRouteInput.value = window.selectedPedDetourRoadName;
+    updatePedestrianDetourDelayTitle();
+    calculatePedestrianDelay();
+
+    if (chipEl) {
+      chipEl.style.background = hasValue ? 'white' : '#b2dfdb';
+      chipEl.style.borderColor = hasValue ? '#80cbc4' : '#26a69a';
+    }
+  }
+
+  function renderDetourRoadNameChips(roads) {
+    const listEl = document.getElementById('detourNearbyRoadsList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (!roads.length) {
+      listEl.innerHTML = '<span style="color: #c30000;">No named roads found in map radius.</span>';
+      return;
+    }
+
+    const selected = new Set(Array.isArray(window.selectedTrafficDetourRoadNames) ? window.selectedTrafficDetourRoadNames : []);
+    roads.forEach(road => {
+      const chip = document.createElement('span');
+      const isSelected = selected.has(road);
+      chip.textContent = road;
+      chip.style.cssText = `background: ${isSelected ? '#e1bee7' : 'white'}; padding: 3px 10px; border-radius: 12px; border: 1px solid ${isSelected ? '#ba68c8' : '#e1bee7'}; cursor: pointer;`;
+      chip.title = 'Click to add/remove this traffic detour street';
+      chip.dataset.roadChip = 'detour';
+      chip.addEventListener('click', () => applyTrafficDetourRoadName(road, chip));
+      listEl.appendChild(chip);
+    });
+
+    updateTrafficSelectedRoadsSummary();
+  }
+
+  function renderPedRoadNameChips(roads) {
+    const listEl = document.getElementById('pedNearbyRoadsList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (!roads.length) {
+      listEl.innerHTML = '<span style="color: #c30000;">No named roads found in map radius.</span>';
+      return;
+    }
+
+    const selected = new Set(Array.isArray(window.selectedPedDetourRoadNames) ? window.selectedPedDetourRoadNames : []);
+    roads.forEach(road => {
+      const chip = document.createElement('span');
+      const isSelected = selected.has(road);
+      chip.textContent = road;
+      chip.style.cssText = `background: ${isSelected ? '#b2dfdb' : 'white'}; padding: 3px 10px; border-radius: 12px; border: 1px solid ${isSelected ? '#26a69a' : '#80cbc4'}; cursor: pointer;`;
+      chip.title = 'Click to use this pedestrian detour street';
+      chip.dataset.roadChip = 'ped';
+      chip.addEventListener('click', () => applyPedDetourRoadName(road, chip));
+      listEl.appendChild(chip);
+    });
+
+    updatePedestrianDetourDelayTitle();
+  }
+
+  async function scanDetourNearbyRoads(latArg, lonArg) {
+    updateDetourNearbyRoadRadiusLabel();
+    const listEl = document.getElementById('detourNearbyRoadsList');
+    const radiusMeters = getDetourNearbyRoadRadiusMeters();
+    const fallbackCoords = getDetourPrimaryCoordinates();
+    const lat = Number.isFinite(Number(latArg)) ? Number(latArg) : (fallbackCoords ? fallbackCoords.lat : NaN);
+    const lon = Number.isFinite(Number(lonArg)) ? Number(lonArg) : (fallbackCoords ? fallbackCoords.lon : NaN);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      if (listEl) listEl.innerHTML = '<span style="color: #8e24aa;">Select a primary site/search first.</span>';
+      return;
+    }
+
+    lastDetourRoadScanContext = { lat, lon };
+
+    if (listEl) listEl.innerHTML = '<span style="color: #8e24aa;">Scanning map...</span>';
+
+    const roads = await getAllRoadsFromMap(lat, lon, radiusMeters);
+    renderDetourRoadNameChips(roads);
+  }
+
+  async function scanPedNearbyRoads(latArg, lonArg) {
+    updatePedNearbyRoadRadiusLabel();
+    const listEl = document.getElementById('pedNearbyRoadsList');
+    const radiusMeters = getPedNearbyRoadRadiusMeters();
+    const fallbackCoords = getDetourPrimaryCoordinates();
+    const lat = Number.isFinite(Number(latArg)) ? Number(latArg) : (fallbackCoords ? fallbackCoords.lat : NaN);
+    const lon = Number.isFinite(Number(lonArg)) ? Number(lonArg) : (fallbackCoords ? fallbackCoords.lon : NaN);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      if (listEl) listEl.innerHTML = '<span style="color: #4db6ac;">Select a primary site/search first.</span>';
+      return;
+    }
+
+    lastPedRoadScanContext = { lat, lon };
+    if (listEl) listEl.innerHTML = '<span style="color: #4db6ac;">Scanning map...</span>';
+
+    const roads = await getAllRoadsFromMap(lat, lon, radiusMeters);
+    renderPedRoadNameChips(roads);
+  }
+
+  window.scanDetourNearbyRoads = scanDetourNearbyRoads;
+  window.scanPedNearbyRoads = scanPedNearbyRoads;
+
   async function populateDetourDropdown() {
     const listEl = document.getElementById('detourListContainer');
     if (!listEl) return;
@@ -5766,14 +6308,52 @@
       return;
     }
 
+    const detourContextKey = `${primaryIdToSkip || 'custom'}|${Number(pLat).toFixed(5)}|${Number(pLon).toFixed(5)}`;
+    if (window.lastDetourPrimaryContextKey && window.lastDetourPrimaryContextKey !== detourContextKey) {
+      window.selectedDetourSiteIds = [];
+      window.selectedDetourSiteId = null;
+      window.selectedTrafficDetourRoadNames = [];
+      if (typeof clearRouteMeasurement === 'function') clearRouteMeasurement();
+      updateTrafficSelectedRoadsSummary();
+    }
+    window.lastDetourPrimaryContextKey = detourContextKey;
+
+    const localCounterMatchRadiusMeters = getDetourCounterMatchRadiusMeters();
+
+    scanDetourNearbyRoads(pLat, pLon);
+    scanPedNearbyRoads(pLat, pLon);
+
+    const detourRoadNameById = {};
+
     const selectDetourOption = (detourId) => {
       if (!detourId || !macroSitesData[detourId]) return;
-      document.querySelectorAll('.detour-list-item').forEach(el => el.classList.remove('selected'));
-      const matched = listEl.querySelector(`.detour-list-item[data-detour-id="${detourId}"]`);
-      if (matched) matched.classList.add('selected');
+      const selectedIds = Array.isArray(window.selectedDetourSiteIds) ? [...window.selectedDetourSiteIds] : [];
+      const idx = selectedIds.indexOf(detourId);
+      if (idx >= 0) {
+        selectedIds.splice(idx, 1);
+      } else {
+        selectedIds.push(detourId);
+      }
+
+      window.selectedDetourSiteIds = selectedIds;
+      window.selectedDetourSiteId = selectedIds[0] || null;
+
+      document.querySelectorAll('.detour-list-item').forEach(el => {
+        const rowId = String(el.dataset.detourId || '');
+        if (rowId && selectedIds.includes(rowId)) {
+          el.classList.add('selected');
+        } else {
+          el.classList.remove('selected');
+        }
+      });
+
       const detourSelectEl = document.getElementById('detourSiteSelect');
-      if (detourSelectEl) detourSelectEl.value = detourId;
-      window.selectedDetourSiteId = detourId;
+      if (detourSelectEl) detourSelectEl.value = selectedIds[0] || '';
+
+      window.selectedTrafficDetourRoadNames = selectedIds.map(id =>
+        String(detourRoadNameById[id] || (macroSitesData[id] && (macroSitesData[id].road_name || macroSitesData[id].description)) || '').trim()
+      ).filter(Boolean);
+      updateTrafficSelectedRoadsSummary();
       calculateDetourOverlay();
     };
 
@@ -5811,7 +6391,7 @@
         }
 
         if (!clickableLayer) return;
-        const tip = canSelect ? `${itemData.label} (Click to select detour)` : `${itemData.label} (No counter mapping)`;
+        const tip = canSelect ? `${itemData.label} (Click to add/remove detour segment)` : `${itemData.label} (No counter mapping)`;
         clickableLayer.bindTooltip(tip);
 
         if (canSelect) {
@@ -5862,7 +6442,7 @@
       lon: Number(s.longitude),
       roadName: String(s.road_name || s.description || '').trim(),
       roadStd: standardizeRoadName(s.road_name || s.description)
-    })).filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon) && s.roadStd && (!primaryIdToSkip || s.id !== primaryIdToSkip));
+    })).filter(s => Number.isFinite(s.lat) && Number.isFinite(s.lon) && s.roadStd && (!primaryIdToSkip || s.id !== primaryIdToSkip) && haversineDistance(pLat, pLon, s.lat, s.lon) <= localCounterMatchRadiusMeters);
 
     const pickBestCounterForRoad = (roadName, roadLat, roadLon) => {
       const target = String(roadName || '').trim();
@@ -5874,6 +6454,7 @@
         const overlap = tokenOverlapScore(target, c.roadName || c.roadStd || '');
         if (overlap < 0.22) return;
         const distToPrimary = haversineDistance(pLat, pLon, c.lat, c.lon);
+        if (distToPrimary > localCounterMatchRadiusMeters) return;
         const distToRoad = (Number.isFinite(roadLat) && Number.isFinite(roadLon)) ? haversineDistance(roadLat, roadLon, c.lat, c.lon) : distToPrimary;
         const distanceScore = Math.max(0, 1 - (Math.min(distToRoad, 6000) / 6000));
         const score = (overlap * 0.75) + (distanceScore * 0.25);
@@ -5889,7 +6470,7 @@
       listEl.innerHTML = '';
       const hasAny = groups.some(g => g.items.length > 0);
       if (!hasAny) {
-        listEl.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">-- No distinct nearby data points found --</div>';
+        listEl.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">-- No distinct nearby data points found --<br><span style="font-size: 0.82em; color: #8e24aa;">Use selected road names + manual Base VPD inputs below.</span></div>';
         return;
       }
 
@@ -5909,6 +6490,12 @@
           item.className = 'detour-list-item';
           if (itemData.id) item.dataset.detourId = itemData.id;
           if (!itemData.id) item.style.opacity = '0.7';
+          if (itemData.id) {
+            detourRoadNameById[itemData.id] = String(itemData.label || '').trim();
+            if (Array.isArray(window.selectedDetourSiteIds) && window.selectedDetourSiteIds.includes(itemData.id)) {
+              item.classList.add('selected');
+            }
+          }
           item.innerHTML = `
             <div style="font-weight: bold; color: #4a148c; font-size: 0.95em; margin-bottom: 2px;">${itemData.label}</div>
             <div style="font-size: 0.8em; color: #666; display: flex; justify-content: space-between; gap: 8px;">
@@ -5928,7 +6515,7 @@
     };
 
     try {
-      const overpassQuery = `[out:json][timeout:15];way(around:3500,${pLat},${pLon})[highway][name];out tags center geom 300;`;
+      const overpassQuery = `[out:json][timeout:15];way(around:${Math.round(localCounterMatchRadiusMeters)},${pLat},${pLon})[highway][name];out tags center geom 300;`;
       const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
       const response = await fetch(overpassUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -5946,7 +6533,7 @@
         if (!std || (primaryRoadStd && std === primaryRoadStd) || seenNames.has(std)) return;
         seenNames.add(std);
         const dist = haversineDistance(pLat, pLon, lat, lon);
-        if (dist > 5000) return;
+        if (dist > localCounterMatchRadiusMeters) return;
         const side = classifySide(bearingDeg(pLat, pLon, lat, lon));
         const geometry = Array.isArray(e && e.geometry)
           ? e.geometry
@@ -5995,7 +6582,7 @@
         const dist = haversineDistance(pLat, pLon, c.lat, c.lon);
         const side = classifySide(bearingDeg(pLat, pLon, c.lat, c.lon));
         return { id: c.id, data: c.data, label: c.roadName, dist, side };
-      }).filter(r => r.dist <= 5000)
+      }).filter(r => r.dist <= localCounterMatchRadiusMeters)
         .sort((a, b) => a.dist - b.dist);
 
       const seenRoads = new Set();
@@ -6031,19 +6618,257 @@
   }
 
   // ===== DETAILED DETOUR ROUTE CAPACITY LOGIC =====
-  function calculateDetourOverlay() {
-    const detourSiteId = window.selectedDetourSiteId; // Uses the global variable set by the list click
-    const diversionRate = (Number(document.getElementById('detourDiversionRate').value) || 80) / 100;
-    const resultsPanel = document.getElementById('detourResults');
-    
-    if (!detourSiteId || !macroSitesData[detourSiteId]) {
-      if (resultsPanel) resultsPanel.style.display = 'none';
-      return; // Silently exit if no detour is selected yet
+  function getCurrentDetourDirectionLabels() {
+    const site = selectedMacroSite && macroSitesData[selectedMacroSite] ? macroSitesData[selectedMacroSite] : null;
+    const d1Label = String(
+      (site && site.d1_direction_label)
+      || (window.selectedTiaData && (window.selectedTiaData.d1_direction_label || window.selectedTiaData.avgD1Label))
+      || (customDirectionContext && customDirectionContext.d1Label)
+      || 'Direction 1'
+    ).trim();
+    const d2Label = String(
+      (site && site.d2_direction_label)
+      || (window.selectedTiaData && (window.selectedTiaData.d2_direction_label || window.selectedTiaData.avgD2Label))
+      || (customDirectionContext && customDirectionContext.d2Label)
+      || 'Direction 2'
+    ).trim();
+    return { d1Label, d2Label };
+  }
+
+  function updateDetourClosureUi() {
+    const closureTypeEl = document.getElementById('detourClosureType');
+    const closedDirectionWrap = document.getElementById('detourClosedDirectionWrap');
+    const closedDirectionEl = document.getElementById('detourClosedDirection');
+    const diversionRateEl = document.getElementById('detourDiversionRate');
+    const mode = String((closureTypeEl && closureTypeEl.value) || 'oneway').toLowerCase();
+    const isOneWay = mode === 'oneway';
+
+    if (closedDirectionWrap) closedDirectionWrap.style.display = isOneWay ? 'block' : 'none';
+
+    if (diversionRateEl) {
+      diversionRateEl.value = '100';
+      diversionRateEl.disabled = true;
+      diversionRateEl.style.opacity = '0.8';
+      diversionRateEl.style.cursor = 'not-allowed';
     }
 
-    const detourSite = macroSitesData[detourSiteId];
-    if (resultsPanel) resultsPanel.style.display = 'block';
-    document.getElementById('detourRouteName').textContent = `Evaluating Detour: ${detourSite.road_name || detourSite.description}`;
+    if (closedDirectionEl) {
+      const { d1Label, d2Label } = getCurrentDetourDirectionLabels();
+      const d1Option = closedDirectionEl.querySelector('option[value="D1"]');
+      const d2Option = closedDirectionEl.querySelector('option[value="D2"]');
+      if (d1Option) d1Option.textContent = `${d1Label} (D1)`;
+      if (d2Option) d2Option.textContent = `${d2Label} (D2)`;
+    }
+  }
+
+  window.updateDetourClosureUi = updateDetourClosureUi;
+
+  // --- INTERACTIVE ROUTE MEASUREMENT MODULE ---
+  function updateDetourLengthModeUi() {
+    const modeEl = document.getElementById('routeMeasureMode');
+    const mode = String((modeEl && modeEl.value) || 'autocalculate');
+    const kmInput = document.getElementById('detourRouteLengthKm');
+    const helpEl = document.getElementById('routeMeasureModeHelp');
+
+    if (kmInput) {
+      const isManual = mode === 'manual_entry';
+      kmInput.readOnly = !isManual;
+      kmInput.style.background = isManual ? '#fff' : '#f3f4f6';
+      kmInput.style.cursor = isManual ? 'text' : 'not-allowed';
+    }
+
+    if (helpEl) {
+      if (mode === 'manual_entry') {
+        helpEl.textContent = 'Type detour length directly in km.';
+      } else if (mode === 'drop_points') {
+        helpEl.textContent = 'Drop points on map to measure straight-line path.';
+      } else {
+        helpEl.textContent = 'Drop points on map to auto-calculate route along road network.';
+      }
+    }
+  }
+
+  function setupRouteMeasurement(targetMap) {
+    if (!targetMap || targetMap.__routeMeasurementBound) return;
+    targetMap.__routeMeasurementBound = true;
+
+    targetMap.on('click', async function(e) {
+      const modeEl = document.getElementById('routeMeasureMode');
+      const mode = String((modeEl && modeEl.value) || 'autocalculate');
+      if (mode === 'manual_entry') return;
+      const latlng = e.latlng;
+
+      routePoints.push(latlng);
+      const marker = L.marker(latlng, {
+        icon: L.divIcon({ className: 'route-node-icon', html: '🔵', iconSize: [16, 16] })
+      }).addTo(targetMap);
+      routeMarkers.push(marker);
+
+      if (routePoints.length < 2) return;
+
+      if (activeRouteLayer) {
+        targetMap.removeLayer(activeRouteLayer);
+        activeRouteLayer = null;
+      }
+
+      if (mode === 'drop_points') {
+        activeRouteLayer = L.polyline(routePoints, { color: '#8e24aa', weight: 5, dashArray: '10, 10' }).addTo(targetMap);
+
+        let totalDist = 0;
+        for (let i = 0; i < routePoints.length - 1; i++) {
+          totalDist += routePoints[i].distanceTo(routePoints[i + 1]);
+        }
+
+        const distanceMeters = Math.max(0, Number(totalDist) || 0);
+        const distanceEl = document.getElementById('routeDistanceDisplay');
+        if (distanceEl) distanceEl.innerText = `${Math.round(distanceMeters)} m`;
+        const kmInput = document.getElementById('detourRouteLengthKm');
+        if (kmInput) kmInput.value = String(numberRoundUp(distanceMeters / 1000, 3));
+        calculateDetourOverlay();
+      } else if (mode === 'autocalculate') {
+        const profile = 'driving';
+        const coordsString = routePoints.map(p => `${p.lng},${p.lat}`).join(';');
+        const url = `https://router.project-osrm.org/route/v1/${profile}/${coordsString}?overview=full&geometries=geojson`;
+
+        try {
+          const distanceEl = document.getElementById('routeDistanceDisplay');
+          if (distanceEl) distanceEl.innerText = 'Calculating...';
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data && data.code === 'Ok' && data.routes && data.routes[0] && data.routes[0].geometry) {
+            const routeGeoJSON = data.routes[0].geometry;
+            const roadColor = profile === 'driving' ? '#1565c0' : '#2e7d32';
+
+            activeRouteLayer = L.geoJSON(routeGeoJSON, {
+              style: { color: roadColor, weight: 6, opacity: 0.8 }
+            }).addTo(targetMap);
+
+            const distanceMeters = Math.max(0, Number(data.routes[0].distance) || 0);
+            if (distanceEl) distanceEl.innerText = `${Math.round(distanceMeters)} m`;
+            const kmInput = document.getElementById('detourRouteLengthKm');
+            if (kmInput) kmInput.value = String(numberRoundUp(distanceMeters / 1000, 3));
+            calculateDetourOverlay();
+          } else {
+            alert('Could not find a valid road/path between those points.');
+            if (distanceEl) distanceEl.innerText = 'Error';
+          }
+        } catch (err) {
+          console.error('Routing error:', err);
+          const distanceEl = document.getElementById('routeDistanceDisplay');
+          if (distanceEl) distanceEl.innerText = 'Error';
+        }
+      }
+    });
+  }
+
+  window.setupRouteMeasurement = setupRouteMeasurement;
+
+  function updateRouteDistanceDisplay() {
+    const distanceEl = document.getElementById('routeDistanceDisplay');
+    const kmInput = document.getElementById('detourRouteLengthKm');
+    if (!distanceEl) return;
+    const km = Math.max(0, Number(kmInput && kmInput.value) || 0);
+    const meters = km * 1000;
+    if (meters < 1000) {
+      distanceEl.textContent = `${numberRoundUp(meters, 0)} m`;
+    } else {
+      distanceEl.textContent = `${numberRoundUp(km, 2)} km`;
+    }
+  }
+
+  function clearRouteMeasurement(options = {}) {
+    const keepMode = !!(options && options.keepMode);
+    const keepDistance = !!(options && options.keepDistance);
+    routePoints = [];
+    routeMarkers.forEach(m => {
+      try { m.remove(); } catch (_) {}
+    });
+    routeMarkers = [];
+    if (activeRouteLayer) {
+      try { activeRouteLayer.remove(); } catch (_) {}
+      activeRouteLayer = null;
+    }
+
+    const kmInput = document.getElementById('detourRouteLengthKm');
+    const modeEl = document.getElementById('routeMeasureMode');
+    if (kmInput && !keepDistance) kmInput.value = '0';
+    if (modeEl && !keepMode) modeEl.value = 'autocalculate';
+    const distanceEl = document.getElementById('routeDistanceDisplay');
+    if (distanceEl && !keepDistance) distanceEl.innerText = '0 m';
+    updateDetourLengthModeUi();
+    calculateDetourOverlay();
+  }
+
+  window.clearRouteMeasurement = clearRouteMeasurement;
+
+  const routeMeasureModeEl = document.getElementById('routeMeasureMode');
+  if (routeMeasureModeEl) {
+    updateDetourLengthModeUi();
+    routeMeasureModeEl.addEventListener('change', () => {
+      const currentMode = String(routeMeasureModeEl.value || 'autocalculate');
+      clearRouteMeasurement({ keepMode: true, keepDistance: currentMode === 'manual_entry' });
+    });
+  }
+
+  function buildManualDetourProfile(baseVpd) {
+    return buildSyntheticHourlyFromDaily(baseVpd);
+  }
+
+  function renderDetourRoadVpdSummary(detourModels, divertedVpdTotal) {
+    const summaryEl = document.getElementById('detourRoadVpdSummary');
+    if (!summaryEl) return;
+
+    if (!Array.isArray(detourModels) || !detourModels.length) {
+      summaryEl.style.display = 'none';
+      summaryEl.innerHTML = '';
+      return;
+    }
+
+    const perRoadDivertedVpd = Math.max(0, Number(divertedVpdTotal) || 0) / detourModels.length;
+    const rows = detourModels.map(model => {
+      const roadName = String(model.roadName || (model.site && (model.site.road_name || model.site.description)) || 'Detour road').trim();
+      const baseVpd = Math.max(0, Number(model.baseVpd) || 0);
+      const futureVpd = Math.round(baseVpd + perRoadDivertedVpd);
+      const sourceLabel = model.sourceType === 'manual' ? 'Manual' : 'Counter';
+      return `<tr><td style="padding: 4px 6px; border-bottom: 1px solid #e1bee7;">${roadName}</td><td style="padding: 4px 6px; border-bottom: 1px solid #e1bee7; text-align: right;">${Math.round(baseVpd).toLocaleString()}</td><td style="padding: 4px 6px; border-bottom: 1px solid #e1bee7; text-align: right;">+${Math.round(perRoadDivertedVpd).toLocaleString()}</td><td style="padding: 4px 6px; border-bottom: 1px solid #e1bee7; text-align: right; font-weight: 700;">${futureVpd.toLocaleString()}</td><td style="padding: 4px 6px; border-bottom: 1px solid #e1bee7; text-align: center;">${sourceLabel}</td></tr>`;
+    }).join('');
+
+    summaryEl.style.display = 'block';
+    summaryEl.innerHTML = `
+      <div style="font-weight: 700; color: #4a148c; margin-bottom: 6px;">Base VPD and Future VPD on Selected Detour Roads</div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8em; color: #4a148c;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 4px 6px; border-bottom: 1px solid #ce93d8;">Road</th>
+            <th style="text-align: right; padding: 4px 6px; border-bottom: 1px solid #ce93d8;">Base VPD</th>
+            <th style="text-align: right; padding: 4px 6px; border-bottom: 1px solid #ce93d8;">Diverted VPD</th>
+            <th style="text-align: right; padding: 4px 6px; border-bottom: 1px solid #ce93d8;">Future VPD</th>
+            <th style="text-align: center; padding: 4px 6px; border-bottom: 1px solid #ce93d8;">Source</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function calculateDetourOverlay() {
+    updateDetourClosureUi();
+    updateRouteDistanceDisplay();
+    const selectedRoadPath = Array.isArray(window.selectedTrafficDetourRoadNames)
+      ? window.selectedTrafficDetourRoadNames.map(v => String(v || '').trim()).filter(Boolean)
+      : [];
+    const selectedIdsRaw = Array.isArray(window.selectedDetourSiteIds) && window.selectedDetourSiteIds.length
+      ? window.selectedDetourSiteIds
+      : (window.selectedDetourSiteId ? [window.selectedDetourSiteId] : []);
+    const detourSiteIds = selectedIdsRaw.filter(id => !!(id && macroSitesData[id]));
+
+    const closureType = String((document.getElementById('detourClosureType') && document.getElementById('detourClosureType').value) || 'oneway').toLowerCase();
+    const closedDirection = String((document.getElementById('detourClosedDirection') && document.getElementById('detourClosedDirection').value) || 'D1').toUpperCase();
+    const diversionRate = 1; // business rule requested: divert 100% of affected traffic
+    const resultsPanel = document.getElementById('detourResults');
+    const delayEstimateEl = document.getElementById('detourDelayEstimate');
     
     // Get Primary Coordinates
     let pLat, pLon;
@@ -6058,26 +6883,142 @@
       pLon = Number(window.selectedTiaData.lon);
     }
 
+    if (!Number.isFinite(pLat) || !Number.isFinite(pLon)) {
+      if (resultsPanel) resultsPanel.style.display = 'none';
+      if (delayEstimateEl) delayEstimateEl.textContent = 'Estimated delay per diverted vehicle: -';
+      renderDetourManualVpdPanel([]);
+      renderDetourRoadVpdSummary([], 0);
+      return;
+    }
+
+    const localCounterMatchRadiusMeters = getDetourCounterMatchRadiusMeters();
+    const detourSiteIdsLocal = detourSiteIds.filter(id => {
+      const site = macroSitesData[id];
+      if (!site) return false;
+      const dLat = Number(site.latitude);
+      const dLon = Number(site.longitude);
+      if (!Number.isFinite(dLat) || !Number.isFinite(dLon)) return false;
+      return haversineDistance(pLat, pLon, dLat, dLon) <= localCounterMatchRadiusMeters;
+    });
+
+    const candidateSites = Object.entries(macroSitesData || {}).map(([id, site]) => ({
+      id,
+      site,
+      roadName: String((site && (site.road_name || site.description)) || '').trim(),
+      roadStd: standardizeRoadName((site && (site.road_name || site.description)) || ''),
+      lat: Number(site && site.latitude),
+      lon: Number(site && site.longitude)
+    })).filter(item => item.roadStd && Number.isFinite(item.lat) && Number.isFinite(item.lon) && haversineDistance(pLat, pLon, item.lat, item.lon) <= localCounterMatchRadiusMeters);
+
+    const usedSiteIds = new Set();
+    const roadMatchedSites = [];
+    selectedRoadPath.forEach(road => {
+      const roadStd = standardizeRoadName(road);
+      let best = null;
+      let bestScore = -1;
+
+      candidateSites.forEach(c => {
+        if (usedSiteIds.has(c.id)) return;
+        const overlap = tokenOverlapScore(road, c.roadName || c.roadStd || '');
+        if (overlap < 0.22) return;
+        const exactBonus = roadStd && c.roadStd === roadStd ? 0.35 : 0;
+        const distToPrimary = (Number.isFinite(pLat) && Number.isFinite(pLon))
+          ? haversineDistance(pLat, pLon, c.lat, c.lon)
+          : 0;
+        const distanceScore = Math.max(0, 1 - (Math.min(distToPrimary, 6000) / 6000));
+        const score = (overlap * 0.75) + (distanceScore * 0.25) + exactBonus;
+        if (score > bestScore) {
+          bestScore = score;
+          best = c;
+        }
+      });
+
+      if (best && !usedSiteIds.has(best.id)) {
+        usedSiteIds.add(best.id);
+        roadMatchedSites.push({
+          id: best.id,
+          road,
+          site: best.site
+        });
+      }
+    });
+
+    const detourSiteIdsFinal = roadMatchedSites.length
+      ? roadMatchedSites.map(v => v.id)
+      : (selectedRoadPath.length ? [] : detourSiteIdsLocal);
+
+    window.selectedDetourSiteIds = detourSiteIdsFinal;
+    window.selectedDetourSiteId = detourSiteIdsFinal[0] || null;
+
+    const detourSites = roadMatchedSites.length
+      ? roadMatchedSites.map(v => v.site).filter(Boolean)
+      : detourSiteIdsFinal.map(id => macroSitesData[id]).filter(Boolean);
+
+    const matchedRoadsByKey = new Map();
+    roadMatchedSites.forEach(item => {
+      const key = getDetourManualRoadKey(item.road);
+      if (key && item.site) matchedRoadsByKey.set(key, item.site);
+    });
+
+    const unmatchedSelectedRoads = selectedRoadPath.filter(road => !matchedRoadsByKey.has(getDetourManualRoadKey(road)));
+    unmatchedSelectedRoads.forEach(roadName => {
+      const key = getDetourManualRoadKey(roadName);
+      if (!key) return;
+      const manualInput = getDetourManualRoadInput(roadName) || { lanes: 2 };
+      const estimate = estimateDetourRoadBaseVpd(roadName, pLat, pLon);
+      manualInput.baseVpd = Math.max(0, Number(estimate.baseVpd) || 0);
+      manualInput.estimateMeta = estimate;
+      window.detourManualRoadInputs[key] = manualInput;
+    });
+    renderDetourManualVpdPanel(unmatchedSelectedRoads);
+
+    if (resultsPanel) resultsPanel.style.display = 'block';
+    const selectedName = getCurrentTrafficDetourRoadName();
+    const fallbackName = detourSites.map(s => String(s.road_name || s.description || '').trim()).filter(Boolean).join(' >> ');
+    const displayRoadName = selectedName || fallbackName || '-';
+    document.getElementById('detourRouteName').textContent = `Evaluating Detour: ${displayRoadName}`;
+    updateTrafficSelectedRoadsSummary();
+
     // --- MAP VISUALIZATION ---
     if (detourMapInstance && detourMapLayer) {
       detourMapLayer.clearLayers();
-      const dLat = Number(detourSite.latitude);
-      const dLon = Number(detourSite.longitude);
+      if (pLat && pLon) {
+        const boundsPoints = [[pLat, pLon]];
+        L.circleMarker([pLat, pLon], { radius: 8, color: '#1f5e63', fillColor: '#1f5e63', fillOpacity: 1 }).bindTooltip('Primary Location').addTo(detourMapLayer);
 
-      if (pLat && pLon && dLat && dLon) {
-        // Draw Primary Site
-        L.circleMarker([pLat, pLon], { radius: 8, color: '#1f5e63', fillColor: '#1f5e63', fillOpacity: 1 }).bindTooltip(`Primary Location`).addTo(detourMapLayer);
-        // Draw Detour Site
-        L.circleMarker([dLat, dLon], { radius: 8, color: '#6a1b9a', fillColor: '#ce93d8', fillOpacity: 0.9, weight: 2 }).bindTooltip(`Detour: ${detourSite.road_name}`).addTo(detourMapLayer);
-        // Draw Dashed Connecting Line
-        const detourLine = L.polyline([[pLat, pLon], [dLat, dLon]], { color: '#8e24aa', weight: 3, opacity: 0.8, dashArray: '8, 8' }).addTo(detourMapLayer);
-        
-        detourMapInstance.fitBounds(detourLine.getBounds(), { padding: [40, 40], maxZoom: 16 });
+        detourSites.forEach((site, idx) => {
+          const dLat = Number(site.latitude);
+          const dLon = Number(site.longitude);
+          if (!Number.isFinite(dLat) || !Number.isFinite(dLon)) return;
+          const roadLabel = String(site.road_name || site.description || `Detour ${idx + 1}`);
+          L.circleMarker([dLat, dLon], { radius: 8, color: '#6a1b9a', fillColor: '#ce93d8', fillOpacity: 0.9, weight: 2 }).bindTooltip(`Detour: ${roadLabel}`).addTo(detourMapLayer);
+          L.polyline([[pLat, pLon], [dLat, dLon]], { color: '#8e24aa', weight: 3, opacity: 0.7, dashArray: '8, 8' }).addTo(detourMapLayer);
+          boundsPoints.push([dLat, dLon]);
+        });
+
+        if (boundsPoints.length > 1) {
+          detourMapInstance.fitBounds(boundsPoints, { padding: [40, 40], maxZoom: 16 });
+        } else {
+          detourMapInstance.setView([pLat, pLon], 14);
+        }
         setTimeout(() => detourMapInstance.invalidateSize(), 50);
       }
     }
     
     // Calculate Volumes
+    const getDirectionalProfile = (site, directionKey, fallbackVadt) => {
+      let profile = new Array(24).fill(0);
+      if (site && site.directions_weekday && Array.isArray(site.directions_weekday[directionKey])) {
+        const src = site.directions_weekday[directionKey] || [];
+        profile = new Array(24).fill(0).map((_, i) => Number(src[i]) || 0);
+      }
+      if (profile.reduce((a, b) => a + b, 0) === 0 && fallbackVadt > 0) {
+        const hrVol = fallbackVadt / 24;
+        profile = new Array(24).fill(hrVol);
+      }
+      return profile;
+    };
+
     const getCombinedProfile = (site, fallbackVadt) => {
       let combined = new Array(24).fill(0);
       if (site && site.directions_weekday) {
@@ -6092,13 +7033,92 @@
       return combined;
     };
 
+    const dtcaYes = txt('DTCA').toUpperCase() === 'YES';
+    const inputVadt = Number(num('VADT')) || 0;
+    const inputD1Vadt = dtcaYes ? (Number(num('D1_VADT')) || (inputVadt / 2)) : (inputVadt / 2);
+    const inputD2Vadt = dtcaYes ? (Number(num('D2_VADT')) || (inputVadt / 2)) : (inputVadt / 2);
+
+    const primaryD1Profile = getDirectionalProfile(primarySite, 'GAZETTAL', inputD1Vadt);
+    const primaryD2Profile = getDirectionalProfile(primarySite, 'AGAINST GAZETTAL', inputD2Vadt);
     const primaryProfile = getCombinedProfile(primarySite, num('VADT'));
-    const detourProfile = getCombinedProfile(detourSite, Number(detourSite.vadt)||0);
-    
-    const detourLanes = Math.max(1, (detourSite.d1_lanes || 1) + (detourSite.d2_lanes || 1));
-    let detourCapacity = (Number(detourSite.vadt || 5000) * 0.12) / detourLanes;
-    if (detourCapacity < 500) detourCapacity = 500; 
-    const totalDetourCapacity = detourCapacity * detourLanes;
+    const detourModels = [];
+    const roadsWithNoEstimate = [];
+
+    if (selectedRoadPath.length) {
+      selectedRoadPath.forEach(roadName => {
+        const roadKey = getDetourManualRoadKey(roadName);
+        const matchedSite = matchedRoadsByKey.get(roadKey);
+        if (matchedSite) {
+          const profile = getCombinedProfile(matchedSite, Number(matchedSite.vadt) || 0);
+          const lanes = Math.max(1, (matchedSite.d1_lanes || 1) + (matchedSite.d2_lanes || 1));
+          let laneCap = (Number(matchedSite.vadt || 5000) * 0.12) / lanes;
+          if (laneCap < 500) laneCap = 500;
+          const totalCapacity = laneCap * lanes;
+          detourModels.push({
+            site: matchedSite,
+            roadName,
+            sourceType: 'counter',
+            baseVpd: Math.max(0, Number(matchedSite.vadt) || 0),
+            profile,
+            totalCapacity
+          });
+          return;
+        }
+
+        const manualInput = getDetourManualRoadInput(roadName);
+        const baseVpd = Math.max(0, Number(manualInput && manualInput.baseVpd) || 0);
+        const lanes = Math.max(1, Number(manualInput && manualInput.lanes) || 2);
+        if (baseVpd <= 0) {
+          roadsWithNoEstimate.push(roadName);
+          return;
+        }
+        const profile = buildManualDetourProfile(baseVpd);
+        const totalCapacity = lanes * 900;
+        detourModels.push({
+          site: null,
+          roadName,
+          sourceType: 'manual',
+          baseVpd,
+          profile,
+          totalCapacity
+        });
+      });
+    } else {
+      detourSites.forEach(site => {
+        const profile = getCombinedProfile(site, Number(site.vadt) || 0);
+        const lanes = Math.max(1, (site.d1_lanes || 1) + (site.d2_lanes || 1));
+        let laneCap = (Number(site.vadt || 5000) * 0.12) / lanes;
+        if (laneCap < 500) laneCap = 500;
+        const totalCapacity = laneCap * lanes;
+        detourModels.push({
+          site,
+          roadName: String(site.road_name || site.description || 'Detour road').trim(),
+          sourceType: 'counter',
+          baseVpd: Math.max(0, Number(site.vadt) || 0),
+          profile,
+          totalCapacity
+        });
+      });
+    }
+
+    const validDetourModels = detourModels.filter(model => model.totalCapacity > 0);
+
+    if (!validDetourModels.length) {
+      const warningText = document.getElementById('detourWarningText');
+      if (warningText) {
+        if (roadsWithNoEstimate.length) {
+          warningText.innerHTML = `No reference counters found within <strong>5 km</strong> to estimate Base VPD for: <strong>${roadsWithNoEstimate.join(', ')}</strong>. Choose different roads.`;
+          warningText.style.color = '#c62828';
+        } else {
+          warningText.innerHTML = 'No valid detour model could be created from the selected roads.';
+          warningText.style.color = '#8e24aa';
+        }
+      }
+      renderDetourRoadVpdSummary([], 0);
+      const tbody = document.getElementById('detourDetailedBody');
+      if (tbody) tbody.innerHTML = '';
+      return;
+    }
 
     const periods = [
       { key: 'AM (7-9)', hours: [7, 8] },
@@ -6110,42 +7130,111 @@
     const tbody = document.getElementById('detourDetailedBody');
     tbody.innerHTML = '';
     let maxNewVcr = 0;
+    let peakDivertedVol = 0;
+
+    const { d1Label, d2Label } = getCurrentDetourDirectionLabels();
+    const closedDirectionLabel = closedDirection === 'D2' ? d2Label : d1Label;
+    const diversionBasisText = closureType === 'oneway'
+      ? `${closedDirectionLabel} closed (100%)`
+      : 'Full road closure (100%)';
 
     periods.forEach(p => {
-      let maxBaseVol = 0;
+      let maxPrimaryD1 = 0;
+      let maxPrimaryD2 = 0;
       let maxPrimaryVol = 0;
       
       p.hours.forEach(h => {
-        if (detourProfile[h] > maxBaseVol) maxBaseVol = detourProfile[h];
+        if (primaryD1Profile[h] > maxPrimaryD1) maxPrimaryD1 = primaryD1Profile[h];
+        if (primaryD2Profile[h] > maxPrimaryD2) maxPrimaryD2 = primaryD2Profile[h];
         if (primaryProfile[h] > maxPrimaryVol) maxPrimaryVol = primaryProfile[h];
       });
 
-      const divertedVol = maxPrimaryVol * diversionRate;
-      const newVol = maxBaseVol + divertedVol;
+      const sourceVol = closureType === 'oneway'
+        ? (closedDirection === 'D2' ? maxPrimaryD2 : maxPrimaryD1)
+        : maxPrimaryVol;
+      const totalDivertedVol = sourceVol * diversionRate;
+      if (totalDivertedVol > peakDivertedVol) peakDivertedVol = totalDivertedVol;
+      const perRoadDivertedVol = totalDivertedVol / validDetourModels.length;
 
-      const baseVcr = maxBaseVol / totalDetourCapacity;
-      const newVcr = newVol / totalDetourCapacity;
+      let baseVcr = 0;
+      let newVcr = 0;
+
+      validDetourModels.forEach(model => {
+        let maxBaseVol = 0;
+        p.hours.forEach(h => {
+          if (model.profile[h] > maxBaseVol) maxBaseVol = model.profile[h];
+        });
+
+        const base = maxBaseVol / model.totalCapacity;
+        const updated = (maxBaseVol + perRoadDivertedVol) / model.totalCapacity;
+        if (base > baseVcr) baseVcr = base;
+        if (updated > newVcr) newVcr = updated;
+      });
+
       if (newVcr > maxNewVcr) maxNewVcr = newVcr;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="rowhead">${p.key}</td>
         <td style="background: ${vcrColor(baseVcr)}; font-weight: bold;">${baseVcr.toFixed(2)} (${losLabel(baseVcr)})</td>
-        <td style="color: #6a1b9a;">+${Math.round(divertedVol).toLocaleString()} vph</td>
+        <td style="color: #6a1b9a;">+${Math.round(totalDivertedVol).toLocaleString()} vph${validDetourModels.length > 1 ? ` (~${Math.round(perRoadDivertedVol).toLocaleString()}/road)` : ''}<br><span style="font-size: 0.75em; color: #8e24aa;">${diversionBasisText}</span></td>
         <td style="background: ${vcrColor(newVcr)}; font-weight: bold;">${newVcr.toFixed(2)} (${losLabel(newVcr)})</td>
       `;
       tbody.appendChild(tr);
     });
 
+    const divertedVpdTotal = closureType === 'oneway'
+      ? (closedDirection === 'D2' ? inputD2Vadt : inputD1Vadt)
+      : inputVadt;
+    renderDetourRoadVpdSummary(validDetourModels, divertedVpdTotal);
+
+    const detourLengthKm = Math.max(0, Number(document.getElementById('detourRouteLengthKm') && document.getElementById('detourRouteLengthKm').value) || 0);
+    const detourAvgSpeedKmh = Math.max(1, Number(document.getElementById('detourAvgSpeedKmh') && document.getElementById('detourAvgSpeedKmh').value) || 55);
+    const controlledInts = Math.max(0, Number(document.getElementById('detourControlledIntCount') && document.getElementById('detourControlledIntCount').value) || 0);
+    const uncontrolledInts = Math.max(0, Number(document.getElementById('detourUncontrolledIntCount') && document.getElementById('detourUncontrolledIntCount').value) || 0);
+    const controlledDelaySec = Math.max(0, Number(document.getElementById('detourControlledDelaySec') && document.getElementById('detourControlledDelaySec').value) || 60);
+    const uncontrolledDelaySec = Math.max(0, Number(document.getElementById('detourUncontrolledDelaySec') && document.getElementById('detourUncontrolledDelaySec').value) || 10);
+
+    const travelTimeHours = detourAvgSpeedKmh > 0 ? (detourLengthKm / detourAvgSpeedKmh) : 0; // P67 = P61/P66
+    const travelTimeSec = travelTimeHours * 60 * 60; // P68 = P67*60*60
+    const intersectionDelaySec = (controlledInts * controlledDelaySec) + (uncontrolledInts * uncontrolledDelaySec);
+    const totalTimeSec = Math.max(0, travelTimeSec + intersectionDelaySec); // P69
+    const totalTimeMinRaw = totalTimeSec / 60;
+    const estimatedDelayMin = (numberRoundUp(totalTimeMinRaw, 0) < totalTimeMinRaw)
+      ? numberRoundUp(totalTimeMinRaw, 1)
+      : numberRoundUp(totalTimeMinRaw, 0); // P70
+    const peakHourDelayHours = (peakDivertedVol * totalTimeSec) / 3600;
+
+    if (delayEstimateEl) {
+      delayEstimateEl.innerHTML = `
+        <div style="font-weight: 700; color: #4a148c; margin-bottom: 6px;">Estimated Delay - Detour route (${displayRoadName})</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.78em; color: #4a148c;">
+          <tbody>
+            <tr><td style="padding: 2px 4px;">Detour Route</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(detourLengthKm, 3)}</td><td style="padding: 2px 4px;">km</td><td style="padding: 2px 4px; color: #8e24aa;">(approx.)</td></tr>
+            <tr><td style="padding: 2px 4px;"># controlled intersections</td><td style="padding: 2px 4px; text-align: right;">${controlledInts}</td><td style="padding: 2px 4px;"></td><td style="padding: 2px 4px;"></td></tr>
+            <tr><td style="padding: 2px 4px;"># uncontrolled intersections</td><td style="padding: 2px 4px; text-align: right;">${uncontrolledInts}</td><td style="padding: 2px 4px;"></td><td style="padding: 2px 4px;"></td></tr>
+            <tr><td style="padding: 2px 4px;">Delay @ uncontrolled intersections</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(uncontrolledDelaySec, 0)}</td><td style="padding: 2px 4px;">s</td><td style="padding: 2px 4px; color: #8e24aa;">(assumed)</td></tr>
+            <tr><td style="padding: 2px 4px;">Delay @ controlled intersections</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(controlledDelaySec, 0)}</td><td style="padding: 2px 4px;">s</td><td style="padding: 2px 4px;"></td></tr>
+            <tr><td style="padding: 2px 4px;">avg. speed</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(detourAvgSpeedKmh, 0)}</td><td style="padding: 2px 4px;">km/hr</td><td style="padding: 2px 4px; color: #8e24aa;">(assumed)</td></tr>
+            <tr><td style="padding: 2px 4px;">travel time</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(travelTimeHours, 4)}</td><td style="padding: 2px 4px;">hrs</td><td style="padding: 2px 4px; color: #8e24aa;">=P61/P66</td></tr>
+            <tr><td style="padding: 2px 4px;"></td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(travelTimeSec, 2)}</td><td style="padding: 2px 4px;">s</td><td style="padding: 2px 4px; color: #8e24aa;">=P67*60*60</td></tr>
+            <tr><td style="padding: 2px 4px;">total time</td><td style="padding: 2px 4px; text-align: right;">${numberRoundUp(totalTimeSec, 2)}</td><td style="padding: 2px 4px;">s</td><td style="padding: 2px 4px; color: #8e24aa;">=P68+(P62*P65)+(P63*P64)</td></tr>
+            <tr><td style="padding: 2px 4px;"></td><td style="padding: 2px 4px; text-align: right; font-weight: 700;">${estimatedDelayMin}</td><td style="padding: 2px 4px;">minutes</td><td style="padding: 2px 4px; color: #8e24aa;">(Estimated)</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 6px; font-size: 0.76em; color: #8e24aa;">Peak-hour network delay ≈ ${peakHourDelayHours.toFixed(1)} veh-hr (using worst diverted hourly volume).</div>
+      `;
+    }
+
     const warningText = document.getElementById('detourWarningText');
     if (maxNewVcr > 1.0) {
-      warningText.innerHTML = `⚠️ <strong>Warning:</strong> The detour route will operate over capacity during at least one period.`;
+      warningText.innerHTML = `⚠️ <strong>Warning:</strong> The selected ${validDetourModels.length} detour segment(s) operate over capacity during at least one period (worst segment shown). Mode: <strong>${diversionBasisText}</strong>.`;
       warningText.style.color = '#c30000';
     } else if (maxNewVcr > 0.85) {
-      warningText.innerHTML = `⚠️ <strong>Caution:</strong> The detour route will experience heavy congestion.`;
+      warningText.innerHTML = `⚠️ <strong>Caution:</strong> The selected ${validDetourModels.length} detour segment(s) will experience heavy congestion (worst segment shown). Mode: <strong>${diversionBasisText}</strong>.`;
       warningText.style.color = '#e65100';
     } else {
-      warningText.innerHTML = `✅ The detour route has sufficient capacity across all periods.`;
+      warningText.innerHTML = `✅ The selected ${validDetourModels.length} detour segment(s) have sufficient capacity across all periods. Mode: <strong>${diversionBasisText}</strong>.`;
       warningText.style.color = '#2e7d32';
     }
   }
@@ -6197,8 +7286,81 @@
     totalHoursEl.textContent = totalDelayHours > 0 ? `${Math.round(totalDelayHours).toLocaleString()} hrs` : '0 hrs';
   }
 
+  (function setupDetourNearbyRoadRadiusSlider() {
+    const sliderEl = document.getElementById('detourNearbyRoadRadius');
+    const inputEl = document.getElementById('detourNearbyRoadRadiusInput');
+    if (!sliderEl) return;
+
+    const updateAndMaybeRescan = (shouldRescan) => {
+      if (inputEl) inputEl.value = String(getDetourNearbyRoadRadiusMeters());
+      updateDetourNearbyRoadRadiusLabel();
+      if (shouldRescan && lastDetourRoadScanContext) {
+        scanDetourNearbyRoads(lastDetourRoadScanContext.lat, lastDetourRoadScanContext.lon);
+      }
+    };
+
+    const applyInputValue = (shouldRescan) => {
+      if (!inputEl) return;
+      const normalized = normalizeNearbyRoadRadiusMeters(inputEl.value);
+      sliderEl.value = String(normalized);
+      inputEl.value = String(normalized);
+      updateAndMaybeRescan(shouldRescan);
+    };
+
+    sliderEl.addEventListener('input', () => updateAndMaybeRescan(false));
+    sliderEl.addEventListener('change', () => updateAndMaybeRescan(true));
+    if (inputEl) {
+      inputEl.addEventListener('change', () => applyInputValue(true));
+      inputEl.addEventListener('blur', () => applyInputValue(false));
+      inputEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          applyInputValue(true);
+        }
+      });
+    }
+    updateAndMaybeRescan(false);
+  })();
+
+  (function setupPedNearbyRoadRadiusSlider() {
+    const sliderEl = document.getElementById('pedNearbyRoadRadius');
+    const inputEl = document.getElementById('pedNearbyRoadRadiusInput');
+    if (!sliderEl) return;
+
+    const updateAndMaybeRescan = (shouldRescan) => {
+      if (inputEl) inputEl.value = String(getPedNearbyRoadRadiusMeters());
+      updatePedNearbyRoadRadiusLabel();
+      if (shouldRescan && lastPedRoadScanContext) {
+        scanPedNearbyRoads(lastPedRoadScanContext.lat, lastPedRoadScanContext.lon);
+      }
+    };
+
+    const applyInputValue = (shouldRescan) => {
+      if (!inputEl) return;
+      const normalized = normalizeNearbyRoadRadiusMeters(inputEl.value);
+      sliderEl.value = String(normalized);
+      inputEl.value = String(normalized);
+      updateAndMaybeRescan(shouldRescan);
+    };
+
+    sliderEl.addEventListener('input', () => updateAndMaybeRescan(false));
+    sliderEl.addEventListener('change', () => updateAndMaybeRescan(true));
+    if (inputEl) {
+      inputEl.addEventListener('change', () => applyInputValue(true));
+      inputEl.addEventListener('blur', () => applyInputValue(false));
+      inputEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          applyInputValue(true);
+        }
+      });
+    }
+    updateAndMaybeRescan(false);
+  })();
+
   // ===== PEDESTRIAN DETOUR DELAY LOGIC =====
   function calculatePedestrianDelay() {
+    updatePedestrianDetourDelayTitle();
     const normDist = Number(document.getElementById('pedNormDist').value) || 0;
     const detourDist = Number(document.getElementById('pedDetourDist').value) || 0;
     const controlledCount = Math.max(0, Number(document.getElementById('pedControlledCount').value) || 0);
@@ -6243,12 +7405,27 @@
   // });
   
   // detour inputs also update overlay
-  ['detourSiteSearch','detourDiversionRate'].forEach(id => {
+  ['detourSiteSearch','detourDiversionRate','detourClosureType','detourClosedDirection','detourRouteLengthKm','detourAvgSpeedKmh','detourControlledIntCount','detourUncontrolledIntCount','detourControlledDelaySec','detourUncontrolledDelaySec'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('change', calculateDetourOverlay);
     el.addEventListener('input', calculateDetourOverlay);
   });
+
+  const pedDetourRouteNameEl = document.getElementById('pedDetourRouteName');
+  if (pedDetourRouteNameEl) {
+    const syncManualDetourRoadName = () => {
+      const typed = String(pedDetourRouteNameEl.value || '').trim();
+      window.selectedPedDetourRoadName = typed;
+      window.selectedPedDetourRoadNames = typed
+        ? typed.split('>>').map(v => String(v || '').trim()).filter(Boolean)
+        : [];
+      updatePedestrianDetourDelayTitle();
+      calculatePedestrianDelay();
+    };
+    pedDetourRouteNameEl.addEventListener('input', syncManualDetourRoadName);
+    pedDetourRouteNameEl.addEventListener('change', syncManualDetourRoadName);
+  }
 
   ['RTR', 'DRTPA', 'RTP'].forEach(id => {
     const el = document.getElementById(id);
@@ -6282,15 +7459,25 @@
   setupGlobalPrintCustomization();
   setVcrView('table');
   setQueueView('table');
+  updatePedestrianDetourDelayTitle();
+  updateTrafficSelectedRoadsSummary();
+  updateDetourClosureUi();
   setHourlyQueueView('table');
   setHourlyVcrView('table');
+  refreshHourlyQueueHeaders(getHourlyQueueDurationMeta(getSelectedHourlyQueueDurationKey()));
+  const hourlyQueueDurationSelectEl = document.getElementById('hourlyQueueDurationSelect');
+  if (hourlyQueueDurationSelectEl) {
+    hourlyQueueDurationSelectEl.addEventListener('change', () => {
+      refreshHourlyQueueHeaders(getHourlyQueueDurationMeta(getSelectedHourlyQueueDurationKey()));
+      calculateAll();
+    });
+  }
   // Initial calculation removed: calculateAll();
 
   // ===== TIA ANALYSIS TOOL FUNCTIONS =====
   // ===== WORK WINDOW OPTIMIZER LOGIC =====
   function generateWorkWindow() {
     const site = selectedMacroSite ? macroSitesData[selectedMacroSite] : null;
-    if (!site) return;
 
     const workWindowCard = document.getElementById('workWindowCard');
     if (workWindowCard) workWindowCard.style.display = 'block';
@@ -6299,14 +7486,34 @@
     const dv = calculateDV(); // Uses your existing DV formula
     const d1Lanes = Math.max(1, num('D1_Lanes'));
     const d2Lanes = Math.max(1, num('D2_Lanes'));
+    const hourlyWorstVcr = (lastHourlyVcrChartData && Array.isArray(lastHourlyVcrChartData.worst) && lastHourlyVcrChartData.worst.length === 24)
+      ? lastHourlyVcrChartData.worst
+      : null;
     
-    // Grab or build 24h profiles
-    let gazData = site.directions_weekday['GAZETTAL'] || new Array(24).fill(0);
-    let agData = site.directions_weekday['AGAINST GAZETTAL'] || new Array(24).fill(0);
-    if (gazData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) gazData = buildSyntheticHourlyFromDaily(num('D1_VADT'));
-    if (agData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) agData = buildSyntheticHourlyFromDaily(num('D2_VADT'));
+    // Prefer latest calculated hourly profiles; otherwise fallback to site data or synthetic hourly from current inputs.
+    const calculatedD1 = Array.isArray(lastWorkWindowHourlyProfiles && lastWorkWindowHourlyProfiles.d1)
+      ? lastWorkWindowHourlyProfiles.d1
+      : null;
+    const calculatedD2 = Array.isArray(lastWorkWindowHourlyProfiles && lastWorkWindowHourlyProfiles.d2)
+      ? lastWorkWindowHourlyProfiles.d2
+      : null;
+
+    let gazData = calculatedD1
+      ? calculatedD1.map(h => Number(h && h.perLane) || 0)
+      : ((site && site.directions_weekday && site.directions_weekday['GAZETTAL']) || new Array(24).fill(0));
+    let agData = calculatedD2
+      ? calculatedD2.map(h => Number(h && h.perLane) || 0)
+      : ((site && site.directions_weekday && site.directions_weekday['AGAINST GAZETTAL']) || new Array(24).fill(0));
+
+    if (!Array.isArray(gazData) || gazData.length !== 24 || gazData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) {
+      gazData = buildSyntheticHourlyFromDaily(num('D1_VADT'));
+    }
+    if (!Array.isArray(agData) || agData.length !== 24 || agData.reduce((a,b)=>a+(Number(b)||0),0) <= 0) {
+      agData = buildSyntheticHourlyFromDaily(num('D2_VADT'));
+    }
 
     const timelineEl = document.getElementById('wwTimeline');
+    if (!timelineEl) return;
     timelineEl.innerHTML = '';
     let permittedHoursCount = 0;
     let permittedBlocks = [];
@@ -6315,17 +7522,19 @@
     for (let h = 0; h < 24; h++) {
       const vol1 = Number(gazData[h]) || 0;
       const vol2 = Number(agData[h]) || 0;
-      let worstVcr = 0;
+      let worstVcr = Number.isFinite(Number(hourlyWorstVcr && hourlyWorstVcr[h]))
+        ? Number(hourlyWorstVcr[h])
+        : 0;
 
-      // Match your SLRF vs SLC logic
-      if (d1Lanes === 1 && d2Lanes === 1) {
-        // SLRF: Both directions share 1 lane
-        worstVcr = (vol1 + vol2) / dv;
-      } else {
-        // SLC: Close 1 lane in whichever direction
-        const d1SlcVcr = d1Lanes > 1 ? (vol1 / (d1Lanes - 1)) / dv : vol1 / dv;
-        const d2SlcVcr = d2Lanes > 1 ? (vol2 / (d2Lanes - 1)) / dv : vol2 / dv;
-        worstVcr = Math.max(d1SlcVcr, d2SlcVcr);
+      // Fallback when hourly table data is unavailable: compute using SLC/SLRF logic.
+      if (!Number.isFinite(worstVcr)) {
+        if (d1Lanes === 1 && d2Lanes === 1) {
+          worstVcr = (vol1 + vol2) / dv;
+        } else {
+          const d1SlcVcr = d1Lanes > 1 ? (vol1 / (d1Lanes - 1)) / dv : vol1 / dv;
+          const d2SlcVcr = d2Lanes > 1 ? (vol2 / (d2Lanes - 1)) / dv : vol2 / dv;
+          worstVcr = Math.max(d1SlcVcr, d2SlcVcr);
+        }
       }
 
       const isPermitted = worstVcr <= maxVcr;
@@ -6732,6 +7941,58 @@
     return null;
   }
 
+  let lastQuickTiaSearchLocation = null;
+  window.lastQuickTiaResolvedAddress = '';
+
+  function setUseCalculatedButtonState(isApplied) {
+    const btn = document.getElementById('quickTiaUseCalculatedBtn');
+    if (!btn) return;
+    if (isApplied) {
+      btn.style.background = '#2e7d32';
+      btn.style.boxShadow = '0 0 0 2px rgba(46, 125, 50, 0.25)';
+      btn.textContent = '✓ Calculated Data Applied';
+    } else {
+      btn.style.background = '#1976d2';
+      btn.style.boxShadow = 'none';
+      btn.textContent = '✓ Use Calculated Data';
+    }
+  }
+
+  function getNearbyRoadRadiusMeters() {
+    const sliderEl = document.getElementById('quickTiaNearbyRoadsRadius');
+    const radiusMeters = Number(sliderEl && sliderEl.value ? sliderEl.value : 200);
+    return Number.isFinite(radiusMeters) && radiusMeters > 0 ? radiusMeters : 200;
+  }
+
+  function updateNearbyRoadRadiusText(radiusMeters) {
+    const radiusValueEl = document.getElementById('quickTiaNearbyRoadsRadiusValue');
+    if (!radiusValueEl) return;
+    radiusValueEl.textContent = (Number(radiusMeters) / 1000).toFixed(1);
+  }
+
+  async function scanNearbyRoads(lat, lon) {
+    const nearbyRoadsContainer = document.getElementById('quickTiaNearbyRoads');
+    const nearbyRoadsList = document.getElementById('quickTiaNearbyRoadsList');
+    const radiusMeters = getNearbyRoadRadiusMeters();
+
+    updateNearbyRoadRadiusText(radiusMeters);
+
+    if (!nearbyRoadsContainer || !nearbyRoadsList) return;
+    nearbyRoadsList.innerHTML = '<span style="color: #8e24aa;">Scanning map...</span>';
+    nearbyRoadsContainer.style.display = 'block';
+
+    const roads = await getAllRoadsFromMap(lat, lon, radiusMeters);
+    if (roads.length > 0) {
+      nearbyRoadsList.innerHTML = roads.map(r =>
+        `<span style="background: white; padding: 3px 10px; border-radius: 12px; border: 1px solid #e1bee7; cursor: pointer;"
+               title="Click to copy"
+               onclick="navigator.clipboard.writeText('${r}'); this.style.background='#e1bee7'; setTimeout(()=>this.style.background='white', 300);">${r}</span>`
+      ).join('');
+    } else {
+      nearbyRoadsList.innerHTML = '<span style="color: #c30000;">No named roads found in map radius.</span>';
+    }
+  }
+
   // --- UPDATED MAIN SEARCH FUNCTION ---
   async function performQuickTIASearch() {
     try {
@@ -6745,6 +8006,8 @@
 
       document.getElementById('quickTiaError').style.display = 'none';
       document.getElementById('quickTiaPanel').style.display = 'none';
+      setUseCalculatedButtonState(false);
+      window.lastQuickTiaResolvedAddress = '';
       document.getElementById('quickTiaSearchAddress').textContent = searchInput;
       const geoSourceEl = document.getElementById('quickTiaGeoSource');
       if (geoSourceEl) geoSourceEl.textContent = 'Searching...';
@@ -6776,7 +8039,13 @@
     }
 
     if (geoSourceEl) geoSourceEl.textContent = location.provider;
+    const resolvedAddressForReport = String(location.displayName || searchInput || '').trim();
+    window.lastQuickTiaResolvedAddress = resolvedAddressForReport;
+    const quickAddressEl = document.getElementById('quickTiaSearchAddress');
+    if (quickAddressEl) quickAddressEl.textContent = formatAddressForReport(resolvedAddressForReport) || formatAddressForReport(searchInput) || searchInput;
     addSearchMarker(location.lat, location.lon, searchInput);
+    lastQuickTiaSearchLocation = { lat: location.lat, lon: location.lon };
+    scanNearbyRoads(location.lat, location.lon);
     
     // 2. Map distances and bearings to all sites
     const sites = Object.entries(macroSitesData).filter(([, d]) => d.latitude && d.longitude).map(([id, data]) => {
@@ -6829,6 +8098,44 @@
   }
 
   window.performQuickTIASearch = performQuickTIASearch;
+
+  (function setupQuickTiaNearbyRoadsRadiusSlider() {
+    const sliderEl = document.getElementById('quickTiaNearbyRoadsRadius');
+    const inputEl = document.getElementById('quickTiaNearbyRoadsRadiusInput');
+    if (!sliderEl) return;
+
+    const onRadiusInput = (shouldRescan) => {
+      const radius = getNearbyRoadRadiusMeters();
+      if (inputEl) inputEl.value = String(radius);
+      updateNearbyRoadRadiusText(radius);
+      if (shouldRescan && lastQuickTiaSearchLocation) {
+        scanNearbyRoads(lastQuickTiaSearchLocation.lat, lastQuickTiaSearchLocation.lon);
+      }
+    };
+
+    const applyInputValue = (shouldRescan) => {
+      if (!inputEl) return;
+      const normalized = normalizeNearbyRoadRadiusMeters(inputEl.value);
+      sliderEl.value = String(normalized);
+      inputEl.value = String(normalized);
+      onRadiusInput(shouldRescan);
+    };
+
+    sliderEl.addEventListener('input', () => onRadiusInput(false));
+    sliderEl.addEventListener('change', () => onRadiusInput(true));
+    if (inputEl) {
+      inputEl.addEventListener('change', () => applyInputValue(true));
+      inputEl.addEventListener('blur', () => applyInputValue(false));
+      inputEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          applyInputValue(true);
+        }
+      });
+    }
+
+    onRadiusInput(false);
+  })();
 
   function addSearchMarker(lat, lon, label) {
     // Clear previous search markers
@@ -7066,6 +8373,7 @@
     document.getElementById('quickTiaExactMatch').style.display = 'none';
     document.getElementById('quickTiaMultipleRefs').style.display = 'block';
     document.getElementById('quickTiaPanel').style.display = 'block';
+    setUseCalculatedButtonState(false);
   }
 
   function updateTiaCalculations() {
@@ -7158,6 +8466,7 @@
     // Scroll to form
     document.querySelector('.card:nth-of-type(2)').scrollIntoView({ behavior: 'smooth' });
     populateDetourDropdown(); // trigger updated detour options
+    setUseCalculatedButtonState(false);
   }
 
   function useCalculatedTIAData() {
@@ -7229,6 +8538,7 @@
       d1_direction_label: customD1Label,
       d2_direction_label: customD2Label
     });
+    setUseCalculatedButtonState(true);
     
     // Scroll to form
     const allCards = document.querySelectorAll('.card');
