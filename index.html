@@ -1010,6 +1010,10 @@
     <div class="card">
       <h2>Queue Length Estimation</h2>
       <div id="queueRiskBadge" style="display:none; margin: 6px 0 10px 0; padding: 8px 10px; border-radius: 6px; background: #fff3e0; border: 1px solid #ffcc80; color: #e65100; font-weight: 700; font-size: 0.9em;"></div>
+      <div class="table-actions" style="justify-content: flex-end; margin: 0 0 8px 0;">
+        <button type="button" class="queue-toggle-btn" data-view="table" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #e3f2fd; color: #0d47a1; cursor: pointer; font-weight: 600;" onclick="setQueueView('table')">Table</button>
+        <button type="button" class="queue-toggle-btn" data-view="chart" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #f5f5f5; color: #37474f; cursor: pointer; font-weight: 600;" onclick="setQueueView('chart')">Chart</button>
+      </div>
 
       <div id="queueTableView">
         <h3 id="queueHeaderD2" class="dir-heading dir-heading-negative">🔴 Against Gazettal (D2)</h3>
@@ -1063,6 +1067,10 @@
     <div class="card">
       <h2>VCR / LOS Analysis</h2>
       <div id="vcrRiskBadge" style="display:none; margin: 6px 0 10px 0; padding: 8px 10px; border-radius: 6px; background: #ffebee; border: 1px solid #ef9a9a; color: #b71c1c; font-weight: 700; font-size: 0.9em;"></div>
+      <div class="table-actions" style="justify-content: flex-end; margin: 0 0 8px 0;">
+        <button type="button" class="vcr-toggle-btn" data-view="table" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #e3f2fd; color: #0d47a1; cursor: pointer; font-weight: 600;" onclick="setVcrView('table')">Table</button>
+        <button type="button" class="vcr-toggle-btn" data-view="chart" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #f5f5f5; color: #37474f; cursor: pointer; font-weight: 600;" onclick="setVcrView('chart')">Chart</button>
+      </div>
 
       <div id="vcrTableView">
       
@@ -1559,6 +1567,10 @@
           <option value="q15">15 minutes</option>
         </select>
       </div>
+      <div class="table-actions" style="justify-content: flex-end; margin: 0 0 8px 0;">
+        <button type="button" class="hourly-queue-toggle-btn" data-view="table" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #e3f2fd; color: #0d47a1; cursor: pointer; font-weight: 600;" onclick="setHourlyQueueView('table')">Table</button>
+        <button type="button" class="hourly-queue-toggle-btn" data-view="chart" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #f5f5f5; color: #37474f; cursor: pointer; font-weight: 600;" onclick="setHourlyQueueView('chart')">Chart</button>
+      </div>
       <div id="hourlyQueueTableView">
         <div class="table-wrap">
           <table id="hourlyQueueTable">
@@ -1580,6 +1592,10 @@
       </div>
 
       <h3 style="margin: 18px 0 8px 0; color: #1f5e63; font-size: 1.0em;">2. VCR (Hourly Basis)</h3>
+      <div class="table-actions" style="justify-content: flex-end; margin: 0 0 8px 0;">
+        <button type="button" class="hourly-vcr-toggle-btn" data-view="table" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #e3f2fd; color: #0d47a1; cursor: pointer; font-weight: 600;" onclick="setHourlyVcrView('table')">Table</button>
+        <button type="button" class="hourly-vcr-toggle-btn" data-view="chart" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #c7d4db; background: #f5f5f5; color: #37474f; cursor: pointer; font-weight: 600;" onclick="setHourlyVcrView('chart')">Chart</button>
+      </div>
       <div id="hourlyVcrTableView">
         <div class="table-wrap">
           <table id="hourlyVcrTable">
@@ -1786,6 +1802,8 @@
   const CUSTOM_SOURCE_NAME = 'Custom Upload';
   let customUploadedSitesData = {};
   const macroMarkersById = {};
+  const DIRECTION_INFERENCE_RADIUS_METERS = 5000;
+  const DIRECTION_INFERENCE_NEIGHBORS = 3;
 
   function parseCsvLine(line) {
     const out = [];
@@ -1947,6 +1965,106 @@
     return Number.isFinite(n) ? n : null;
   }
 
+  function normalizeRoadClass(value) {
+    const raw = String(value || '').trim().toLowerCase();
+    if (!raw) return 'tmr';
+    if (/(tmr|state|motorway|highway|arterial|a\d+|m\d+)/.test(raw)) return 'tmr';
+    if (/collector/.test(raw)) return 'collector';
+    if (/local|residential/.test(raw)) return 'local';
+    return raw;
+  }
+
+  function normalizeGrowthPercent(value) {
+    const n = numberOrNull(value);
+    if (n === null) return null;
+    if (Math.abs(n) <= 1) return Math.round(n * 10000) / 100;
+    return Math.round(n * 100) / 100;
+  }
+
+  function inferDirectionalSplitFromNearest(siteId, site, allSitesMap) {
+    const lat = Number(site && site.latitude);
+    const lon = Number(site && site.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+    const candidates = Object.entries(allSitesMap || {})
+      .filter(([id, other]) => {
+        if (id === siteId || !other) return false;
+        const oLat = Number(other.latitude);
+        const oLon = Number(other.longitude);
+        const d1 = Number(other.d1_vadt) || 0;
+        const d2 = Number(other.d2_vadt) || 0;
+        const total = d1 + d2;
+        const splitMode = String(other.direction_split_mode || '').toLowerCase();
+        if (splitMode === 'fallback_50_50') return false;
+        if (!Number.isFinite(oLat) || !Number.isFinite(oLon) || total <= 0) return false;
+        const dist = haversineDistance(lat, lon, oLat, oLon);
+        return Number.isFinite(dist) && dist <= DIRECTION_INFERENCE_RADIUS_METERS;
+      })
+      .map(([id, other]) => {
+        const dist = haversineDistance(lat, lon, Number(other.latitude), Number(other.longitude));
+        return {
+          id,
+          dist,
+          d1: Number(other.d1_vadt) || 0,
+          d2: Number(other.d2_vadt) || 0
+        };
+      })
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, DIRECTION_INFERENCE_NEIGHBORS);
+
+    if (!candidates.length) return null;
+
+    let weightedShare = 0;
+    let weightTotal = 0;
+    candidates.forEach(item => {
+      const total = item.d1 + item.d2;
+      if (total <= 0) return;
+      const share = item.d1 / total;
+      const weight = 1 / Math.max(1, item.dist);
+      weightedShare += share * weight;
+      weightTotal += weight;
+    });
+
+    if (!(weightTotal > 0)) return null;
+    const d1Share = Math.max(0.05, Math.min(0.95, weightedShare / weightTotal));
+    return { d1Share, refs: candidates.length };
+  }
+
+  function applyDirectionalSplitInferenceToSites(sitesMap) {
+    const out = sitesMap || {};
+    Object.entries(out).forEach(([siteId, site]) => {
+      if (!site) return;
+      const currentMode = String(site.direction_split_mode || '').toLowerCase();
+      const totalVadt = Math.max(0, Number(site.vadt) || (Number(site.d1_vadt) || 0) + (Number(site.d2_vadt) || 0));
+      if (totalVadt <= 0) return;
+
+      const shouldInfer = currentMode === 'fallback_50_50'
+        || (Number(site.d1_vadt) <= 0 && Number(site.d2_vadt) <= 0);
+      if (!shouldInfer) return;
+
+      const inferred = inferDirectionalSplitFromNearest(siteId, site, out);
+      if (!inferred) {
+        const d1Fallback = Math.round(totalVadt * 0.5);
+        const d2Fallback = Math.max(0, totalVadt - d1Fallback);
+        site.d1_vadt = d1Fallback;
+        site.d2_vadt = d2Fallback;
+        site.direction_split_mode = 'fallback_50_50';
+        return;
+      }
+
+      const d1 = Math.round(totalVadt * inferred.d1Share);
+      const d2 = Math.max(0, totalVadt - d1);
+      site.d1_vadt = d1;
+      site.d2_vadt = d2;
+      site.direction_split_mode = 'nearest_counters';
+      site.direction_split_reference_count = inferred.refs;
+      site.dtca_auto = true;
+      if (!site.d1_direction_label || /^direction\s*1$/i.test(String(site.d1_direction_label))) site.d1_direction_label = 'Direction 1 (Nearest split)';
+      if (!site.d2_direction_label || /^direction\s*2$/i.test(String(site.d2_direction_label))) site.d2_direction_label = 'Direction 2 (Nearest split)';
+    });
+    return out;
+  }
+
   function firstValidByPattern(row, patterns) {
     const keys = Object.keys(row || {});
     for (const pattern of (Array.isArray(patterns) ? patterns : [])) {
@@ -2041,13 +2159,16 @@
         d2_vadt: d2,
         d1_lanes: Math.max(1, Math.round(numberOrNull(firstValid(row, ['d1_lanes', 'lanes_d1', 'dir1_lanes']) || firstValidByPattern(row, [/d1.?lane/i, /dir.?1.?lane/i, /lane.?d1/i])) || 1)),
         d2_lanes: Math.max(1, Math.round(numberOrNull(firstValid(row, ['d2_lanes', 'lanes_d2', 'dir2_lanes']) || firstValidByPattern(row, [/d2.?lane/i, /dir.?2.?lane/i, /lane.?d2/i])) || 1)),
-        hv_percent: numberOrNull(firstValid(row, ['hv_percent', 'hv', 'heavy_vehicle_percent']) || firstValidByPattern(row, [/hv/i, /heavy.?vehicle/i])),
-        growth_rate: numberOrNull(firstValid(row, ['growth_rate', 'growth', 'growth_percent']) || firstValidByPattern(row, [/growth/i])),
+        hv_percent: numberOrNull(firstValid(row, ['hv_percent', 'hv', 'heavy_vehicle_percent']) || firstValidByPattern(row, [/hv_percent/i, /heavy.?vehicle/i])),
+        growth_rate: normalizeGrowthPercent(firstValid(row, ['growth_rate', 'growth', 'growth_percent']) || firstValidByPattern(row, [/^growth(_rate|_percent)?$/i, /annual.?growth/i])),
         countYear: numberOrNull(firstValid(row, ['count_year', 'countyear', 'year']) || firstValidByPattern(row, [/count.?year/i, /^year$/i])),
         count_year: numberOrNull(firstValid(row, ['count_year', 'countyear', 'year']) || firstValidByPattern(row, [/count.?year/i, /^year$/i])),
+        road_class: normalizeRoadClass(firstValid(row, ['road_class', 'road_type', 'classification']) || firstValidByPattern(row, [/road.?class/i, /road.?type/i, /classification/i])),
+        design_capacity_daily: Math.max(0, Number(numberOrNull(firstValid(row, ['design_capacity_daily', 'capacity_daily', 'capacity_ref_daily']) || firstValidByPattern(row, [/capacity.*daily/i, /design.*capacity/i])) || 0)),
         d1_direction_label: String(firstValid(row, ['d1_direction_label', 'd1_label', 'dir1_label']) || 'Direction 1').trim(),
         d2_direction_label: String(firstValid(row, ['d2_direction_label', 'd2_label', 'dir2_label']) || 'Direction 2').trim(),
         dtca_auto: true,
+        direction_split_mode: (d1 > 0 && d2 > 0 && vadt > 0 && Math.abs((d1 + d2) - vadt) <= 1) ? 'provided' : 'fallback_50_50',
         direction_descriptions: {
           'GAZETTAL': String(firstValid(row, ['d1_direction_label', 'd1_label', 'dir1_label']) || 'Direction 1').trim(),
           'AGAINST GAZETTAL': String(firstValid(row, ['d2_direction_label', 'd2_label', 'dir2_label']) || 'Direction 2').trim()
@@ -2085,6 +2206,7 @@
 
   function refreshMacroSitesView() {
     macroSitesData = mergeMacroSites(baseMacroSitesData, customUploadedSitesData);
+    applyDirectionalSplitInferenceToSites(macroSitesData);
     const totalSites = Object.keys(macroSitesData).length;
     const countEl = document.getElementById('sitesLoadedCount');
     if (countEl) countEl.textContent = totalSites;
@@ -2499,10 +2621,12 @@
       const countYear = parseYearFromAny(
         props['COUNT_YEAR'], props['DATA_YEAR'], props['YEAR'], props['AADT_DATE'], props['SURVEY_DATE'], props['AAWT_DATE'], props['Start Day|Survey'], props['Finish_Date']
       );
-      const growthRate = Number(props['GROWTH_RATE'] || props['GROWTH'] || '') || null;
+      const growthRate = normalizeGrowthPercent(props['GROWTH_RATE'] || props['GROWTH'] || null);
       const hvPercentDirectRaw = props['HV_PERCENT'] || props['HVP'] || props['Percentage Commercial Vehicles'] || props['Percent_Commercial_Heavy_Vehicl'];
       const hvPercentDirect = normalizePercentValue(hvPercentDirectRaw);
       const hvPercent = hvPercentDirect !== null ? hvPercentDirect : normalizePercentValue(isLogan ? calcLoganHvPercent(props) : null);
+      const roadClass = normalizeRoadClass(props['ROAD_CLASS'] || props['ROAD_TYPE'] || props['CLASSIFICATION'] || props['ROAD CATEGORY'] || 'tmr');
+      const designCapacityDaily = Math.max(0, Number(props['DESIGN_CAPACITY_DAILY'] || props['CAPACITY_DAILY'] || props['CAPACITY_REF_DAILY'] || props['ROAD_CAPACITY_DAILY'] || 0));
       const totalVadtFromProps = Number(props['VADT'] || props['AADT'] || props['VPD'] || props['TOTAL_VADT'] || props['Average Daily Traffic Adt Vehicles Per Day'] || props['Average Weekday Traffic Awt Vehicles Per Day'] || props['ADT']) || null;
 
       let d1VadtFromProps = Number(props['D1_VADT'] || props['GAZETTAL_VADT'] || props['VADT_D1'] || props['VOL1'] || '') || null;
@@ -2542,12 +2666,15 @@
           vadt: 0,
           growth_rate: growthRate,
           hv_percent: hvPercent,
+          road_class: roadClass,
+          design_capacity_daily: designCapacityDaily,
           d1_lanes: d1Lanes,
           d2_lanes: d2Lanes,
           total_lanes: totalLanes,
           d1_vadt: 0,
           d2_vadt: 0,
           dtca_auto: false,
+          direction_split_mode: 'unknown',
           d1_direction_label: 'Gazettal',
           d2_direction_label: 'Against Gazettal',
           directions_weekday: {
@@ -2582,6 +2709,8 @@
       if (d2VadtFromProps) site.d2_vadt = d2VadtFromProps;
       if (!site.hv_percent && hvPercent) site.hv_percent = hvPercent;
       if (!site.growth_rate && growthRate) site.growth_rate = growthRate;
+      if (!site.road_class && roadClass) site.road_class = roadClass;
+      if (!site.design_capacity_daily && designCapacityDaily > 0) site.design_capacity_daily = designCapacityDaily;
       if (!site.d1_lanes && d1Lanes) site.d1_lanes = d1Lanes;
       if (!site.d2_lanes && d2Lanes) site.d2_lanes = d2Lanes;
       if (!site.total_lanes && totalLanes) site.total_lanes = totalLanes;
@@ -2721,6 +2850,7 @@
       if (computedD1 > 0 || computedD2 > 0) {
         site.d1_vadt = computedD1;
         site.d2_vadt = computedD2;
+        site.direction_split_mode = 'hourly';
       }
 
       if (site.d1_vadt <= 0 && site.d2_vadt <= 0) {
@@ -2728,10 +2858,12 @@
         if (totalVadt > 0) {
           site.d1_vadt = Math.round(totalVadt * 0.5);
           site.d2_vadt = Math.round(totalVadt * 0.5);
+          site.direction_split_mode = 'fallback_50_50';
         }
       } else if (!site.vadt || site.vadt <= 0) {
         // If we have d1/d2 but no total, calculate it (for Ipswich data)
         site.vadt = (site.d1_vadt || 0) + (site.d2_vadt || 0);
+        if (!site.direction_split_mode || site.direction_split_mode === 'unknown') site.direction_split_mode = 'provided';
       }
 
       if (isGoldCoast) {
@@ -2760,6 +2892,7 @@
         if (totalVadt > 0 && d1Vadt <= 0 && d2Vadt <= 0) {
           d1Vadt = Math.round(totalVadt * 0.5);
           d2Vadt = Math.max(0, totalVadt - d1Vadt);
+          site.direction_split_mode = 'fallback_50_50';
         }
 
         site.vadt = Math.round(Math.max(0, totalVadt));
@@ -2870,6 +3003,8 @@
 
     baseMacroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites, toowoomSites);
     macroSitesData = mergeMacroSites(baseMacroSitesData, customUploadedSitesData);
+    applyDirectionalSplitInferenceToSites(baseMacroSitesData);
+    applyDirectionalSplitInferenceToSites(macroSitesData);
 
     console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites (TMR: ${Object.keys(tmrSites).length}, Gold Coast: ${Object.keys(goldCoastSites).length}, Ipswich: ${Object.keys(ipswichSites).length}, Logan: ${Object.keys(loganSites).length}, Toowoomba: ${Object.keys(toowoomSites).length})`);
     document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
@@ -3026,6 +3161,7 @@
         growthLabel.innerHTML = 'Growth Rate (% p.a.) (from DB)';
       }
     } else {
+      growthEl.value = '';
       growthEl.readOnly = false;
       growthEl.style.border = '1px solid #ffc107';
       growthEl.style.backgroundColor = '#fffbf0';
@@ -3976,23 +4112,32 @@
     return numberRoundUp((num('RTP') / 2) / 100, 12);
   }
 
-  function baseDirectionalVolume(direction){
+  function baseDirectionalVolume(direction, dailyTotalOverride = null){
     const dtca = txt('DTCA').toUpperCase();
-    const vadt = num('VADT');
-    if (dtca === 'YES') return num(`D${direction}_VADT`) * 0.12 * 0.8;
-    return vadt * 0.12 * 0.8 * 0.5;
+    const directionDaily = Number.isFinite(Number(dailyTotalOverride))
+      ? Number(dailyTotalOverride)
+      : (dtca === 'YES' ? num(`D${direction}_VADT`) : (num('VADT') * 0.5));
+    return numberRoundUp(directionDaily * 0.15 * 0.85, 0);
   }
 
-  function calcDirection(direction){
+  function calcDirection(direction, dailyTotalOverride = null){
     const lanes = Math.max(1, num(`D${direction}_Lanes`));
+    const directionDaily = Number.isFinite(Number(dailyTotalOverride))
+      ? Number(dailyTotalOverride)
+      : (txt('DTCA').toUpperCase() === 'YES' ? num(`D${direction}_VADT`) : (num('VADT') * 0.5));
+    const hvPct = getHVPercent(direction);
+    const rtPct = getRTPercent(direction);
 
-    const peakHV = numberRoundUp(baseDirectionalVolume(direction) * getHVPercent(direction), 0);
-    const peakRT = numberRoundUp(baseDirectionalVolume(direction) * getRTPercent(direction), 0);
-    const peakLV = numberRoundUp(baseDirectionalVolume(direction) - peakHV - peakRT, 0);
+    const peakSeed = baseDirectionalVolume(direction, directionDaily);
+    const peakHV = numberRoundUp(peakSeed * hvPct, 0);
+    const peakRT = numberRoundUp(peakSeed * rtPct, 0);
+    const peakLV = numberRoundUp(Math.max(0, peakSeed - peakHV - peakRT), 0);
 
-    const offLV = numberRoundUp(peakLV * 0.42, 0);
-    const offHV = numberRoundUp(peakHV * 0.42, 0);
-    const offRT = numberRoundUp(peakRT * 0.42, 0);
+    const remainingDaily = Math.max(0, directionDaily - (peakLV + peakHV + peakRT));
+    const offSeed = numberRoundUp(remainingDaily * 0.15 * 0.45, 0);
+    const offLV = numberRoundUp(offSeed, 0);
+    const offHV = numberRoundUp(offSeed * hvPct, 0);
+    const offRT = numberRoundUp(offSeed * rtPct, 0);
 
     const peakLVPL = numberRoundUp(peakLV / lanes, 0);
     const peakHVPL = numberRoundUp(peakHV / lanes, 0);
@@ -4017,20 +4162,10 @@
 
     const rtr = txt('RTR').toUpperCase();
     const roadTrainFactor = rtr === 'YES' ? 1.5 : 1;
-    const minQ = rtr === 'YES' ? 89 : 26;
-    q2qp = q2qp * roadTrainFactor;
-    q5qp = q5qp * roadTrainFactor;
-    q2qop = q2qop * roadTrainFactor;
-    q5qop = q5qop * roadTrainFactor;
-    q2qp = q2qp < minQ ? minQ : q2qp;
-    q5qp = q5qp < minQ ? minQ : q5qp;
-    q2qop = q2qop < minQ ? minQ : q2qop;
-    q5qop = q5qop < minQ ? minQ : q5qop;
-
-    q2qp = ceilingVBA(q2qp, 5);
-    q5qp = ceilingVBA(q5qp, 5);
-    q2qop = ceilingVBA(q2qop, 5);
-    q5qop = ceilingVBA(q5qop, 5);
+    q2qp = numberRoundUp(q2qp * roadTrainFactor, 0);
+    q5qp = numberRoundUp(q5qp * roadTrainFactor, 0);
+    q2qop = numberRoundUp(q2qop * roadTrainFactor, 0);
+    q5qop = numberRoundUp(q5qop * roadTrainFactor, 0);
 
     return {
       lanes,
@@ -4044,9 +4179,32 @@
     };
   }
 
-  function calculateDV(){
+  function getDesignCapacityReferenceDailyVolume(totalVadt) {
+    const site = selectedMacroSite ? macroSitesData[selectedMacroSite] : null;
+    const siteCapDaily = Math.max(0, Number(site && site.design_capacity_daily) || 0);
+    if (siteCapDaily > 0) return siteCapDaily;
+
+    const externalLookup = window && window.capacityLookupDatabase && site && site.source
+      ? window.capacityLookupDatabase[String(site.source).trim()]
+      : null;
+    if (externalLookup && site) {
+      const cls = String(site.road_class || 'tmr').trim();
+      const candidate = Math.max(0, Number(externalLookup[cls]) || 0);
+      if (candidate > 0) return candidate;
+    }
+
+    const sourceUpper = site && site.source ? String(site.source).trim().toUpperCase() : '';
+    if (sourceUpper === 'GOLD COAST') {
+      return 28989;
+    }
+    return totalVadt;
+  }
+
+  function calculateDV(totalVadtOverride = null){
     const totalLanes = Math.max(1, num('D1_Lanes') + num('D2_Lanes'));
-    let dv = num('VADT') * 0.12 / totalLanes;
+    const totalVadt = Number.isFinite(Number(totalVadtOverride)) ? Number(totalVadtOverride) : num('VADT');
+    const referenceDaily = getDesignCapacityReferenceDailyVolume(totalVadt);
+    let dv = referenceDaily * 0.15 / totalLanes;
     if (dv < 500) dv = 500;
     return numberRoundUp(dv, 0);
   }
@@ -4546,18 +4704,16 @@
     let q15 = (lv * 18) + (hv * 60) + (rt * 189);
 
     const factor = isRtr ? 1.5 : 1;
-    const minQ = isRtr ? 89 : 26;
-
-    q2 = Math.max(q2 * factor, minQ);
-    q5 = Math.max(q5 * factor, minQ);
-    q10 = Math.max(q10 * factor, minQ);
-    q15 = Math.max(q15 * factor, minQ);
+    q2 = q2 * factor;
+    q5 = q5 * factor;
+    q10 = q10 * factor;
+    q15 = q15 * factor;
 
     return {
-      q2: ceilingVBA(q2, 5),
-      q5: ceilingVBA(q5, 5),
-      q10: ceilingVBA(q10, 5),
-      q15: ceilingVBA(q15, 5)
+      q2: numberRoundUp(q2, 0),
+      q5: numberRoundUp(q5, 0),
+      q10: numberRoundUp(q10, 0),
+      q15: numberRoundUp(q15, 0)
     };
   }
 
@@ -5404,10 +5560,6 @@
     ['RTR','DTCA','DHVPA','DRTPA'].forEach(applyYesNoColor);
     updateAssumptionsPanel();
 
-    const d1 = calcDirection(1);
-    const d2 = calcDirection(2);
-    const dv = calculateDV();
-    
     // Get direction labels from selected site
     const d1Label = (selectedMacroSite && macroSitesData[selectedMacroSite])
       ? macroSitesData[selectedMacroSite].d1_direction_label
@@ -5420,12 +5572,20 @@
     const drtpa = txt('DRTPA').toUpperCase();
     const rtr = txt('RTR').toUpperCase();
 
-    const d1Daily = dtca === 'YES' ? num('D1_VADT') : num('VADT') / 2;
-    const d2Daily = dtca === 'YES' ? num('D2_VADT') : num('VADT') / 2;
+    const d1DailyBase = dtca === 'YES' ? num('D1_VADT') : num('VADT') / 2;
+    const d2DailyBase = dtca === 'YES' ? num('D2_VADT') : num('VADT') / 2;
     const growthProjectionContext = getCurrentGrowthProjectionContext();
     const growthRatePct = growthProjectionContext.growthRatePct;
     const effectiveYears = growthProjectionContext.effectiveYears;
     const growthFactor = growthProjectionContext.growthFactor;
+
+    const d1Daily = Math.round((Number(d1DailyBase) || 0) * growthFactor);
+    const d2Daily = Math.round((Number(d2DailyBase) || 0) * growthFactor);
+    const totalDailyForCapacity = Math.max(0, d1Daily + d2Daily);
+
+    const d1 = calcDirection(1, d1Daily);
+    const d2 = calcDirection(2, d2Daily);
+    const dv = calculateDV(totalDailyForCapacity);
 
     const projectedTotal = Math.round((num('VADT') || 0) * growthFactor);
     const projectedD1 = Math.round((num('D1_VADT') || 0) * growthFactor);
@@ -5664,78 +5824,18 @@
     renderQueueCharts(lastQueueChartData);
 
     const periodKeys = ['AM','OP','PM','EV'];
-    const derivePeriodVcrFromHourly = (d1Hourly, d2Hourly, capacity, d1LaneCount, d2LaneCount, fallbackD1Profile, fallbackD2Profile) => {
-      const result = {
-        baseD1: {},
-        baseD2: {},
-        slcD1: {},
-        slcD2: {},
-        slrf: {}
-      };
+    const assignPeakOff = (peakValue, offValue) => ({
+      AM: peakValue,
+      OP: offValue,
+      PM: peakValue,
+      EV: offValue
+    });
 
-      const toWorkVcr = (base, laneCount) => {
-        if (!Number.isFinite(base)) return null;
-        if (laneCount === 2) return base * 2;
-        if (laneCount > 2) return (base * laneCount) / (laneCount - 1);
-        return null;
-      };
-
-      periodKeys.forEach(periodKey => {
-        const periodDef = periods.find(p => p.key === periodKey);
-        const hours = periodDef ? periodDef.hours : [];
-
-        let maxBaseD1 = null;
-        let maxBaseD2 = null;
-        let maxSlcD1 = null;
-        let maxSlcD2 = null;
-        let maxSlrf = null;
-
-        hours.forEach(hour => {
-          const d1PerLane = Number(d1Hourly && d1Hourly[hour] && d1Hourly[hour].perLane);
-          const d2PerLane = Number(d2Hourly && d2Hourly[hour] && d2Hourly[hour].perLane);
-          const b1 = capacity > 0 && Number.isFinite(d1PerLane) ? (d1PerLane / capacity) : null;
-          const b2 = capacity > 0 && Number.isFinite(d2PerLane) ? (d2PerLane / capacity) : null;
-          const w1 = toWorkVcr(b1, d1LaneCount);
-          const w2 = toWorkVcr(b2, d2LaneCount);
-          const ws = (d1LaneCount === 1 && d2LaneCount === 1 && capacity > 0 && Number.isFinite(d1PerLane) && Number.isFinite(d2PerLane))
-            ? ((d1PerLane + d2PerLane) / capacity)
-            : null;
-
-          if (Number.isFinite(b1)) maxBaseD1 = maxBaseD1 === null ? b1 : Math.max(maxBaseD1, b1);
-          if (Number.isFinite(b2)) maxBaseD2 = maxBaseD2 === null ? b2 : Math.max(maxBaseD2, b2);
-          if (Number.isFinite(w1)) maxSlcD1 = maxSlcD1 === null ? w1 : Math.max(maxSlcD1, w1);
-          if (Number.isFinite(w2)) maxSlcD2 = maxSlcD2 === null ? w2 : Math.max(maxSlcD2, w2);
-          if (Number.isFinite(ws)) maxSlrf = maxSlrf === null ? ws : Math.max(maxSlrf, ws);
-        });
-
-        const fallbackB1 = fallbackD1Profile && fallbackD1Profile[periodKey] ? (fallbackD1Profile[periodKey].hourlyPerLane / capacity) : null;
-        const fallbackB2 = fallbackD2Profile && fallbackD2Profile[periodKey] ? (fallbackD2Profile[periodKey].hourlyPerLane / capacity) : null;
-        const fallbackW1 = toWorkVcr(fallbackB1, d1LaneCount);
-        const fallbackW2 = toWorkVcr(fallbackB2, d2LaneCount);
-        const fallbackWs = (d1LaneCount === 1 && d2LaneCount === 1 && fallbackD1Profile && fallbackD2Profile && fallbackD1Profile[periodKey] && fallbackD2Profile[periodKey] && capacity > 0)
-          ? ((fallbackD1Profile[periodKey].hourlyPerLane + fallbackD2Profile[periodKey].hourlyPerLane) / capacity)
-          : null;
-
-        result.baseD1[periodKey] = maxBaseD1 !== null ? maxBaseD1 : fallbackB1;
-        result.baseD2[periodKey] = maxBaseD2 !== null ? maxBaseD2 : fallbackB2;
-        result.slcD1[periodKey] = maxSlcD1 !== null ? maxSlcD1 : fallbackW1;
-        result.slcD2[periodKey] = maxSlcD2 !== null ? maxSlcD2 : fallbackW2;
-        result.slrf[periodKey] = maxSlrf !== null ? maxSlrf : fallbackWs;
-
-        if (!(d1LaneCount === 1 && d2LaneCount === 1)) {
-          result.slrf[periodKey] = null;
-        }
-      });
-
-      return result;
-    };
-
-    const periodVcr = derivePeriodVcrFromHourly(d1HourlyProfile, d2HourlyProfile, dv, d1.lanes, d2.lanes, d1Profile, d2Profile);
-    const baseD1 = periodVcr.baseD1;
-    const baseD2 = periodVcr.baseD2;
-    const slcD1 = periodVcr.slcD1;
-    const slcD2 = periodVcr.slcD2;
-    const slrf = periodVcr.slrf;
+    const baseD1 = assignPeakOff(base1Peak, base1Off);
+    const baseD2 = assignPeakOff(base2Peak, base2Off);
+    const slcD1 = assignPeakOff(slc1Peak, slc1Off);
+    const slcD2 = assignPeakOff(slc2Peak, slc2Off);
+    const slrf = assignPeakOff(slrfPeak, slrfOff);
 
     const vcrGroupedBodyD2 = document.getElementById('vcrGroupedBodyD2');
     if (vcrGroupedBodyD2) {
@@ -6032,9 +6132,10 @@
       ['DHVPA Path', dhvpa === 'YES' ? 'Directional HV% (D1_HVP / D2_HVP)' : 'HVP/2 applied per direction'],
       ['DRTPA Path', drtpa === 'YES' ? 'Directional RT% (D1_RTP / D2_RTP)' : 'RTP/2 applied per direction'],
       ['RTR Queue Rule', rtr === 'YES' ? 'Road Train: queue ×1.5, then min 89 m, then ceiling-to-5' : 'No Road Train: min 26 m, then ceiling-to-5'],
-      ['DV Formula', `max(500, VADT×0.12/(D1_Lanes+D2_Lanes)) = ${dv}`],
-      ['D1 Base Peak Volume', `VADT branch result = ${numberRoundUp(baseDirectionalVolume(1), 3)}`],
-      ['D2 Base Peak Volume', `VADT branch result = ${numberRoundUp(baseDirectionalVolume(2), 3)}`],
+      ['DV Formula', `max(500, CapacityRefDaily×0.15/(D1_Lanes+D2_Lanes)) = ${dv}`],
+      ['DV Capacity Ref', `${numberRoundUp(getDesignCapacityReferenceDailyVolume(totalDailyForCapacity), 0).toLocaleString()} vpd`],
+      ['D1 Base Peak Volume', `Projected branch result = ${numberRoundUp(baseDirectionalVolume(1, d1Daily), 3)}`],
+      ['D2 Base Peak Volume', `Projected branch result = ${numberRoundUp(baseDirectionalVolume(2, d2Daily), 3)}`],
       ['D1 HV% Used', `${numberRoundUp(getHVPercent(1) * 100, 3)}%`],
       ['D2 HV% Used', `${numberRoundUp(getHVPercent(2) * 100, 3)}%`],
       ['D1 RT% Used', `${numberRoundUp(getRTPercent(1) * 100, 3)}%`],
