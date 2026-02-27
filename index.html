@@ -771,6 +771,12 @@
               <option value="Toowoomba">Toowoomba Only</option>
             </select>
           </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+            <button type="button" id="customDataUploadBtn" style="width: auto; margin: 0; padding: 6px 10px; font-size: 0.85em; background: #2e7d32; box-shadow: none;">⬆ Upload Custom Data (CSV/JSON)</button>
+            <input type="file" id="customDataUploadInput" accept=".csv,.txt,.json,.geojson,application/json,text/csv,text/plain" style="display: none;" />
+            <button type="button" id="customDataClearBtn" style="width: auto; margin: 0; padding: 6px 10px; font-size: 0.85em; background: #9e9e9e; box-shadow: none;">Clear Custom Uploads</button>
+          </div>
+          <div id="customDataUploadStatus" style="font-size: 0.76em; color: #2e7d32; margin: 0 0 8px 0;">No custom upload loaded.</div>
           <input type="text" id="macroSiteSearch" list="macroSitesList" placeholder="Type Site ID or Name to autofill..." style="border: 2px solid #4caf50; background-color: #f0fdf4;" />
           <datalist id="macroSitesList"></datalist>
           <p style="font-size: 0.75em; color: #666; margin-top: 6px;">Or manually enter VADT & parameters below</p>
@@ -1757,6 +1763,7 @@
   const GITHUB_TOOWOOMBA_URL = 'https://raw.githubusercontent.com/crsanju/Crompton_TIA_QUEUE/refs/heads/main/toowoomba.geojson';
 
   let macroSitesData = {};
+  let baseMacroSitesData = {};
   let selectedMacroSite = null;
   let customDirectionContext = null;
   // store the most recent period profiles so auxiliary calculators can access them
@@ -1776,7 +1783,404 @@
   let routeMarkers = [];
   let activeRouteLayer = null;
   let macroSourceFilter = 'ALL';
+  const CUSTOM_SOURCE_NAME = 'Custom Upload';
+  let customUploadedSitesData = {};
   const macroMarkersById = {};
+
+  function parseCsvLine(line) {
+    const out = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        out.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    out.push(current);
+    return out.map(v => String(v || '').trim());
+  }
+
+  function parseCsvTextToRows(csvText) {
+    const lines = String(csvText || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return [];
+    const headers = parseCsvLine(lines[0]);
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = parseCsvLine(lines[i]);
+      const row = {};
+      headers.forEach((header, idx) => {
+        row[String(header || '').trim()] = values[idx] !== undefined ? values[idx] : '';
+      });
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function getDefaultUploadCoordinates() {
+    if (selectedMacroSite && macroSitesData[selectedMacroSite]) {
+      const site = macroSitesData[selectedMacroSite];
+      const lat = numberOrNull(site && site.latitude);
+      const lon = numberOrNull(site && site.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    }
+    if (window.selectedTiaData) {
+      const lat = numberOrNull(window.selectedTiaData.lat);
+      const lon = numberOrNull(window.selectedTiaData.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    }
+    return null;
+  }
+
+  function parseHourlyReportTextToSites(rawText, sourceName = CUSTOM_SOURCE_NAME) {
+    const lines = String(rawText || '').split(/\r?\n/).map(line => String(line || '').trim()).filter(Boolean);
+    const hourly = new Array(24).fill(0);
+    let foundHourlyRows = 0;
+
+    lines.forEach(line => {
+      const match = line.match(/^(\d{4})-(\d{4})\s+.*?\|\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/);
+      if (!match) return;
+      const startHour = Number(match[1].slice(0, 2));
+      if (!Number.isFinite(startHour) || startHour < 0 || startHour > 23) return;
+      const avg15 = numberOrNull(match[3]);
+      const avg17 = numberOrNull(match[4]);
+      const chosen = Number.isFinite(avg15) && avg15 > 0 ? avg15 : (Number.isFinite(avg17) ? avg17 : null);
+      if (!Number.isFinite(chosen)) return;
+      hourly[startHour] = Math.max(0, Math.round(chosen));
+      foundHourlyRows += 1;
+    });
+
+    if (foundHourlyRows < 12) return {};
+
+    const vadt = Math.max(0, hourly.reduce((sum, v) => sum + (Number(v) || 0), 0));
+    if (vadt <= 0) return {};
+
+    const coords = getDefaultUploadCoordinates();
+    const siteId = `CUSTOM_HOURLY_${Date.now()}`;
+    const d1Hourly = hourly.map(v => Math.max(0, Math.round((Number(v) || 0) * 0.5)));
+    const d2Hourly = hourly.map((v, idx) => Math.max(0, (Number(v) || 0) - (Number(d1Hourly[idx]) || 0)));
+    const d1Total = d1Hourly.reduce((s, v) => s + (Number(v) || 0), 0);
+    const d2Total = d2Hourly.reduce((s, v) => s + (Number(v) || 0), 0);
+
+    return {
+      [siteId]: {
+        id: siteId,
+        source: sourceName,
+        road_name: 'Custom Uploaded Hourly Data',
+        description: 'Imported from hourly report text (Mon-Sun averages)',
+        latitude: coords ? coords.lat : null,
+        longitude: coords ? coords.lon : null,
+        vadt,
+        d1_vadt: d1Total,
+        d2_vadt: d2Total,
+        d1_lanes: 1,
+        d2_lanes: 1,
+        hv_percent: null,
+        growth_rate: null,
+        countYear: new Date().getFullYear(),
+        count_year: new Date().getFullYear(),
+        d1_direction_label: 'Direction 1 (50/50 hourly split)',
+        d2_direction_label: 'Direction 2 (50/50 hourly split)',
+        dtca_auto: true,
+        direction_descriptions: {
+          'GAZETTAL': 'Direction 1',
+          'AGAINST GAZETTAL': 'Direction 2'
+        },
+        direction_base_labels: {
+          'GAZETTAL': 'Direction 1',
+          'AGAINST GAZETTAL': 'Direction 2'
+        },
+        directions_weekday: {
+          'GAZETTAL': d1Hourly,
+          'AGAINST GAZETTAL': d2Hourly
+        },
+        directions: {
+          'GAZETTAL': [...d1Hourly],
+          'AGAINST GAZETTAL': [...d2Hourly]
+        }
+      }
+    };
+  }
+
+  function normalizeUploadedRowKeys(row) {
+    const normalized = {};
+    Object.entries(row || {}).forEach(([key, value]) => {
+      const safeKey = String(key || '').trim();
+      if (!safeKey) return;
+      const nKey = safeKey
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      normalized[nKey] = value;
+    });
+    return normalized;
+  }
+
+  function firstValid(row, keys) {
+    for (const k of keys) {
+      if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
+    }
+    return null;
+  }
+
+  function numberOrNull(value) {
+    if (value === null || value === undefined) return null;
+    let raw = String(value).trim();
+    if (!raw) return null;
+    raw = raw
+      .replace(/,/g, '')
+      .replace(/\s+/g, '')
+      .replace(/%/g, '')
+      .replace(/[^0-9+\-.]/g, '');
+    if (!raw || raw === '-' || raw === '+' || raw === '.' || raw === '+.' || raw === '-.') return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function firstValidByPattern(row, patterns) {
+    const keys = Object.keys(row || {});
+    for (const pattern of (Array.isArray(patterns) ? patterns : [])) {
+      const regex = pattern instanceof RegExp ? pattern : new RegExp(String(pattern), 'i');
+      const matchedKey = keys.find(k => regex.test(String(k)));
+      if (matchedKey) {
+        const value = row[matchedKey];
+        if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+      }
+    }
+    return null;
+  }
+
+  function parseHourlySeriesFromRow(row, prefix) {
+    const arr = new Array(24).fill(0);
+    let found = false;
+    for (let h = 0; h < 24; h++) {
+      const hh = String(h).padStart(2, '0');
+      const value = firstValid(row, [
+        `${prefix}_h${h}`,
+        `${prefix}_h${hh}`,
+        `${prefix}_hour_${h}`,
+        `${prefix}_hour_${hh}`,
+        `${prefix}_${h}`,
+        `${prefix}_${hh}`
+      ]);
+      const n = numberOrNull(value);
+      if (n !== null) {
+        arr[h] = Math.max(0, Math.round(n));
+        found = true;
+      }
+    }
+    return found ? arr : null;
+  }
+
+  function parseCustomRowsToSites(rows, sourceName = CUSTOM_SOURCE_NAME) {
+    const sites = {};
+    (Array.isArray(rows) ? rows : []).forEach((rawRow, idx) => {
+      const row = normalizeUploadedRowKeys(rawRow);
+      const siteIdRaw = firstValid(row, ['site_id', 'siteid', 'id', 'counter_id', 'station_id'])
+        || firstValidByPattern(row, [/^site.?id$/i, /counter.?id/i, /station.?id/i, /^id$/i]);
+      const roadRaw = firstValid(row, ['road_name', 'road', 'street', 'route_name'])
+        || firstValidByPattern(row, [/road/i, /street/i, /route/i]);
+      const descRaw = firstValid(row, ['description', 'desc', 'location', 'name'])
+        || firstValidByPattern(row, [/description/i, /location/i, /^name$/i]);
+      const latRaw = firstValid(row, ['latitude', 'lat', 'y'])
+        || firstValidByPattern(row, [/^lat/i, /latitude/i]);
+      const lonRaw = firstValid(row, ['longitude', 'lon', 'lng', 'x'])
+        || firstValidByPattern(row, [/^lon/i, /lng/i, /long/i, /longitude/i]);
+
+      const lat = numberOrNull(latRaw);
+      const lon = numberOrNull(lonRaw);
+      const fallbackCoords = getDefaultUploadCoordinates();
+      const finalLat = Number.isFinite(lat) ? lat : (fallbackCoords ? fallbackCoords.lat : null);
+      const finalLon = Number.isFinite(lon) ? lon : (fallbackCoords ? fallbackCoords.lon : null);
+
+      const siteId = String(siteIdRaw || `CUSTOM_${idx + 1}`).trim();
+      const roadName = String(roadRaw || descRaw || `Custom Road ${idx + 1}`).trim();
+      const description = String(descRaw || roadName || siteId).trim();
+
+      const vadtRaw = firstValid(row, ['vadt', 'aadt', 'adt', 'total_vadt'])
+        || firstValidByPattern(row, [/\baadt\b/i, /\bvadt\b/i, /\badt\b/i, /total/i, /2.?way/i, /two.?way/i]);
+      const d1Raw = firstValid(row, ['d1_vadt', 'd1', 'dir1_vadt', 'gazettal_vadt'])
+        || firstValidByPattern(row, [/^d1($|_)/i, /dir.?1/i, /direction.?1/i, /gazettal/i, /northbound/i, /eastbound/i]);
+      const d2Raw = firstValid(row, ['d2_vadt', 'd2', 'dir2_vadt', 'against_gazettal_vadt'])
+        || firstValidByPattern(row, [/^d2($|_)/i, /dir.?2/i, /direction.?2/i, /against/i, /southbound/i, /westbound/i]);
+
+      const vadt = Math.max(0, Math.round(numberOrNull(vadtRaw) || 0));
+      let d1 = Math.max(0, Math.round(numberOrNull(d1Raw) || 0));
+      let d2 = Math.max(0, Math.round(numberOrNull(d2Raw) || 0));
+
+      if (d1 <= 0 && d2 <= 0 && vadt > 0) {
+        d1 = Math.round(vadt * 0.5);
+        d2 = Math.max(0, vadt - d1);
+      }
+
+      const d1Hourly = parseHourlySeriesFromRow(row, 'd1') || parseHourlySeriesFromRow(row, 'gazettal') || parseHourlySeriesFromRow(row, 'dir1');
+      const d2Hourly = parseHourlySeriesFromRow(row, 'd2') || parseHourlySeriesFromRow(row, 'against_gazettal') || parseHourlySeriesFromRow(row, 'ag') || parseHourlySeriesFromRow(row, 'dir2');
+
+      if (d1 <= 0 && Array.isArray(d1Hourly)) d1 = Math.round(d1Hourly.reduce((s, v) => s + (Number(v) || 0), 0));
+      if (d2 <= 0 && Array.isArray(d2Hourly)) d2 = Math.round(d2Hourly.reduce((s, v) => s + (Number(v) || 0), 0));
+
+      const site = {
+        id: siteId,
+        source: sourceName,
+        road_name: roadName,
+        description,
+        latitude: finalLat,
+        longitude: finalLon,
+        vadt: vadt > 0 ? vadt : (d1 + d2),
+        d1_vadt: d1,
+        d2_vadt: d2,
+        d1_lanes: Math.max(1, Math.round(numberOrNull(firstValid(row, ['d1_lanes', 'lanes_d1', 'dir1_lanes']) || firstValidByPattern(row, [/d1.?lane/i, /dir.?1.?lane/i, /lane.?d1/i])) || 1)),
+        d2_lanes: Math.max(1, Math.round(numberOrNull(firstValid(row, ['d2_lanes', 'lanes_d2', 'dir2_lanes']) || firstValidByPattern(row, [/d2.?lane/i, /dir.?2.?lane/i, /lane.?d2/i])) || 1)),
+        hv_percent: numberOrNull(firstValid(row, ['hv_percent', 'hv', 'heavy_vehicle_percent']) || firstValidByPattern(row, [/hv/i, /heavy.?vehicle/i])),
+        growth_rate: numberOrNull(firstValid(row, ['growth_rate', 'growth', 'growth_percent']) || firstValidByPattern(row, [/growth/i])),
+        countYear: numberOrNull(firstValid(row, ['count_year', 'countyear', 'year']) || firstValidByPattern(row, [/count.?year/i, /^year$/i])),
+        count_year: numberOrNull(firstValid(row, ['count_year', 'countyear', 'year']) || firstValidByPattern(row, [/count.?year/i, /^year$/i])),
+        d1_direction_label: String(firstValid(row, ['d1_direction_label', 'd1_label', 'dir1_label']) || 'Direction 1').trim(),
+        d2_direction_label: String(firstValid(row, ['d2_direction_label', 'd2_label', 'dir2_label']) || 'Direction 2').trim(),
+        dtca_auto: true,
+        direction_descriptions: {
+          'GAZETTAL': String(firstValid(row, ['d1_direction_label', 'd1_label', 'dir1_label']) || 'Direction 1').trim(),
+          'AGAINST GAZETTAL': String(firstValid(row, ['d2_direction_label', 'd2_label', 'dir2_label']) || 'Direction 2').trim()
+        },
+        direction_base_labels: {
+          'GAZETTAL': 'Direction 1',
+          'AGAINST GAZETTAL': 'Direction 2'
+        },
+        directions_weekday: {
+          'GAZETTAL': Array.isArray(d1Hourly) && d1Hourly.length === 24 ? d1Hourly : buildSyntheticHourlyFromDaily(d1),
+          'AGAINST GAZETTAL': Array.isArray(d2Hourly) && d2Hourly.length === 24 ? d2Hourly : buildSyntheticHourlyFromDaily(d2)
+        },
+        directions: {
+          'GAZETTAL': Array.isArray(d1Hourly) && d1Hourly.length === 24 ? [...d1Hourly] : buildSyntheticHourlyFromDaily(d1),
+          'AGAINST GAZETTAL': Array.isArray(d2Hourly) && d2Hourly.length === 24 ? [...d2Hourly] : buildSyntheticHourlyFromDaily(d2)
+        }
+      };
+
+      sites[siteId] = site;
+    });
+    return sites;
+  }
+
+  function ensureCustomSourceFilterOption() {
+    const filterEl = document.getElementById('macroSourceFilter');
+    if (!filterEl) return;
+    const hasOption = Array.from(filterEl.options || []).some(opt => String(opt.value) === CUSTOM_SOURCE_NAME);
+    if (!hasOption) {
+      const option = document.createElement('option');
+      option.value = CUSTOM_SOURCE_NAME;
+      option.textContent = 'Custom Upload Only';
+      filterEl.appendChild(option);
+    }
+  }
+
+  function refreshMacroSitesView() {
+    macroSitesData = mergeMacroSites(baseMacroSitesData, customUploadedSitesData);
+    const totalSites = Object.keys(macroSitesData).length;
+    const countEl = document.getElementById('sitesLoadedCount');
+    if (countEl) countEl.textContent = totalSites;
+    populateMacroSitesDatalist();
+    renderMacroMapSites();
+    const mapInfo = document.getElementById('macroMapInfo');
+    if (mapInfo) mapInfo.textContent = `${totalSites} sites loaded. Click a marker to select a site.`;
+  }
+
+  async function handleCustomDataUpload(file) {
+    if (!file) return;
+    const statusEl = document.getElementById('customDataUploadStatus');
+    try {
+      if (statusEl) {
+        statusEl.style.color = '#1565c0';
+        statusEl.textContent = `Loading ${file.name}...`;
+      }
+
+      const text = await file.text();
+      const lowerName = String(file.name || '').toLowerCase();
+      let parsedSites = {};
+
+      if (lowerName.endsWith('.geojson') || lowerName.endsWith('.json')) {
+        const json = JSON.parse(text);
+        if (json && Array.isArray(json.features)) {
+          parsedSites = parseMacroTrafficData(json, CUSTOM_SOURCE_NAME);
+        } else if (Array.isArray(json)) {
+          parsedSites = parseCustomRowsToSites(json, CUSTOM_SOURCE_NAME);
+        } else if (json && Array.isArray(json.rows)) {
+          parsedSites = parseCustomRowsToSites(json.rows, CUSTOM_SOURCE_NAME);
+        } else {
+          parsedSites = parseCustomRowsToSites([json], CUSTOM_SOURCE_NAME);
+        }
+      } else {
+        const rows = parseCsvTextToRows(text);
+        parsedSites = parseCustomRowsToSites(rows, CUSTOM_SOURCE_NAME);
+        if (!Object.keys(parsedSites).length) {
+          parsedSites = parseHourlyReportTextToSites(text, CUSTOM_SOURCE_NAME);
+        }
+      }
+
+      const parsedCount = Object.keys(parsedSites).length;
+      if (!parsedCount) {
+        throw new Error('No valid rows found. Expected either CSV/JSON columns (site/road/lat/lon/volume) or hourly report text with HHMM-HHMM rows and averages.');
+      }
+
+      const zeroVolumeCount = Object.values(parsedSites).filter(site => (Number(site && site.vadt) || 0) <= 0).length;
+
+      customUploadedSitesData = mergeMacroSites(customUploadedSitesData, parsedSites);
+      ensureCustomSourceFilterOption();
+
+      const filterEl = document.getElementById('macroSourceFilter');
+      macroSourceFilter = CUSTOM_SOURCE_NAME;
+      if (filterEl) filterEl.value = CUSTOM_SOURCE_NAME;
+
+      refreshMacroSitesView();
+
+      const uploadedIds = Object.keys(parsedSites);
+      const firstUploadedId = uploadedIds.length ? uploadedIds[0] : null;
+      if (firstUploadedId && macroSitesData[firstUploadedId]) {
+        selectMacroSite(firstUploadedId);
+        focusMacroSiteOnMap(firstUploadedId);
+      }
+
+      if (statusEl) {
+        statusEl.style.color = '#2e7d32';
+        statusEl.textContent = zeroVolumeCount > 0
+          ? `Loaded ${parsedCount} custom sites from ${file.name}. Auto-selected first uploaded site. ${zeroVolumeCount} rows had no usable volume fields.`
+          : `Loaded ${parsedCount} custom sites from ${file.name}. Auto-selected first uploaded site.`;
+      }
+    } catch (err) {
+      console.error('Custom upload failed:', err);
+      if (statusEl) {
+        statusEl.style.color = '#c30000';
+        statusEl.textContent = `Upload failed: ${String(err && err.message ? err.message : err)}`;
+      }
+    }
+  }
+
+  function clearCustomUploads() {
+    customUploadedSitesData = {};
+    macroSourceFilter = 'ALL';
+    const filterEl = document.getElementById('macroSourceFilter');
+    if (filterEl) {
+      Array.from(filterEl.options || []).forEach(opt => {
+        if (String(opt.value) === CUSTOM_SOURCE_NAME) opt.remove();
+      });
+      filterEl.value = 'ALL';
+    }
+    const statusEl = document.getElementById('customDataUploadStatus');
+    if (statusEl) {
+      statusEl.style.color = '#666';
+      statusEl.textContent = 'No custom upload loaded.';
+    }
+    loadMacroSitesData();
+  }
 
   /**
    * Queries OpenStreetMap for all road names within a specific radius of lat/lon
@@ -1928,13 +2332,13 @@
       macroMapInstance.fitBounds(points, { padding: [24, 24] });
       const info = document.getElementById('macroMapInfo');
       if (info) {
-        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan + Toowoomba' : macroSourceFilter;
+        const label = macroSourceFilter === 'ALL' ? 'All Sources' : macroSourceFilter;
         info.textContent = `${points.length} sites loaded for ${label}. Click a marker to select a site.`;
       }
     } else {
       const info = document.getElementById('macroMapInfo');
       if (info) {
-        const label = macroSourceFilter === 'ALL' ? 'TMR + Gold Coast + Ipswich + Logan + Toowoomba' : macroSourceFilter;
+        const label = macroSourceFilter === 'ALL' ? 'All Sources' : macroSourceFilter;
         info.textContent = `No mappable sites found for ${label}.`;
       }
     }
@@ -2464,7 +2868,8 @@
     const loganSites = loganData ? parseMacroTrafficData(loganData, 'Logan') : {};
     const toowoomSites = toowoombaData ? parseMacroTrafficData(toowoombaData, 'Toowoomba') : {};
 
-    macroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites, toowoomSites);
+    baseMacroSitesData = mergeMacroSites(tmrSites, goldCoastSites, ipswichSites, loganSites, toowoomSites);
+    macroSitesData = mergeMacroSites(baseMacroSitesData, customUploadedSitesData);
 
     console.log(`Loaded ${Object.keys(macroSitesData).length} macro sites (TMR: ${Object.keys(tmrSites).length}, Gold Coast: ${Object.keys(goldCoastSites).length}, Ipswich: ${Object.keys(ipswichSites).length}, Logan: ${Object.keys(loganSites).length}, Toowoomba: ${Object.keys(toowoomSites).length})`);
     document.getElementById('sitesLoadedCount').textContent = Object.keys(macroSitesData).length;
@@ -3270,6 +3675,21 @@
       setupRouteMeasurement(detourMapInstance);
     }
     // --------------------------------
+
+    const uploadBtn = document.getElementById('customDataUploadBtn');
+    const uploadInput = document.getElementById('customDataUploadInput');
+    const clearBtn = document.getElementById('customDataClearBtn');
+    if (uploadBtn && uploadInput) {
+      uploadBtn.addEventListener('click', () => uploadInput.click());
+      uploadInput.addEventListener('change', async (event) => {
+        const file = event && event.target && event.target.files ? event.target.files[0] : null;
+        await handleCustomDataUpload(file);
+        try { uploadInput.value = ''; } catch (_) {}
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => clearCustomUploads());
+    }
 
     loadMacroSitesData();
 
